@@ -9,7 +9,7 @@ export default function RootLayout() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
-    document.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
 
@@ -18,7 +18,7 @@ export default function RootLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans antialiased text-foreground flex flex-col">
+    <div className={`min-h-screen bg-background antialiased text-foreground flex flex-col ${i18n.language === 'ar' ? 'font-cairo' : 'font-sans'}`}>
       <Navbar />
       <div className="flex justify-end p-2 bg-muted/30">
         <Button variant="ghost" size="sm" onClick={toggleLang}>

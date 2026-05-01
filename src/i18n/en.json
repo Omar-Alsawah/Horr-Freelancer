@@ -9,11 +9,6 @@
     "submit_register": "Create Account",
     "logout": "Log Out"
   },
-  "home": {
-    "welcome": "Welcome to HORR Platform",
-    "subtitle": "Find the best freelancers for your next project.",
-    "logged_in_as": "Logged in completely"
-  },
   "nav": {
     "brand": "HORR",
     "home": "Home",
@@ -21,10 +16,10 @@
     "lang_ar": "العربية"
   },
   "common": {
-    "loading": "Loading..."
-  },
-  "errors": {
-    "unexpected": "An unexpected error occurred.",
-    "network": "Network error."
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
   }
 }
