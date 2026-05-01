@@ -8,6 +8,7 @@ import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
 import FindWorkPage from '../features/jobs/FindWorkPage';
 import SavedJobsPage from '../features/jobs/SavedJobsPage';
+import JobDetailsPage from '../features/jobs/JobDetailsPage';
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
           { path: 'dashboard', element: <Dashboard /> },
           { path: 'find-work', element: <FindWorkPage /> },
           { path: 'saved-jobs', element: <SavedJobsPage /> },
+          { path: 'jobs/:id', element: <JobDetailsPage /> },
           { path: 'profile', element: <div className="p-8">My Profile Placeholder</div> },
           { path: 'settings', element: <div className="p-8">Settings Placeholder</div> }
         ]
