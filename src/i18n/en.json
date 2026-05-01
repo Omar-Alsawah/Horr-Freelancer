@@ -12,7 +12,15 @@
     "role_freelancer": "Freelancer",
     "role_client": "Client",
     "go_to_register": "Don't have an account? Register",
-    "go_to_login": "Already have an account? Log In"
+    "go_to_login": "Already have an account? Log In",
+    "phone": "Phone Number",
+    "bio": "Bio",
+    "address": "Address",
+    "city": "City",
+    "country": "Country",
+    "state_province": "State / Province",
+    "timezone": "Time Zone",
+    "zip_code": "Zip Code"
   },
   "home": {
     "welcome": "Welcome to HORR Platform",
