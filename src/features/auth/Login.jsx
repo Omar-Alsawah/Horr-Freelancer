@@ -1,32 +1,49 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../../app/store';
-import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/authStore';
+import api from '@/api/axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import api from '../../api/axios';
 import toast from 'react-hot-toast';
+
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+  } catch(e) { return {}; }
+}
 
 export default function Login() {
   const { t } = useTranslation();
-  const loginAction = useAuthStore(state => state.login);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const loginAction = useAuthStore(state => state.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const handleErrorKey = (field) => {
+    const key = Object.keys(fieldErrors).find(k => k.toLowerCase() === field.toLowerCase());
+    return key ? fieldErrors[key] : null;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setFieldErrors({});
     try {
-      // Mock API call to satisfy requirements before hitting a real backend
-      // Replace with real api.post('/api/auth/login') when backend is ready
-      await new Promise(resolve => setTimeout(resolve, 800));
-      loginAction('mock-jwt-token-123', { email });
-      navigate('/');
-    } catch (error) {
-      // Errors map via global axios interceptor
+      const res = await api.post('/api/auth/login', { email, password });
+      const payload = parseJwt(res.data.token);
+      loginAction(res.data.token, { userId: payload.userId, email: payload.email, role: payload.role, name: payload.name });
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+      if (err.errors) {
+        setFieldErrors(err.errors);
+      }
     } finally {
       setLoading(false);
     }
@@ -44,23 +61,28 @@ export default function Login() {
               <label className="text-sm font-medium text-textMain">{t('auth.email')}</label>
               <Input 
                 type="email" 
-                required 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                className={handleErrorKey('email') ? 'border-red-500' : ''}
               />
+              {handleErrorKey('email') && <div className="text-red-500 text-xs">{handleErrorKey('email')[0]}</div>}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-textMain">{t('auth.password')}</label>
               <Input 
                 type="password" 
-                required 
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                className={handleErrorKey('password') ? 'border-red-500' : ''}
               />
+              {handleErrorKey('password') && <div className="text-red-500 text-xs">{handleErrorKey('password')[0]}</div>}
             </div>
             <Button type="submit" className="w-full bg-gold hover:bg-yellow-500 text-white" disabled={loading}>
               {loading ? t('common.loading') : t('auth.submit_login')}
             </Button>
+            <div className="mt-4 text-center text-sm">
+              <Link to="/register" className="text-navy hover:underline">{t('auth.go_to_register')}</Link>
+            </div>
           </form>
         </CardContent>
       </Card>
