@@ -1,0 +1,30 @@
+{
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirm_password": "تأكيد كلمة المرور",
+    "submit_login": "دخول",
+    "submit_register": "تسجيل",
+    "logout": "تسجيل الخروج"
+  },
+  "home": {
+    "welcome": "أهلاً بك في منصة HORR",
+    "subtitle": "ابحث عن أفضل المستقلين لمشروعك القادم.",
+    "logged_in_as": "تم تسجيل الدخول بالكامل"
+  },
+  "nav": {
+    "brand": "HORR",
+    "home": "الرئيسية",
+    "lang_en": "English",
+    "lang_ar": "العربية"
+  },
+  "common": {
+    "loading": "جاري التحميل..."
+  },
+  "errors": {
+    "unexpected": "حدث خطأ غير متوقع.",
+    "network": "خطأ في الشبكة."
+  }
+}

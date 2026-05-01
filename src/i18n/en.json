@@ -1,0 +1,30 @@
+{
+  "auth": {
+    "login": "Log In",
+    "register": "Register",
+    "email": "Email Address",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "submit_login": "Log In",
+    "submit_register": "Create Account",
+    "logout": "Log Out"
+  },
+  "home": {
+    "welcome": "Welcome to HORR Platform",
+    "subtitle": "Find the best freelancers for your next project.",
+    "logged_in_as": "Logged in completely"
+  },
+  "nav": {
+    "brand": "HORR",
+    "home": "Home",
+    "lang_en": "English",
+    "lang_ar": "العربية"
+  },
+  "common": {
+    "loading": "Loading..."
+  },
+  "errors": {
+    "unexpected": "An unexpected error occurred.",
+    "network": "Network error."
+  }
+}
