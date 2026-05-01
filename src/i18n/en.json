@@ -22,6 +22,11 @@
   "nav": {
     "brand": "HORR",
     "home": "Home",
+    "find_work": "Find work",
+    "deliver_work": "Deliver work",
+    "messages": "Messages",
+    "my_profile": "My Profile",
+    "settings": "Settings",
     "lang_en": "English",
     "lang_ar": "العربية"
   },
@@ -30,10 +35,41 @@
     "cancel": "Cancel",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page"
   },
   "errors": {
     "unexpected": "An unexpected error occurred.",
-    "network": "Network error."
+    "network": "Network error.",
+    "save_failed": "Failed to save job. Please try again.",
+    "unsave_failed": "Failed to unsave job. Please try again."
+  },
+  "jobs": {
+    "find_work": "Find Work",
+    "saved_jobs": "Saved Jobs",
+    "search_placeholder": "Search for jobs",
+    "section_title": "Jobs you might like",
+    "section_hint": "Browse jobs that match your experience to a client's hiring preferences. Ordered by most relevant.",
+    "best_matches": "Best Matches",
+    "sort_by": "Sort by:",
+    "sort_newest": "Newest",
+    "sort_oldest": "Oldest",
+    "sort_budget_high": "Budget: High to Low",
+    "sort_budget_low": "Budget: Low to High",
+    "filter_all": "All",
+    "filter_fixed": "Fixed Price",
+    "filter_hourly": "Hourly",
+    "fixed_price": "Fixed-price",
+    "hourly": "Hourly",
+    "est_budget": "Est. Budget",
+    "posted_time": "Posted {{time}}",
+    "payment_verified": "Payment verified",
+    "egp_format": "EGP {{amount}}",
+    "empty_title": "No jobs found",
+    "empty_subtitle": "Try adjusting your search or filters to find what you're looking for.",
+    "empty_saved_title": "No saved jobs yet",
+    "empty_saved_subtitle": "Bookmark jobs you're interested in and they'll appear here."
   }
 }

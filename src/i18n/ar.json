@@ -22,6 +22,11 @@
   "nav": {
     "brand": "HORR",
     "home": "الرئيسية",
+    "find_work": "ابحث عن عمل",
+    "deliver_work": "قدّم عمل",
+    "messages": "الرسائل",
+    "my_profile": "ملفي الشخصي",
+    "settings": "الإعدادات",
     "lang_en": "English",
     "lang_ar": "العربية"
   },
@@ -30,10 +35,41 @@
     "cancel": "إلغاء",
     "loading": "جاري التحميل...",
     "error": "خطأ",
-    "success": "نجاح"
+    "success": "نجاح",
+    "prev": "السابق",
+    "next": "التالي",
+    "page": "صفحة"
   },
   "errors": {
     "unexpected": "حدث خطأ غير متوقع.",
-    "network": "خطأ في الشبكة."
+    "network": "خطأ في الشبكة.",
+    "save_failed": "فشل حفظ الوظيفة. يرجى المحاولة مرة أخرى.",
+    "unsave_failed": "فشل إلغاء حفظ الوظيفة. يرجى المحاولة مرة أخرى."
+  },
+  "jobs": {
+    "find_work": "ابحث عن عمل",
+    "saved_jobs": "الوظائف المحفوظة",
+    "search_placeholder": "ابحث عن وظائف",
+    "section_title": "وظائف قد تعجبك",
+    "section_hint": "تصفّح الوظائف التي تتوافق مع خبرتك وتفضيلات العملاء. مرتبة حسب الأكثر صلة.",
+    "best_matches": "أفضل التطابقات",
+    "sort_by": "ترتيب حسب:",
+    "sort_newest": "الأحدث",
+    "sort_oldest": "الأقدم",
+    "sort_budget_high": "الميزانية: من الأعلى",
+    "sort_budget_low": "الميزانية: من الأقل",
+    "filter_all": "الكل",
+    "filter_fixed": "سعر ثابت",
+    "filter_hourly": "بالساعة",
+    "fixed_price": "سعر ثابت",
+    "hourly": "بالساعة",
+    "est_budget": "الميزانية المقدرة",
+    "posted_time": "نُشرت {{time}}",
+    "payment_verified": "الدفع مُوثّق",
+    "egp_format": "{{amount}} ج.م",
+    "empty_title": "لا توجد وظائف",
+    "empty_subtitle": "جرّب تعديل البحث أو الفلاتر للعثور على ما تبحث عنه.",
+    "empty_saved_title": "لا توجد وظائف محفوظة بعد",
+    "empty_saved_subtitle": "احفظ الوظائف التي تهمك وستظهر هنا."
   }
 }

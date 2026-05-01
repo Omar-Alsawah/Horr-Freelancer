@@ -6,6 +6,8 @@ import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
 import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
+import FindWorkPage from '../features/jobs/FindWorkPage';
+import SavedJobsPage from '../features/jobs/SavedJobsPage';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +19,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Dashboard /> },
           { path: 'dashboard', element: <Dashboard /> },
+          { path: 'find-work', element: <FindWorkPage /> },
+          { path: 'saved-jobs', element: <SavedJobsPage /> },
           { path: 'profile', element: <div className="p-8">My Profile Placeholder</div> },
           { path: 'settings', element: <div className="p-8">Settings Placeholder</div> }
         ]
