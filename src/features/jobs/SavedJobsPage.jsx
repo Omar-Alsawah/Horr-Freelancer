@@ -48,30 +48,34 @@ export default function SavedJobsPage() {
   const handleJobClick = (id) => navigate(`/jobs/${id}`);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('jobs.saved_jobs')}</h1>
+    <div className="container container-single-col">
+      <h1 className="page-title">{t('jobs.saved_jobs')}</h1>
 
-      {loading ? (
-        <div>
-          {[...Array(3)].map((_, i) => <JobCardSkeleton key={i} />)}
-        </div>
-      ) : jobs.length === 0 ? (
-        <EmptyState title={t('jobs.empty_saved_title')} subtitle={t('jobs.empty_saved_subtitle')} />
-      ) : (
-        <div>
-          {jobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              isSaved={true}
-              onToggleSave={handleUnsave}
-              onClick={handleJobClick}
-            />
-          ))}
-        </div>
-      )}
+      <div className="job-list">
+        {loading ? (
+          <div>
+            {[...Array(3)].map((_, i) => <JobCardSkeleton key={i} />)}
+          </div>
+        ) : jobs.length === 0 ? (
+          <EmptyState title={t('jobs.empty_saved_title')} subtitle={t('jobs.empty_saved_subtitle')} />
+        ) : (
+          <div>
+            {jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                isSaved={true}
+                onToggleSave={handleUnsave}
+                onClick={handleJobClick}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <div className="load-more-container">
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </div>
     </div>
   );
 }

@@ -84,110 +84,120 @@ export default function FindWorkPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex gap-6 flex-col lg:flex-row">
-        {/* Main Feed Column */}
-        <main className="flex-1 min-w-0">
-          {/* Search Bar */}
-          <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2.5 bg-white mb-6 focus-within:ring-2 focus-within:ring-[#eab308] focus-within:border-transparent">
-            <Search className="w-5 h-5 text-gray-500 mr-3 flex-shrink-0" />
+    <div className="container" style={{ gridTemplateColumns: '7fr 3fr' }}>
+      {/* Main Feed Column */}
+      <main className="feed-section">
+        {/* Search Bar */}
+        <div className="search-bar-main">
+          <div className="search-input-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
             <input
               type="text"
               placeholder={t('jobs.search_placeholder')}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              className="w-full bg-transparent border-none focus:outline-none text-sm text-gray-900 placeholder-gray-500"
             />
           </div>
+        </div>
 
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('jobs.section_title')}</h2>
+        <h2 className="section-title" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+          {t('jobs.section_title')}
+        </h2>
 
-          {/* Tabs + Sort */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b border-gray-200 mb-4 pb-3 gap-3">
-            <div className="flex items-center gap-1">
-              {jobTypeFilters.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => setJobType(f.value)}
-                  className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
-                    jobType === f.value 
-                      ? 'bg-[#1e293b] text-white' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">{t('jobs.sort_by')}</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-700 outline-none cursor-pointer bg-white"
+        {/* Tabs + Sort */}
+        <div className="job-feed-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0', marginBottom: '1.5rem' }}>
+          <div className="job-feed-tabs" style={{ borderBottom: 'none', marginBottom: 0 }}>
+            {jobTypeFilters.map((f) => (
+              <div
+                key={f.value}
+                onClick={() => setJobType(f.value)}
+                className={`feed-tab ${jobType === f.value ? 'active' : ''}`}
               >
-                <option value="newest">{t('jobs.sort_newest')}</option>
-                <option value="oldest">{t('jobs.sort_oldest')}</option>
-                <option value="budget-high">{t('jobs.sort_budget_high')}</option>
-                <option value="budget-low">{t('jobs.sort_budget_low')}</option>
-              </select>
-            </div>
-          </div>
-
-          <p className="text-sm text-gray-500 mb-6">{t('jobs.section_hint')}</p>
-
-          {/* Job List */}
-          {loading ? (
-            <div>
-              {[...Array(3)].map((_, i) => <JobCardSkeleton key={i} />)}
-            </div>
-          ) : jobs.length === 0 ? (
-            <EmptyState title={t('jobs.empty_title')} subtitle={t('jobs.empty_subtitle')} />
-          ) : (
-            <div>
-              {jobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  isSaved={savedJobIds.has(job.id)}
-                  onToggleSave={handleToggleSave}
-                  onClick={handleJobClick}
-                />
-              ))}
-            </div>
-          )}
-
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-        </main>
-
-        {/* Sidebar */}
-        <aside className="w-full lg:w-72 flex-shrink-0">
-          {/* Profile Snapshot */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-[#1e293b] text-white flex items-center justify-center text-2xl font-bold mx-auto mb-3">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-            </div>
-            <div className="text-lg font-semibold text-gray-900">{user?.name || 'User'}</div>
-            <div className="text-sm text-gray-500 mb-4">{user?.role || ''}</div>
-            <div className="w-full">
-              <div className="flex justify-between text-xs text-[#eab308] font-medium mb-1">
-                <span className="text-[#eab308] hover:underline cursor-pointer">{t('jobs.complete_profile') || 'Complete your profile'}</span>
-                <span>40%</span>
+                {f.label}
               </div>
-              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-[#eab308] w-2/5"></div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Identity Verification */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-4">
-            <h3 className="font-semibold text-gray-900 mb-2">Identity verification</h3>
-            <p className="text-sm text-gray-500 mb-3 leading-relaxed">Increase your profile visibility in search results and win more work with an ID Verified Badge.</p>
-            <a href="#" className="text-sm font-medium text-[#eab308] hover:underline">Get ID Verified</a>
+          <div className="sort-container" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.9rem', color: '#5e6d55' }}>{t('jobs.sort_by')}</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              id="job-sort-select"
+              style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', color: '#333', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="newest">{t('jobs.sort_newest')}</option>
+              <option value="oldest">{t('jobs.sort_oldest')}</option>
+              <option value="budget-high">{t('jobs.sort_budget_high')}</option>
+              <option value="budget-low">{t('jobs.sort_budget_low')}</option>
+            </select>
           </div>
-        </aside>
-      </div>
+        </div>
+
+        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
+          {t('jobs.section_hint')}
+        </div>
+
+        {/* Job List */}
+        {loading ? (
+          <div id="job-feed-container">
+            {[...Array(3)].map((_, i) => <JobCardSkeleton key={i} />)}
+          </div>
+        ) : jobs.length === 0 ? (
+          <EmptyState title={t('jobs.empty_title')} subtitle={t('jobs.empty_subtitle')} />
+        ) : (
+          <div id="job-feed-container">
+            {jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                isSaved={savedJobIds.has(job.id)}
+                onToggleSave={handleToggleSave}
+                onClick={handleJobClick}
+              />
+            ))}
+          </div>
+        )}
+
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </main>
+
+      {/* Sidebar */}
+      <aside className="sidebar">
+        {/* Profile Snapshot */}
+        <div className="card profile-card">
+          <div className="profile-avatar">
+            {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
+          </div>
+          <a href="#" className="profile-name">{user?.name || 'User'}</a>
+          <div className="profile-title">{user?.role || 'Freelancer'}</div>
+          <div className="progress-container">
+            <div className="progress-label">
+              <span className="promo-link" style={{ fontSize: '0.8rem', cursor: 'pointer' }}>
+                {t('jobs.complete_profile')}
+              </span>
+              <span>40%</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: '40%' }}></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Identity Verification */}
+        <div className="card promo-card">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+            Identity verification
+          </h3>
+          <p className="promo-text">
+            Increase your profile visibility in search results and win more work with an ID Verified Badge.
+          </p>
+          <a href="#" className="promo-link">Get ID Verified</a>
+        </div>
+      </aside>
     </div>
   );
 }

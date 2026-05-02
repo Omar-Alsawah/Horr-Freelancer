@@ -118,177 +118,227 @@ export default function JobDetailsPage() {
   if (!job) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex gap-6 flex-col lg:flex-row">
-        {/* Main Content */}
-        <main className="flex-1 bg-white border border-gray-200 rounded-lg p-6">
-          {/* Job Header */}
-          <div className="mb-6">
-            <h1 className="text-xl font-bold text-gray-900 mb-2">{job.title}</h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <span>{t('jobs.posted_time', { time: job.postedTime })}</span>
-              <span className="flex items-center gap-1"><Globe className="w-4 h-4" /> {job.location || t('job_details.worldwide')}</span>
-            </div>
+    <div className="container">
+      {/* Left Column: Job Content */}
+      <main className="section-wrapper card">
+        <div className="job-header">
+          <h1 className="job-title">{job.title}</h1>
+
+          <div className="job-meta">
+            <span className="meta-item">{t('jobs.posted_time', { time: job.postedTime })}</span>
+            <span className="meta-item">
+              <Globe className="w-4 h-4" />
+              {job.location || t('job_details.worldwide')}
+            </span>
           </div>
 
-          {/* Feature Items */}
-          <div className="flex flex-wrap gap-8 mb-6 pb-6 border-b border-gray-200">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg"><Tag className="w-5 h-5 text-gray-600" /></div>
-              <div>
-                <div className="font-semibold text-gray-900">{formatBudget(job.budgetMin, job.budgetMax, lang)}</div>
-                <div className="text-sm text-gray-500">{job.jobType === 'FixedPrice' ? t('jobs.fixed_price') : t('jobs.hourly')}</div>
+          <div className="job-features">
+            <div className="feature-item">
+              <div className="feature-icon">
+                <Tag className="w-5 h-5" />
+              </div>
+              <div className="feature-text">
+                <div>{formatBudget(job.budgetMin, job.budgetMax, lang)}</div>
+                <div>{job.jobType === 'FixedPrice' ? t('jobs.fixed_price') : t('jobs.hourly')}</div>
               </div>
             </div>
             {job.experienceLevel && (
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-gray-100 rounded-lg"><Star className="w-5 h-5 text-gray-600" /></div>
-                <div>
-                  <div className="font-semibold text-gray-900">{job.experienceLevel}</div>
-                  <div className="text-sm text-gray-500">{t('job_details.experience_hint')}</div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Star className="w-5 h-5" />
+                </div>
+                <div className="feature-text">
+                  <div>{job.experienceLevel}</div>
+                  <div>{t('job_details.experience_hint')}</div>
                 </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Description */}
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <h2 className="text-base font-semibold text-gray-900 mb-2">{t('job_details.summary')}</h2>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{job.description}</p>
+        <div className="job-description-section">
+          <h2 className="section-title">{t('job_details.summary')}</h2>
+          <div className="job-description whitespace-pre-line">
+            {job.description}
           </div>
+        </div>
 
-          {/* Project Type */}
-          {job.projectType && (
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <strong className="text-gray-900">{t('job_details.project_type')}:</strong>
-                <span className="text-gray-500">{job.projectType}</span>
+        {job.projectType && (
+          <div className="project-type-section">
+            <div className="feature-item">
+              <div className="feature-icon">
+                <Calendar className="w-5 h-5" />
               </div>
+              <strong>{t('job_details.project_type')}:</strong>&nbsp;
+              <span className="text-gray-500">{job.projectType}</span>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Skills */}
-          {job.skills?.length > 0 && (
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <h2 className="text-base font-semibold text-gray-900 mb-3">{t('job_details.skills_title')}</h2>
-              <div className="flex flex-wrap gap-2">
-                {job.skills.map((skill, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full font-medium">{skill}</span>
-                ))}
+        {job.skills?.length > 0 && (
+          <div className="skills-section">
+            <h2 className="section-title">{t('job_details.skills_title')}</h2>
+            <div className="skills-list">
+              {job.skills.map((skill, i) => (
+                <span key={i} className="skill-badge">{skill}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {job.activity && (
+          <div className="activity-section">
+            <h2 className="section-title">{t('job_details.activity_title')}</h2>
+            {job.activity.proposals != null && (
+              <div className="activity-row">
+                <span>{t('job_details.proposals')}:</span>
+                <span>{job.activity.proposals}</span>
               </div>
-            </div>
-          )}
-
-          {/* Activity */}
-          {job.activity && (
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <h2 className="text-base font-semibold text-gray-900 mb-3">{t('job_details.activity_title')}</h2>
-              <div className="space-y-2 text-sm">
-                {job.activity.proposals != null && <div className="flex justify-between text-gray-600"><span>{t('job_details.proposals')}:</span><span>{job.activity.proposals}</span></div>}
-                {job.activity.hires != null && <div className="flex justify-between text-gray-600"><span>{t('job_details.hires')}:</span><span>{job.activity.hires}</span></div>}
-                {job.activity.invitesSent != null && <div className="flex justify-between text-gray-600"><span>{t('job_details.invites_sent')}:</span><span>{job.activity.invitesSent}</span></div>}
-                {job.activity.unansweredInvites != null && <div className="flex justify-between text-gray-600"><span>{t('job_details.unanswered_invites')}:</span><span>{job.activity.unansweredInvites}</span></div>}
+            )}
+            {job.activity.hires != null && (
+              <div className="activity-row">
+                <span>{t('job_details.hires')}:</span>
+                <span>{job.activity.hires}</span>
               </div>
-            </div>
-          )}
+            )}
+            {job.activity.invitesSent != null && (
+              <div className="activity-row">
+                <span>{t('job_details.invites_sent')}:</span>
+                <span>{job.activity.invitesSent}</span>
+              </div>
+            )}
+            {job.activity.unansweredInvites != null && (
+              <div className="activity-row">
+                <span>{t('job_details.unanswered_invites')}:</span>
+                <span>{job.activity.unansweredInvites}</span>
+              </div>
+            )}
+          </div>
+        )}
 
-          {/* Client History */}
-          {job.clientHistory?.length > 0 && (
-            <div className="pt-2">
-              <h2 className="text-base font-semibold text-gray-900 mb-4">{t('job_details.client_history')} ({job.clientHistory.length})</h2>
-              <div className="space-y-5">
-                {job.clientHistory.map((item, i) => (
-                  <div key={i} className="flex justify-between items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <div className="max-w-[70%]">
-                      <h3 className="text-sm font-medium text-[#eab308] mb-1">{item.title}</h3>
-                      <div className="text-green-700 text-xs mb-1">{'★'.repeat(Math.round(item.rating || 5))} <span className="text-gray-900 font-semibold ml-1">{item.ratingValue || '5.0'}</span></div>
-                      {item.feedback && <p className="text-sm text-gray-700 italic mb-1 leading-snug">"{item.feedback}"</p>}
-                      <div className="text-xs text-gray-500">{t('job_details.to_freelancer')}: <span className="text-gray-900 font-medium">{item.freelancerName}</span></div>
+        {job.clientHistory?.length > 0 && (
+          <div className="history-section" style={{ marginTop: '3rem', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+            <h2 className="section-title" style={{ marginBottom: '1rem' }}>
+              {t('job_details.client_history')} ({job.clientHistory.length})
+            </h2>
+
+            <div className="space-y-6">
+              {job.clientHistory.map((item, i) => (
+                <div key={i} className="history-item">
+                  <div className="flex justify-between items-start">
+                    <div style={{ maxWidth: '70%' }}>
+                      <h3 style={{ fontSize: '1rem', color: 'var(--color-primary-gold)', fontWeight: 500, margin: '0 0 0.5rem 0' }}>
+                        {item.title}
+                      </h3>
+                      <div className="rating-stars" style={{ color: '#108a00', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
+                        {'★'.repeat(Math.round(item.rating || 5))}{' '}
+                        <span style={{ fontWeight: 600, color: '#333', marginLeft: '0.3rem' }}>{item.ratingValue || '5.0'}</span>
+                      </div>
+                      {item.feedback && (
+                        <p style={{ fontSize: '0.9rem', color: '#333', marginBottom: '0.5rem', fontStyle: 'italic', lineHeight: 1.4 }}>
+                          "{item.feedback}"
+                        </p>
+                      )}
+                      <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                        {t('job_details.to_freelancer')}: <span style={{ fontWeight: 500, color: '#333' }}>{item.freelancerName}</span>
+                      </div>
                     </div>
-                    <div className="text-right text-xs text-gray-500">
-                      <div className="mb-1">{item.duration}</div>
-                      <div className="text-gray-900 font-medium">{item.billed}</div>
+                    <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#555' }}>
+                      <div style={{ marginBottom: '0.3rem' }}>{item.duration}</div>
+                      <div style={{ fontWeight: 500, color: '#333' }}>{item.billed}</div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-        </main>
+          </div>
+        )}
+      </main>
 
-        {/* Sidebar */}
-        <aside className="w-full lg:w-80 flex-shrink-0 space-y-4">
-          {/* Action Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <div className="space-y-3 mb-4">
-              <button
-                onClick={() => navigate(`/proposals/submit?jobId=${id}`)}
-                className="w-full py-2.5 px-4 bg-[#eab308] hover:bg-yellow-500 text-white font-semibold rounded-md transition-colors text-sm"
-              >
-                {t('job_details.submit_proposal')}
-              </button>
-              <button
-                onClick={handleToggleSave}
-                className={`w-full py-2.5 px-4 border rounded-md transition-colors text-sm font-medium flex items-center justify-center gap-2 ${
-                  isSaved ? 'border-red-300 text-red-600 bg-red-50 hover:bg-red-100' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
-                {isSaved ? t('job_details.saved') : t('job_details.save_job')}
-              </button>
-            </div>
-            <button className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
-              <Flag className="w-3 h-3" /> {t('job_details.flag_inappropriate')}
+      {/* Right Column: Sidebar */}
+      <aside className="sidebar">
+        <div className="card action-card">
+          <div className="action-buttons">
+            <button
+              onClick={() => navigate(`/proposals/submit?jobId=${id}`)}
+              className="btn btn-apply"
+            >
+              {t('job_details.submit_proposal')}
+            </button>
+            <button
+              onClick={handleToggleSave}
+              className={`btn btn-save ${isSaved ? 'active' : ''}`}
+            >
+              <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+              {isSaved ? t('job_details.saved') : t('job_details.save_job')}
             </button>
           </div>
+          <button className="flag-link bg-transparent border-none p-0 text-left">
+            {t('job_details.flag_inappropriate')}
+          </button>
+        </div>
 
-          {/* Client Info Card */}
-          {job.client && (
-            <div className="bg-white border border-gray-200 rounded-lg p-5">
-              <h3 className="font-semibold text-gray-900 mb-3">{t('job_details.about_client')}</h3>
+        {job.client && (
+          <div className="card client-info-card">
+            <h3 className="client-info-title">{t('job_details.about_client')}</h3>
 
-              {job.client.paymentVerified && (
-                <div className="flex items-center gap-1.5 text-sm text-green-700 mb-3">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
-                  {t('job_details.payment_method_verified')}
-                </div>
-              )}
-
-              {job.client.rating && (
-                <div className="flex items-center gap-2 text-sm mb-3">
-                  <span className="text-yellow-500">{'★'.repeat(Math.round(job.client.rating))}</span>
-                  <span className="text-gray-900 font-medium">{job.client.ratingValue}</span>
-                  <span className="text-gray-500">{job.client.reviewCount} {t('job_details.reviews')}</span>
-                </div>
-              )}
-
-              <div className="text-sm font-medium text-gray-900 mb-0.5">{job.client.country}</div>
-              {job.client.localTime && <div className="text-xs text-gray-500 mb-3">{job.client.localTime}</div>}
-
-              <div className="space-y-1.5 text-sm text-gray-600">
-                {job.client.jobsPosted != null && <div><strong className="text-gray-900">{job.client.jobsPosted}</strong> {t('job_details.jobs_posted')}</div>}
-                {job.client.hireRate && <div>{job.client.hireRate}</div>}
-                {job.client.totalSpent && <div><strong className="text-gray-900">{job.client.totalSpent}</strong> {t('job_details.total_spent')}</div>}
-                {job.client.totalHires && <div>{job.client.totalHires}</div>}
+            {job.client.paymentVerified && (
+              <div className="client-verified">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+                {t('job_details.payment_method_verified')}
               </div>
+            )}
 
-              {job.client.memberSince && <div className="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-100">{t('job_details.member_since')} {job.client.memberSince}</div>}
-            </div>
-          )}
+            {job.client.rating && (
+              <div className="rating-row">
+                <div className="stars">
+                  {'★'.repeat(Math.round(job.client.rating))}
+                </div>
+                <span className="font-medium text-gray-900">{job.client.ratingValue}</span>
+                <span className="text-gray-500">
+                  {job.client.reviewCount} {t('job_details.reviews')}
+                </span>
+              </div>
+            )}
 
-          {/* Copy Link Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <h3 className="font-semibold text-gray-900 mb-2 text-sm">{t('job_details.job_link')}</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 truncate flex-1 bg-gray-50 px-2 py-1.5 rounded border border-gray-200">{window.location.href}</span>
-              <button onClick={handleCopyLink} className="flex-shrink-0 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors flex items-center gap-1">
-                <Copy className="w-3 h-3" /> {t('job_details.copy_link')}
-              </button>
+            <div className="location-row">{job.client.country}</div>
+            {job.client.localTime && (
+              <div style={{ fontSize: '0.85rem', color: '#777', marginBottom: '1rem' }}>
+                {job.client.localTime}
+              </div>
+            )}
+
+            <div className="client-stat">
+              <strong>{job.client.jobsPosted}</strong> {t('job_details.jobs_posted')}
             </div>
+            {job.client.hireRate && <div className="client-stat">{job.client.hireRate}</div>}
+            <div className="client-stat" style={{ marginTop: '1rem' }}>
+              <strong>{job.client.totalSpent}</strong> {t('job_details.total_spent')}
+            </div>
+            {job.client.totalHires && <div className="client-stat">{job.client.totalHires}</div>}
+
+            {job.client.memberSince && (
+              <div className="member-since">
+                {t('job_details.member_since')} {job.client.memberSince}
+              </div>
+            )}
           </div>
-        </aside>
-      </div>
+        )}
+
+        <div className="card copy-link-box">
+          <h3 className="client-info-title" style={{ fontSize: '1rem' }}>
+            {t('job_details.job_link')}
+          </h3>
+          <div className="link-input-group">
+            <span className="link-text">{window.location.href}</span>
+            <button onClick={handleCopyLink} className="copy-btn">
+              {t('job_details.copy_link')}
+            </button>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }
