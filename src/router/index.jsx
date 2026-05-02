@@ -6,6 +6,8 @@ import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
 import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
+import VerifyEmail from '../pages/VerifyEmail';
+import EmailConfirmed from '../pages/EmailConfirmed';
 import FindWorkPage from '../features/jobs/FindWorkPage';
 import SavedJobsPage from '../features/jobs/SavedJobsPage';
 import JobDetailsPage from '../features/jobs/JobDetailsPage';
@@ -41,6 +43,20 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { index: true, element: <Register /> }
+    ]
+  },
+  {
+    path: '/verify-email',
+    element: <AuthLayout />,
+    children: [
+      { index: true, element: <VerifyEmail /> }
+    ]
+  },
+  {
+    path: '/email-confirmed',
+    element: <AuthLayout />,
+    children: [
+      { index: true, element: <EmailConfirmed /> }
     ]
   },
   {

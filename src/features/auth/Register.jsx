@@ -52,14 +52,7 @@ export default function Register() {
     setFieldErrors({});
     try {
       const res = await api.post('/api/auth/register', form);
-      const payload = parseJwt(res.data.token);
-      loginAction(res.data.token, {
-        userId: payload.userId,
-        email: payload.email,
-        role: payload.role,
-        name: payload.name || payload.fullName,
-      });
-      navigate('/dashboard');
+      navigate('/verify-email', { state: { email: form.email } });
     } catch (err) {
       toast.error(err.title || t('common.error'));
       if (err.errors) setFieldErrors(err.errors);
