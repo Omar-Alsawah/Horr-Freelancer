@@ -120,6 +120,7 @@
     "rate_question": "What is the rate you'd like to bid for this job?",
     "price_label": "Price",
     "price_hint": "Total amount the client will see on your proposal",
+    "horrFee": "10% HORR Service Fee",
     "service_fee_label": "10% HORR Service Fee",
     "receive_label": "You'll receive",
     "receive_hint": "The estimated amount you'll receive after service fees",
@@ -133,6 +134,7 @@
     "char_counter": "{{count}} / 2000 characters",
     "submit_button": "Submit a Proposal",
     "cancel_button": "Cancel",
+    "duplicateError": "You have already submitted a proposal for this job.",
     "validation": {
       "bid_rate_required": "Bid rate must be greater than 0.",
       "cover_letter_min": "Cover letter must be at least 50 characters.",
