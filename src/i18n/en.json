@@ -20,7 +20,8 @@
     "country": "Country",
     "state_province": "State / Province",
     "timezone": "Time Zone",
-    "zip_code": "Zip Code"
+    "zip_code": "Zip Code",
+    "email_not_verified": "Your email is not verified yet. Please check your inbox."
   },
   "home": {
     "welcome": "Welcome to HORR Platform",
@@ -183,5 +184,23 @@
     "decline_offer_success": "Offer declined successfully",
     "decline_reason_prompt": "Please enter a reason for declining this offer:",
     "offer_not_found": "Offer not found"
+  },
+  "verify_email": {
+    "title": "Verify your email",
+    "subtitle": "We've sent a verification link to:",
+    "instructions": "Please check your inbox and click the link to verify your account. If you didn't receive the email, you can request a new one below.",
+    "resend_btn": "Resend verification email",
+    "back_to_login": "Back to Log In",
+    "resend_success": "Verification email sent successfully!",
+    "no_email_error": "No email address found to resend."
+  },
+  "email_confirmed": {
+    "verifying": "Verifying your email...",
+    "error_title": "Verification Failed",
+    "error_subtitle": "The verification link is invalid or has expired.",
+    "try_again": "Request a new verification link",
+    "success_title": "Email Verified!",
+    "success_subtitle": "Your email has been successfully verified. You can now access your account.",
+    "redirect_msg": "Redirecting to login in {{seconds}} seconds..."
   }
 }

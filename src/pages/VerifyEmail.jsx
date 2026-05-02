@@ -14,9 +14,14 @@ export default function VerifyEmail() {
   const [resending, setResending] = useState(false);
 
   const handleResend = async () => {
+    if (!email) {
+      toast.error(t('verify_email.no_email_error'));
+      return;
+    }
     setResending(true);
     try {
-      await api.post('/api/auth/resend-verification', { email });
+      // Backend: POST /api/auth/resend-confirmation-email?email=...
+      await api.post(`/api/auth/resend-confirmation-email?email=${encodeURIComponent(email)}`);
       toast.success(t('verify_email.resend_success'));
     } catch (err) {
       toast.error(err.title || t('common.error'));

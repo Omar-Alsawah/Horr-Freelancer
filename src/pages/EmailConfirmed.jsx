@@ -10,25 +10,27 @@ export default function EmailConfirmed() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const userId = searchParams.get('userId');
 
   const [status, setStatus] = useState('loading'); // loading | success | error
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     const verify = async () => {
-      if (!token) {
+      if (!token || !userId) {
         setStatus('error');
         return;
       }
       try {
-        await api.post('/api/auth/verify-email', { token });
+        // Backend: POST /api/auth/confirm-email?userId=...&token=...
+        await api.post(`/api/auth/confirm-email?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`);
         setStatus('success');
       } catch {
         setStatus('error');
       }
     };
     verify();
-  }, [token]);
+  }, [token, userId]);
 
   // Auto-redirect countdown on success
   useEffect(() => {
