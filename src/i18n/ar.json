@@ -108,5 +108,40 @@
     "member_since": "عضو منذ",
     "job_link": "رابط الوظيفة",
     "copy_link": "نسخ الرابط"
+  },
+  "proposals": {
+    "submit_title": "تقديم عرض",
+    "settings_title": "إعدادات العرض",
+    "submit_as_label": "هل تريد تقديم العرض كمستقل أم كعضو في وكالة؟",
+    "as_freelancer": "كمستقل",
+    "as_agency": "كعضو فريق تحت Vampires Animation Studio",
+    "terms_title": "الشروط",
+    "client_budget": "ميزانية العميل:",
+    "rate_question": "ما هو السعر الذي تود المزايدة به على هذه الوظيفة؟",
+    "price_label": "السعر",
+    "price_hint": "المبلغ الإجمالي الذي سيراه العميل في عرضك",
+    "service_fee_label": "10% رسوم خدمة HORR",
+    "receive_label": "ستستلم",
+    "receive_hint": "المبلغ المقدر الذي ستستلمه بعد رسوم الخدمة",
+    "milestones_title": "المراحل (Milestones)",
+    "add_milestone": "إضافة مرحلة",
+    "milestone_title_label": "العنوان",
+    "milestone_amount_label": "المبلغ",
+    "milestone_date_label": "تاريخ الاستحقاق",
+    "cover_letter_title": "رسالة التغطية",
+    "cover_letter_placeholder": "صف لماذا أنت مناسب لهذه الوظيفة...",
+    "char_counter": "{{count}} / 2000 حرف",
+    "submit_button": "تقديم العرض",
+    "cancel_button": "إلغاء",
+    "validation": {
+      "bid_rate_required": "يجب أن يكون سعر العرض أكبر من 0.",
+      "cover_letter_min": "يجب أن تكون رسالة التغطية 50 حرفًا على الأقل.",
+      "cover_letter_max": "لا يمكن أن تتجاوز رسالة التغطية 2000 حرف.",
+      "cover_letter_invalid": "تحتوي رسالة التغطية على أحرف غير صالحة.",
+      "milestone_title_required": "عنوان المرحلة مطلوب.",
+      "milestone_amount_required": "مبلغ المرحلة مطلوب.",
+      "duplicate_proposal": "لقد قمت بالفعل بتقديم عرض لهذه الوظيفة."
+    },
+    "success_message": "تم تقديم العرض بنجاح!"
   }
 }

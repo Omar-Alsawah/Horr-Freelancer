@@ -108,5 +108,40 @@
     "member_since": "Member since",
     "job_link": "Job link",
     "copy_link": "Copy link"
+  },
+  "proposals": {
+    "submit_title": "Submit a Proposal",
+    "settings_title": "Proposal settings",
+    "submit_as_label": "Do you want to submit the proposal as a freelancer or as an agency member?",
+    "as_freelancer": "As a freelancer",
+    "as_agency": "As a team member under Vampires Animation Studio",
+    "terms_title": "Terms",
+    "client_budget": "Client's budget:",
+    "rate_question": "What is the rate you'd like to bid for this job?",
+    "price_label": "Price",
+    "price_hint": "Total amount the client will see on your proposal",
+    "service_fee_label": "10% HORR Service Fee",
+    "receive_label": "You'll receive",
+    "receive_hint": "The estimated amount you'll receive after service fees",
+    "milestones_title": "Milestones",
+    "add_milestone": "Add milestone",
+    "milestone_title_label": "Title",
+    "milestone_amount_label": "Amount",
+    "milestone_date_label": "Due Date",
+    "cover_letter_title": "Cover Letter",
+    "cover_letter_placeholder": "Describe why you are a good fit for this job...",
+    "char_counter": "{{count}} / 2000 characters",
+    "submit_button": "Submit a Proposal",
+    "cancel_button": "Cancel",
+    "validation": {
+      "bid_rate_required": "Bid rate must be greater than 0.",
+      "cover_letter_min": "Cover letter must be at least 50 characters.",
+      "cover_letter_max": "Cover letter cannot exceed 2000 characters.",
+      "cover_letter_invalid": "Cover letter contains invalid characters.",
+      "milestone_title_required": "Milestone title is required.",
+      "milestone_amount_required": "Milestone amount is required.",
+      "duplicate_proposal": "You have already submitted a proposal for this job."
+    },
+    "success_message": "Proposal submitted successfully!"
   }
 }

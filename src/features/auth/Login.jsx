@@ -13,7 +13,7 @@ function parseJwt(token) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-  } catch(e) { return {}; }
+  } catch (e) { return {}; }
 }
 
 export default function Login() {
@@ -38,7 +38,7 @@ export default function Login() {
       const res = await api.post('/api/auth/login', { email, password });
       const payload = parseJwt(res.data.token);
       loginAction(res.data.token, { userId: payload.userId, email: payload.email, role: payload.role, name: payload.name });
-      navigate('/dashboard');
+      navigate('/jobs');
     } catch (err) {
       toast.error(err.title || t('common.error'));
       if (err.errors) {
@@ -59,8 +59,8 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-textMain">{t('auth.email')}</label>
-              <Input 
-                type="email" 
+              <Input
+                type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className={handleErrorKey('email') ? 'border-red-500' : ''}
@@ -69,8 +69,8 @@ export default function Login() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-textMain">{t('auth.password')}</label>
-              <Input 
-                type="password" 
+              <Input
+                type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className={handleErrorKey('password') ? 'border-red-500' : ''}
