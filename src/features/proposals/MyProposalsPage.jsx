@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { proposalsApi } from '../../api/proposals';
-import { AlertCircle, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 const MyProposalsPage = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('active');
   const [proposals, setProposals] = useState({
@@ -20,8 +19,6 @@ const MyProposalsPage = () => {
     const fetchProposals = async () => {
       try {
         const response = await proposalsApi.getMyProposals();
-        // Assuming the API returns data grouped or we filter it here
-        // For prototype, we'll just set it
         setProposals({
           active: response.data.active || [],
           submitted: response.data.submitted || [],
@@ -29,45 +26,90 @@ const MyProposalsPage = () => {
         });
       } catch (error) {
         console.error('Error fetching proposals:', error);
-        // Fallback dummy data for prototype demo if API fails
-        setProposals({
-          active: [
-            { id: 1, title: 'React Native Mobile App Development', date: 'Initiated Yesterday', status: 'Interviewing' },
-            { id: 2, title: 'E-commerce Website redesign', date: 'Initiated 3 days ago', status: 'Sent a proposal' }
-          ],
-          submitted: [
-            { id: 3, title: 'Python Script for Data Analysis', date: 'Submitted 5 days ago', status: 'General Profile' }
-          ],
-          offers: [
-            { id: 4, title: 'Looking for a Senior Frontend Developer', date: 'Received Today', clientName: 'TechCorp Inc.' }
-          ]
-        });
+        toast.error(error.title || t('errors.unexpected'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchProposals();
-  }, []);
+  }, [t]);
 
-  const handleWithdraw = async (id) => {
+  const handleWithdraw = async (id, e) => {
+    e.stopPropagation();
     if (!window.confirm(t('proposals.withdraw_confirm'))) return;
+
+    // Save previous state for rollback
+    const previousActive = [...proposals.active];
+
+    // Optimistic update
+    setProposals(prev => ({
+      ...prev,
+      active: prev.active.filter(p => p.id !== id)
+    }));
 
     try {
       await proposalsApi.withdrawProposal(id);
-      toast.success(t('proposals.withdraw_success'));
-      // Update local state
+    } catch (error) {
+      // Rollback
       setProposals(prev => ({
         ...prev,
-        active: prev.active.filter(p => p.id !== id),
-        submitted: prev.submitted.filter(p => p.id !== id)
+        active: previousActive
       }));
-    } catch (error) {
-      toast.error(t('errors.unexpected'));
+      toast.error(error.title || t('errors.unexpected'));
     }
   };
 
   if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
+
+  const renderEmptyState = (tabName) => (
+    <div className="card empty-state" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+      <svg width="200" height="150" viewBox="0 0 200 150" fill="none" style={{ margin: '0 auto 1.5rem' }}>
+        <rect x="40" y="40" width="60" height="60" rx="30" fill="#E0F2F1" />
+        <rect x="100" y="40" width="60" height="60" rx="30" fill="#E1BEE7" />
+        <path d="M100 100 L40 40" stroke="#aaa" strokeWidth="2" />
+        <path d="M100 100 L160 40" stroke="#aaa" strokeWidth="2" />
+      </svg>
+      <h3 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>
+        {tabName === 'active' ? t('proposals.no_active') : tabName === 'submitted' ? t('proposals.no_submitted') : t('proposals.no_offers')}
+      </h3>
+      <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
+        {t('proposals.empty_saved_subtitle') || 'You have no proposals here.'}
+      </p>
+    </div>
+  );
+
+  const renderStatusBadge = (status) => {
+    let color = '#777';
+    let bg = '#eee';
+    if (status === 'Active' || status === 'Interviewing') {
+      color = '#108a00';
+      bg = '#e5f3e5';
+    } else if (status === 'Submitted') {
+      color = '#1565C0';
+      bg = '#E3F2FD';
+    } else if (status === 'Withdrawn' || status === 'Declined') {
+      color = '#d32f2f';
+      bg = '#fdeaea';
+    }
+
+    return (
+      <span style={{ 
+        display: 'inline-block', 
+        padding: '0.2rem 0.6rem', 
+        borderRadius: '4px', 
+        fontSize: '0.75rem', 
+        fontWeight: '500',
+        backgroundColor: bg,
+        color: color,
+        marginLeft: '0.5rem'
+      }}>
+        {status}
+      </span>
+    );
+  };
+
+  const currentList = proposals[activeTab] || [];
 
   return (
     <div className="container container-single-col" style={{ maxWidth: '1000px', marginTop: '2rem' }}>
@@ -78,128 +120,64 @@ const MyProposalsPage = () => {
           className={`proposal-tab ${activeTab === 'active' ? 'active' : ''}`} 
           onClick={() => setActiveTab('active')}
         >
-          {t('proposals.tab_active')}
+          {t('proposals.tab_active')} ({proposals.active.length})
         </div>
         <div 
-          className={`proposal-tab ${activeTab === 'referrals' ? 'active' : ''}`} 
-          onClick={() => setActiveTab('referrals')}
+          className={`proposal-tab ${activeTab === 'submitted' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('submitted')}
         >
-          {t('proposals.tab_referrals')}
+          {t('proposals.submitted_proposals')} ({proposals.submitted.length})
+        </div>
+        <div 
+          className={`proposal-tab ${activeTab === 'offers' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('offers')}
+        >
+          {t('proposals.offers')} ({proposals.offers.length})
         </div>
       </div>
 
-      {activeTab === 'active' ? (
-        <div id="content-active">
-          {/* Offers */}
+      <div id={`content-${activeTab}`}>
+        {currentList.length === 0 ? (
+          renderEmptyState(activeTab)
+        ) : (
           <div className="proposal-group">
             <div className="proposal-group-header">
-              {t('proposals.offers')} ({proposals.offers.length})
+              {activeTab === 'active' ? t('proposals.active_proposals') : activeTab === 'submitted' ? t('proposals.submitted_proposals') : t('proposals.offers')}
             </div>
-            {proposals.offers.length > 0 ? (
-              proposals.offers.map(offer => (
+            {currentList.map(item => {
+              const fee = item.bidRate ? item.bidRate * 0.10 : 0;
+              return (
                 <div 
-                  key={offer.id} 
-                  className="proposal-list-item flex justify-between items-center" 
-                  onClick={() => navigate(`/proposals/view-offer/${offer.id}`)}
-                  style={{ cursor: 'pointer' }}
+                  key={item.id} 
+                  className="proposal-list-item" 
+                  onClick={() => navigate(activeTab === 'offers' ? `/proposals/view-offer/${item.id}` : `/proposals/${item.id}`)}
+                  style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                 >
                   <div>
-                    <div className="proposal-date">{offer.date}</div>
-                    <div className="proposal-title">{offer.title}</div>
-                    <div className="proposal-meta">{offer.clientName}</div>
+                    <div className="proposal-date">{item.submittedDate || item.date}</div>
+                    <div className="proposal-title">{item.jobTitle || item.title}</div>
+                    <div className="proposal-meta" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {item.bidRate && <span>{t('jobs.egp_format', { amount: item.bidRate.toFixed(2) })}</span>}
+                      {item.bidRate && <span style={{ color: '#aaa' }}>|</span>}
+                      {item.bidRate && <span>{t('proposals.horrFee') || 'Fee'}: ${fee.toFixed(2)}</span>}
+                      {renderStatusBadge(item.status)}
+                    </div>
                   </div>
-                  <CheckCircle className="text-green-500 w-5 h-5" />
+                  {activeTab === 'active' && (
+                    <button 
+                      onClick={(e) => handleWithdraw(item.id, e)}
+                      style={{ color: '#d32f2f', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '500' }}
+                    >
+                      {t('proposals.withdraw')}
+                    </button>
+                  )}
                 </div>
-              ))
-            ) : (
-              <div className="proposal-list-item text-gray-500 italic">{t('proposals.no_offers')}</div>
-            )}
+              );
+            })}
           </div>
+        )}
+      </div>
 
-          {/* Active Proposals */}
-          <div className="proposal-group">
-            <div className="proposal-group-header">
-              {t('proposals.active_proposals')} ({proposals.active.length})
-            </div>
-            {proposals.active.length > 0 ? (
-              proposals.active.map(proposal => (
-                <div 
-                  key={proposal.id} 
-                  className="proposal-list-item flex justify-between items-center"
-                  onClick={() => navigate(`/proposals/view/${proposal.id}`)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div>
-                    <div className="proposal-date">{proposal.date}</div>
-                    <div className="proposal-title">{proposal.title}</div>
-                    <div className="proposal-meta">{proposal.status}</div>
-                  </div>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleWithdraw(proposal.id); }}
-                    className="text-red-500 hover:underline text-sm font-medium"
-                  >
-                    {t('proposals.withdraw')}
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="proposal-list-item text-gray-500 italic">{t('proposals.no_active')}</div>
-            )}
-          </div>
-
-          {/* Submitted Proposals */}
-          <div className="proposal-group">
-            <div className="proposal-group-header">
-              {t('proposals.submitted_proposals')} ({proposals.submitted.length})
-            </div>
-            {proposals.submitted.length > 0 ? (
-              proposals.submitted.map(proposal => (
-                <div 
-                  key={proposal.id} 
-                  className="proposal-list-item flex justify-between items-center"
-                  onClick={() => navigate(`/proposals/view/${proposal.id}`)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div>
-                    <div className="proposal-date">{proposal.date}</div>
-                    <div className="proposal-title">{proposal.title}</div>
-                    <div className="proposal-meta">{proposal.status}</div>
-                  </div>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleWithdraw(proposal.id); }}
-                    className="text-red-500 hover:underline text-sm font-medium"
-                  >
-                    {t('proposals.withdraw')}
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="proposal-list-item text-gray-500 italic">{t('proposals.no_submitted')}</div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div id="content-referrals">
-          <div className="section-wrapper text-center py-16">
-            <div className="flex justify-center mb-8">
-              <div className="relative w-48 h-32">
-                <div className="absolute left-0 bottom-0 w-16 h-16 rounded-full bg-teal-50" />
-                <div className="absolute right-0 bottom-0 w-16 h-16 rounded-full bg-purple-50" />
-                <div className="absolute left-8 top-0 w-32 h-24 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                   <AlertCircle className="text-gray-300 w-12 h-12" />
-                </div>
-              </div>
-            </div>
-            <h3 className="text-xl font-bold mb-2">{t('proposals.no_referrals_title')}</h3>
-            <p className="text-gray-500 mb-4 max-w-md mx-auto">
-              {t('proposals.no_referrals_desc')}
-            </p>
-            <a href="#" className="text-green-600 underline font-medium">
-              {t('proposals.learn_referrals')}
-            </a>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
