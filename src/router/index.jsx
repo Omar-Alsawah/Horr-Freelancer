@@ -18,8 +18,7 @@ export const router = createBrowserRouter([
       {
         element: <MainLayout />,
         children: [
-          { index: true, element: <Dashboard /> },
-          { path: 'dashboard', element: <Dashboard /> },
+          { index: true, element: <FindWorkPage /> },
           { path: 'find-work', element: <FindWorkPage /> },
           { path: 'saved-jobs', element: <SavedJobsPage /> },
           { path: 'jobs/:id', element: <JobDetailsPage /> },
