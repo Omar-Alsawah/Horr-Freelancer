@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5200',
+  baseURL: 'https://localhost:5200',
 });
 
 api.interceptors.request.use(
@@ -28,7 +28,7 @@ api.interceptors.response.use(
         });
       }
     }
-    
+
     return Promise.reject({
       title: error.message || 'Network error',
       status: 0,
