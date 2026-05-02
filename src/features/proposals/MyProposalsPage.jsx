@@ -150,7 +150,7 @@ const MyProposalsPage = () => {
                 <div 
                   key={item.id} 
                   className="proposal-list-item" 
-                  onClick={() => navigate(activeTab === 'offers' ? `/proposals/view-offer/${item.id}` : `/proposals/${item.id}`)}
+                  onClick={() => navigate(activeTab === 'offers' ? `/offers/${item.id}` : `/proposals/${item.id}`)}
                   style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                 >
                   <div>
