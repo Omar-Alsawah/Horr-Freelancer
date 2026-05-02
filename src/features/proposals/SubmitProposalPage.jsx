@@ -120,7 +120,7 @@ const SubmitProposalPage = () => {
       navigate('/proposals/my-proposals');
     } catch (error) {
       if (error.status === 409) {
-        setApiError(t('proposals.validation.duplicate_proposal'));
+        setApiError(t('proposals.duplicateError'));
       } else {
         toast.error(error.title || t('errors.unexpected'));
       }
@@ -183,6 +183,7 @@ const SubmitProposalPage = () => {
             {job && (
               <div className="client-budget-tag">
                 {t('proposals.client_budget')} {job.budgetType === 'Fixed' ? `EGP ${job.budget}` : `EGP ${job.minBudget} - ${job.maxBudget}`}
+                <span className="inline-block w-[14px] h-[14px] bg-[#666] rounded-full text-center leading-[14px] text-[10px] text-white ml-1">?</span>
               </div>
             )}
           </div>
@@ -209,7 +210,7 @@ const SubmitProposalPage = () => {
 
           <div className="rate-grid fee-row text-sm">
             <div>
-              <strong>{t('proposals.service_fee_label')}</strong>
+              <strong>{t('proposals.horrFee')}</strong>
             </div>
             <div className="text-right">
               -${horrFee.toFixed(2)}
@@ -321,16 +322,7 @@ const SubmitProposalPage = () => {
           </div>
         </div>
 
-        {apiError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 flex items-center gap-2">
-             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-              </svg>
-            {apiError}
-          </div>
-        )}
-
-        <div className="flex gap-4 mb-12">
+        <div className="flex gap-4 mb-2">
           <button 
             type="submit"
             disabled={submitting}
@@ -346,6 +338,15 @@ const SubmitProposalPage = () => {
             {t('proposals.cancel_button')}
           </button>
         </div>
+
+        {apiError && (
+          <div className="error-message mb-10">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+              </svg>
+            {apiError}
+          </div>
+        )}
       </form>
     </div>
   );

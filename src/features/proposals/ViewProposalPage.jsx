@@ -18,23 +18,14 @@ const ViewProposalPage = () => {
         setProposal(response.data);
       } catch (error) {
         console.error('Error fetching proposal:', error);
-        // Fallback for demo
-        setProposal({
-          id: id,
-          title: "React Native Mobile App Development",
-          status: "Submitted",
-          bidAmount: 45.00,
-          description: "Looking for an experienced React Native developer to build a cross-platform mobile app for our e-commerce store.",
-          coverLetter: "Hi, I have 3 years of experience with React Native. I have built several apps including a food delivery app and a fitness tracker. I am proficient in Redux, Context API, and integrating REST APIs.",
-          jobId: '1'
-        });
+        toast.error(error.title || t('errors.unexpected'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchProposal();
-  }, [id]);
+  }, [id, t]);
 
   const handleWithdraw = async () => {
     if (!window.confirm(t('proposals.withdraw_confirm'))) return;
@@ -44,79 +35,100 @@ const ViewProposalPage = () => {
       toast.success(t('proposals.withdraw_success'));
       navigate('/proposals/my-proposals');
     } catch (error) {
-      toast.error(t('errors.unexpected'));
+      toast.error(error.title || t('errors.unexpected'));
     }
   };
 
   if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
   if (!proposal) return <div className="p-8 text-center text-red-500">{t('proposals.not_found')}</div>;
 
-  const horrFee = proposal.bidAmount * 0.10;
-  const receiveAmount = proposal.bidAmount - horrFee;
+  const bidRate = proposal.bidRate || 0;
+  const horrFee = bidRate * 0.10;
+  const receiveAmount = bidRate - horrFee;
 
   return (
-    <div className="container" style={{ maxWidth: '1000px', margin: '2rem auto' }}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 section-wrapper" style={{ padding: '2rem' }}>
-          <h1 className="text-2xl font-bold mb-2">{proposal.title}</h1>
-          <div className="inline-block bg-blue-50 text-blue-600 px-3 py-1 rounded text-sm font-medium mb-6">
-            {proposal.status}
-          </div>
+    <div className="container proposal-container" style={{ maxWidth: '1000px', margin: '2rem auto', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div className="main-col" style={{ background: '#fff', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '2rem' }}>
+        <h1 className="job-title" style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem' }}>{proposal.jobTitle}</h1>
+        <div className="proposal-status" style={{ display: 'inline-block', background: '#E3F2FD', color: '#1565C0', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', marginBottom: '1.5rem', fontWeight: '500' }}>
+          {proposal.status}
+        </div>
 
-          <div className="section-title text-lg font-semibold mb-4 border-b pb-2">
-            {t('job_details.details_title')}
-          </div>
-          <p className="mb-6 text-gray-700 leading-relaxed">
-            {proposal.description}
-            <Link to={`/jobs/${proposal.jobId}`} className="text-[#C5A47E] ml-2 font-medium hover:underline">
-              {t('proposals.view_posting')}
-            </Link>
-          </p>
+        <div className="section-title" style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', marginTop: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+          {t('job_details.summary')}
+        </div>
+        <p style={{ marginBottom: '1rem', color: '#555' }}>
+          <span>{proposal.jobDescription}</span>
+          <Link to={`/jobs/${proposal.jobPostId}`} style={{ color: 'var(--color-primary-gold)', marginLeft: '0.5rem' }}>
+            {t('proposals.view_posting')}
+          </Link>
+        </p>
 
-          <div className="section-title text-lg font-semibold mb-4 border-b pb-2">
-            {t('proposals.your_proposal')}
-          </div>
-          <div className="mb-6">
-            <div className="font-bold mb-2">{t('proposals.cover_letter')}</div>
-            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
-              {proposal.coverLetter}
-            </div>
+        <div className="section-title" style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', marginTop: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+          {t('proposals.your_proposal')}
+        </div>
+
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{t('proposals.cover_letter_title')}</div>
+          <div className="cover-letter" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#333' }}>
+            {proposal.coverLetter}
           </div>
         </div>
 
-        <div className="sidebar-col">
-          <div className="section-wrapper" style={{ padding: '1.5rem', height: 'fit-content' }}>
-            <h3 className="text-lg font-bold mb-4">{t('proposals.proposed_terms')}</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t('proposals.bid_price')}</span>
-                <span className="font-semibold">${proposal.bidAmount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t('proposals.service_fee')}</span>
-                <span className="font-semibold">-${horrFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between pt-3 border-t border-gray-100 font-bold">
-                <span>{t('proposals.you_receive')}</span>
-                <span>${receiveAmount.toFixed(2)}</span>
-              </div>
+        {proposal.terms && proposal.terms.length > 0 && (
+          <div style={{ marginTop: '2rem' }}>
+            <div className="section-title" style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', marginTop: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+               {t('proposals.milestones_title')}
             </div>
-
-            <div className="mt-8 space-y-3">
-              {proposal.status === 'Submitted' && (
-                <button className="sidebar-btn sidebar-btn-primary w-full">
-                  {t('proposals.edit_proposal')}
-                </button>
-              )}
-              <button 
-                onClick={handleWithdraw}
-                className="sidebar-btn sidebar-btn-outline w-full text-red-500 border-red-200 hover:bg-red-50"
-              >
-                {t('proposals.withdraw_button')}
-              </button>
-            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', borderBottom: '1px solid #eee' }}>
+                  <th style={{ padding: '0.75rem 0' }}>{t('proposals.milestone_title_label')}</th>
+                  <th style={{ padding: '0.75rem 0' }}>{t('proposals.milestone_amount_label')}</th>
+                  <th style={{ padding: '0.75rem 0' }}>{t('proposals.milestone_date_label')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {proposal.terms.map((term, index) => (
+                  <tr key={index} style={{ borderBottom: '1px solid #f9f9f9' }}>
+                    <td style={{ padding: '0.75rem 0' }}>{term.milestoneTitle}</td>
+                    <td style={{ padding: '0.75rem 0' }}>{t('jobs.egp_format', { amount: term.amount.toFixed(2) })}</td>
+                    <td style={{ padding: '0.75rem 0' }}>{new Date(term.dueDate).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        )}
+      </div>
+
+      <div className="side-col" style={{ background: '#fff', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1.5rem', height: 'fit-content' }}>
+        <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>{t('proposals.proposed_terms')}</h3>
+        <div className="terms-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <span className="terms-label" style={{ color: 'var(--color-text-secondary)' }}>{t('proposals.price_label')}</span>
+          <span className="terms-value" style={{ fontWeight: '500' }}>{t('jobs.egp_format', { amount: bidRate.toFixed(2) })}</span>
         </div>
+        <div className="terms-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <span className="terms-label" style={{ color: 'var(--color-text-secondary)' }}>{t('proposals.horrFee')}</span>
+          <span className="terms-value" style={{ fontWeight: '500' }}>-{t('jobs.egp_format', { amount: horrFee.toFixed(2) })}</span>
+        </div>
+        <div className="terms-row" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #eee' }}>
+          <span className="terms-label" style={{ color: 'var(--color-text-secondary)' }}>{t('proposals.receive_label')}</span>
+          <span className="terms-value" style={{ fontWeight: '500' }}>{t('jobs.egp_format', { amount: receiveAmount.toFixed(2) })}</span>
+        </div>
+
+        {proposal.status === 'Submitted' && (
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem', backgroundColor: '#C5A47E', borderColor: '#C5A47E', borderRadius: '20px' }}>
+            {t('proposals.edit_proposal')}
+          </button>
+        )}
+        <button 
+          className="btn btn-outline" 
+          style={{ width: '100%', marginTop: '1rem', color: '#d32f2f', border: '1px solid #eee', borderRadius: '20px' }}
+          onClick={handleWithdraw}
+        >
+          {t('proposals.withdraw_button')}
+        </button>
       </div>
     </div>
   );

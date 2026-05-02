@@ -120,6 +120,7 @@
     "rate_question": "ما هو السعر الذي تود المزايدة به على هذه الوظيفة؟",
     "price_label": "السعر",
     "price_hint": "المبلغ الإجمالي الذي سيراه العميل في عرضك",
+    "horrFee": "10% رسوم خدمة HORR",
     "service_fee_label": "10% رسوم خدمة HORR",
     "receive_label": "ستستلم",
     "receive_hint": "المبلغ المقدر الذي ستستلمه بعد رسوم الخدمة",
@@ -133,6 +134,7 @@
     "char_counter": "{{count}} / 2000 حرف",
     "submit_button": "تقديم العرض",
     "cancel_button": "إلغاء",
+    "duplicateError": "لقد قمت بالفعل بتقديم عرض لهذه الوظيفة.",
     "validation": {
       "bid_rate_required": "يجب أن يكون سعر العرض أكبر من 0.",
       "cover_letter_min": "يجب أن تكون رسالة التغطية 50 حرفًا على الأقل.",

@@ -30,8 +30,8 @@ export const router = createBrowserRouter([
           { path: 'jobs/:id', element: <JobDetailsPage /> },
           { path: 'proposals/submit', element: <SubmitProposalPage /> },
           { path: 'proposals/my-proposals', element: <MyProposalsPage /> },
-          { path: 'proposals/view/:id', element: <ViewProposalPage /> },
-          { path: 'proposals/view-offer/:id', element: <ViewOfferPage /> },
+          { path: 'proposals/:id', element: <ViewProposalPage /> },
+          { path: 'offers/:proposalId', element: <ViewOfferPage /> },
           { path: 'profile', element: <div className="p-8">My Profile Placeholder</div> },
           { path: 'settings', element: <div className="p-8">Settings Placeholder</div> }
         ]
