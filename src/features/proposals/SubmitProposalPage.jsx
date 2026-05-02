@@ -137,83 +137,8 @@ const SubmitProposalPage = () => {
   const isRtl = i18n.language === 'ar';
 
   return (
-    <div className="container mx-auto max-w-[900px] py-12 px-4">
-      <style>{`
-        .proposal-section {
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 1.5rem;
-          margin-bottom: 2rem;
-          background-color: white;
-        }
-        .proposal-section-title {
-          font-size: 1.25rem;
-          font-weight: 600;
-          margin-bottom: 1.5rem;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .rate-grid {
-          display: grid;
-          grid-template-columns: 1fr 150px;
-          gap: 1rem;
-          align-items: center;
-          margin-bottom: 1rem;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid #f3f4f6;
-        }
-        .rate-grid:last-child {
-          border-bottom: none;
-        }
-        .rate-input-group {
-          position: relative;
-        }
-        .rate-input-group span {
-          position: absolute;
-          ${isRtl ? 'right' : 'left'}: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #6b7280;
-        }
-        .rate-input-group input {
-          width: 100%;
-          padding: 0.6rem 0.6rem 0.6rem 1.5rem;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          text-align: ${isRtl ? 'left' : 'right'};
-          font-weight: 600;
-        }
-        .cover-letter-area {
-          width: 100%;
-          min-height: 200px;
-          padding: 1rem;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-family: inherit;
-          resize: vertical;
-        }
-        .error-message {
-          color: #d32f2f;
-          font-size: 0.85rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-top: 0.5rem;
-          font-weight: 600;
-        }
-        .client-budget-tag {
-          background-color: #f3f4f6;
-          padding: 0.2rem 0.6rem;
-          border-radius: 4px;
-          font-size: 0.85rem;
-          color: #374151;
-          display: inline-block;
-          margin-${isRtl ? 'right' : 'left'}: 0.5rem;
-        }
-      `}</style>
-
-      <h1 className="text-3xl font-bold mb-8">{t('proposals.submit_title')}</h1>
+    <div className="container container-single-col" style={{ maxWidth: '900px' }}>
+      <h1 className="page-title">{t('proposals.submit_title')}</h1>
       
       {job && (
         <div className="mb-6">
@@ -227,27 +152,27 @@ const SubmitProposalPage = () => {
           <div className="proposal-section-title">{t('proposals.settings_title')}</div>
           <p className="mb-4 font-medium">{t('proposals.submit_as_label')}</p>
           
-          <div className="space-y-3">
-            <label className="flex items-start gap-3 cursor-pointer">
+          <div className="radio-group">
+            <div className="radio-option">
               <input 
                 type="radio" 
+                id="freelancer"
                 name="submit-as" 
                 checked={submitAsType === 'Freelancer'} 
                 onChange={() => setSubmitAsType('Freelancer')}
-                className="mt-1"
               />
-              <span className="font-medium">{t('proposals.as_freelancer')}</span>
-            </label>
-            <label className="flex items-start gap-3 cursor-pointer">
+              <label htmlFor="freelancer">{t('proposals.as_freelancer')}</label>
+            </div>
+            <div className="radio-option">
               <input 
                 type="radio" 
+                id="agency"
                 name="submit-as" 
                 checked={submitAsType === 'Agency'} 
                 onChange={() => setSubmitAsType('Agency')}
-                className="mt-1"
               />
-              <span className="font-medium">{t('proposals.as_agency')}</span>
-            </label>
+              <label htmlFor="agency">{t('proposals.as_agency')}</label>
+            </div>
           </div>
         </div>
 
@@ -282,11 +207,11 @@ const SubmitProposalPage = () => {
           </div>
           {errors.bidRate && <div className="error-message mb-4">{errors.bidRate}</div>}
 
-          <div className="rate-grid text-gray-500 text-sm">
+          <div className="rate-grid fee-row text-sm">
             <div>
               <strong>{t('proposals.service_fee_label')}</strong>
             </div>
-            <div className={`text-right ${isRtl ? 'text-left' : 'text-right'}`}>
+            <div className="text-right">
               -${horrFee.toFixed(2)}
             </div>
           </div>
@@ -424,6 +349,7 @@ const SubmitProposalPage = () => {
       </form>
     </div>
   );
-};
+}
+;
 
 export default SubmitProposalPage;

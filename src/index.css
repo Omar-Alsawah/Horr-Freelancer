@@ -324,3 +324,425 @@
     padding: 1.5rem;
     border: 1px solid var(--color-border);
 }
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 7fr 3fr;
+    gap: 2rem;
+}
+
+.container-single-col {
+    grid-template-columns: 1fr;
+    max-width: 800px;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 2rem;
+}
+
+.job-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.load-more-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* Job Details Styles */
+.job-header {
+    margin-bottom: 2rem;
+}
+
+.job-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 1rem;
+}
+
+.job-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1.5rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.job-features {
+    display: flex;
+    gap: 3rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+    color: var(--color-text-main);
+}
+
+.feature-text div:first-child {
+    font-weight: 600;
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+}
+
+.feature-text div:last-child {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.2rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-text-main);
+}
+
+.job-description {
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.activity-row {
+    display: flex;
+    justify-content: space-between;
+    max-width: 300px;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+/* Sidebar & Client Info */
+.btn-apply {
+    background-color: var(--color-primary-navy);
+    color: var(--color-white);
+    border-radius: var(--radius-btn);
+    padding: 0.8rem;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.btn-save {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-primary-navy);
+    color: var(--color-primary-navy);
+    border-radius: var(--radius-btn);
+    padding: 0.8rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-save.active {
+    background-color: #f0f4f8;
+}
+
+.flag-link {
+    display: block;
+    margin-top: 1rem;
+    color: var(--color-text-main);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    padding-left: 0.5rem;
+    cursor: pointer;
+}
+
+.flag-link:hover {
+    text-decoration: underline;
+    color: var(--color-primary-gold);
+}
+
+.client-info-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.client-verified {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary-gold);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.rating-row .stars {
+    color: var(--color-primary-gold);
+}
+
+.location-row {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.client-stat {
+    font-size: 0.9rem;
+    color: var(--color-text-main);
+    margin-bottom: 0.3rem;
+}
+
+.member-since {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.link-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.link-text {
+    flex: 1;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary-gold);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* Proposal & Form Styles */
+.proposal-section {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    background-color: var(--color-white);
+}
+
+.proposal-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.radio-group {
+    margin-bottom: 1.5rem;
+}
+
+.radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.radio-option label {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.rate-grid {
+    display: grid;
+    grid-template-columns: 1fr 150px;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.rate-grid:last-child {
+    border-bottom: none;
+}
+
+.rate-input-group {
+    position: relative;
+}
+
+.rate-input-group span {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-secondary);
+}
+
+.rate-input-group input {
+    width: 100%;
+    padding: 0.6rem 0.6rem 0.6rem 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.fee-row {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+}
+
+.cover-letter-area {
+    width: 100%;
+    min-height: 200px;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.error-message {
+    color: #d32f2f;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.client-budget-tag {
+    background-color: #f1f1f1;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--color-text-main);
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+/* My Proposals Tabs */
+.proposal-tabs {
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 2rem;
+}
+
+.proposal-tab {
+    padding-bottom: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.proposal-tab.active {
+    color: var(--color-text-main);
+    border-bottom: 2px solid var(--color-text-main);
+    font-weight: 600;
+}
+
+.proposal-group {
+    margin-bottom: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.proposal-group-header {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.proposal-list-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.2s;
+}
+
+.proposal-list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.proposal-list-item:last-child {
+    border-bottom: none;
+}
+
+.proposal-date {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.proposal-title {
+    color: var(--color-primary-gold);
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-decoration: none;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+}
+
+.proposal-title:hover {
+    text-decoration: underline;
+}
+
+.proposal-meta {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+}
+

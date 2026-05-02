@@ -10,6 +10,9 @@ import FindWorkPage from '../features/jobs/FindWorkPage';
 import SavedJobsPage from '../features/jobs/SavedJobsPage';
 import JobDetailsPage from '../features/jobs/JobDetailsPage';
 import SubmitProposalPage from '../features/proposals/SubmitProposalPage';
+import MyProposalsPage from '../features/proposals/MyProposalsPage';
+import ViewProposalPage from '../features/proposals/ViewProposalPage';
+import ViewOfferPage from '../features/proposals/ViewOfferPage';
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +27,9 @@ export const router = createBrowserRouter([
           { path: 'saved-jobs', element: <SavedJobsPage /> },
           { path: 'jobs/:id', element: <JobDetailsPage /> },
           { path: 'proposals/submit', element: <SubmitProposalPage /> },
+          { path: 'proposals/my-proposals', element: <MyProposalsPage /> },
+          { path: 'proposals/view/:id', element: <ViewProposalPage /> },
+          { path: 'proposals/view-offer/:id', element: <ViewOfferPage /> },
           { path: 'profile', element: <div className="p-8">My Profile Placeholder</div> },
           { path: 'settings', element: <div className="p-8">Settings Placeholder</div> }
         ]
