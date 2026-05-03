@@ -11,7 +11,7 @@ import {
   Globe,
   ExternalLink
 } from 'lucide-react';
-import api from '../../api/axios';
+import { profileApi } from '../../api/profile';
 import { toast } from 'react-hot-toast';
 import './MyProfilePage.css';
 
@@ -35,7 +35,7 @@ const MyProfilePage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/api/profile');
+      const response = await profileApi.getProfile();
       setProfile(response.data);
       setEditedFields({});
       setFieldErrors({});
@@ -65,7 +65,7 @@ const MyProfilePage = () => {
     setFieldErrors({});
     
     try {
-      await api.put('/api/profile', editedFields);
+      await profileApi.updateProfile(editedFields);
       setProfile(prev => ({ ...prev, ...editedFields }));
       setIsEditMode(false);
       setEditedFields({});

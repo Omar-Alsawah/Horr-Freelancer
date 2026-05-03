@@ -1,10 +1,10 @@
 import api from './axios';
 
 export const profileApi = {
-  getProfile: () => api.get('/api/profile'),
-  updateProfile: (data) => api.put('/api/profile', data),
-  updateName: (name) => api.patch('/api/profile/name', name),
-  updateLocation: (data) => api.patch('/api/profile/location', data),
-  getPrivacy: () => api.get('/api/profile/privacy'),
-  updatePrivacy: (data) => api.patch('/api/profile/privacy', data)
+  getProfile: () => api.get('/api/UserProfile'),
+  updateProfile: (data) => api.patch('/api/UserProfile', data),
+  updateName: (data) => api.patch('/api/UserProfile/name', data),
+  updateLocation: (data) => api.patch('/api/UserProfile/location', data),
+  getPrivacy: () => api.get('/api/UserProfile/privacy'),
+  updatePrivacy: (data) => api.patch('/api/UserProfile/privacy', data)
 };
