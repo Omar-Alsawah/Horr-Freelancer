@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   User, 
-  Mail, 
   MapPin, 
   Phone, 
-  Globe, 
   Clock,
   Edit2,
   Loader2
@@ -24,6 +22,7 @@ const SettingsPage = () => {
     location: false
   });
   const [editedFields, setEditedFields] = useState({});
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchProfile();
@@ -33,12 +32,8 @@ const SettingsPage = () => {
     try {
       setLoading(true);
       const response = await profileApi.getProfile();
-      const profileData = response.data.data;
-      if (profileData) {
-        setProfile({
-          ...profileData,
-          name: profileData.fullName // Map for consistency
-        });
+      if (response.data) {
+        setProfile(response.data);
       }
     } catch (error) {
       toast.error('Failed to load settings');
@@ -49,11 +44,19 @@ const SettingsPage = () => {
 
   const toggleEdit = (section) => {
     setEditSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setErrors({});
   };
 
   const handleFieldChange = (field, value) => {
     setProfile(prev => ({ ...prev, [field]: value }));
     setEditedFields(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleUpdate = async (section) => {
@@ -63,12 +66,23 @@ const SettingsPage = () => {
     }
 
     try {
-      await profileApi.updateProfile(editedFields);
+      await profileApi.updateProfile(profile); // Send full profile as per "full current form state" logic if needed, or just editedFields. 
+      // Subtask 3 says for ProfileSettingsPage "full current form state". 
+      // Let's be consistent and send full state if that's the PUT expectation.
       toast.success('Settings updated successfully');
       setEditedFields({});
       toggleEdit(section);
     } catch (error) {
-      toast.error('Failed to update settings');
+      if (error.response?.status === 400 && error.response.data?.errors) {
+        const fieldErrors = {};
+        Object.keys(error.response.data.errors).forEach(key => {
+          const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+          fieldErrors[camelKey] = error.response.data.errors[key][0];
+        });
+        setErrors(fieldErrors);
+      } else {
+        toast.error('Failed to update settings');
+      }
     }
   };
 
@@ -109,25 +123,31 @@ const SettingsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">First name</label>
                       <Input 
-                        value={profile?.firstName || profile?.name?.split(' ')[0] || ''} 
+                        value={profile?.firstName || ''} 
                         onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                        className={errors.firstName ? 'border-red-500' : ''}
                       />
+                      {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Last name</label>
                       <Input 
-                        value={profile?.lastName || profile?.name?.split(' ')[1] || ''} 
+                        value={profile?.lastName || ''} 
                         onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                        className={errors.lastName ? 'border-red-500' : ''}
                       />
+                      {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName}</p>}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email</label>
                     <Input 
                       type="email"
-                      value={profile?.email} 
+                      value={profile?.email || ''} 
                       onChange={(e) => handleFieldChange('email', e.target.value)}
+                      className={errors.email ? 'border-red-500' : ''}
                     />
+                    {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
                   </div>
                   <div className="flex gap-4 pt-4 border-t border-gray-100">
                     <Button className="bg-[#d4af37] hover:bg-[#b8962d] text-white" onClick={() => handleUpdate('account')}>Update</Button>
@@ -138,11 +158,11 @@ const SettingsPage = () => {
                 <div className="space-y-6 text-sm">
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">User ID</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.id?.substring(0, 8) || 'e83b2bbd'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.id?.substring(0, 8) || 'N/A'}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Name</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.name}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.firstName} {profile?.lastName}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Email</div>
@@ -175,24 +195,30 @@ const SettingsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Time Zone</label>
                       <select 
-                        className="w-full p-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#d4af37]"
+                        className={`w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#d4af37] ${
+                          errors.timezone ? 'border-red-500' : 'border-gray-200'
+                        }`}
                         value={profile?.timezone || 'UTC+02:00 Cairo'}
                         onChange={(e) => handleFieldChange('timezone', e.target.value)}
                       >
                         <option>UTC+02:00 Cairo</option>
                         <option>UTC+03:00 Riyadh</option>
                       </select>
+                      {errors.timezone && <p className="text-red-500 text-xs">{errors.timezone}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Country</label>
                       <select 
-                        className="w-full p-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#d4af37]"
+                        className={`w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#d4af37] ${
+                          errors.country ? 'border-red-500' : 'border-gray-200'
+                        }`}
                         value={profile?.country || 'Egypt'}
                         onChange={(e) => handleFieldChange('country', e.target.value)}
                       >
                         <option>Egypt</option>
                         <option>United States</option>
                       </select>
+                      {errors.country && <p className="text-red-500 text-xs">{errors.country}</p>}
                     </div>
                   </div>
 
@@ -202,11 +228,15 @@ const SettingsPage = () => {
                       <Input 
                         value={profile?.address || ''} 
                         onChange={(e) => handleFieldChange('address', e.target.value)}
+                        className={errors.address ? 'border-red-500' : ''}
                       />
+                      {errors.address && <p className="text-red-500 text-xs">{errors.address}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Phone</label>
-                      <div className="flex items-center overflow-hidden border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-[#d4af37]">
+                      <div className={`flex items-center overflow-hidden border rounded-md focus-within:ring-2 focus-within:ring-[#d4af37] ${
+                        errors.phone ? 'border-red-500' : 'border-gray-200'
+                      }`}>
                         <span className="px-3 bg-gray-50 border-r border-gray-200 text-lg">🇪🇬</span>
                         <input 
                           className="flex-1 p-2 outline-none"
@@ -214,6 +244,7 @@ const SettingsPage = () => {
                           onChange={(e) => handleFieldChange('phone', e.target.value)}
                         />
                       </div>
+                      {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
                     </div>
                   </div>
 
@@ -240,7 +271,7 @@ const SettingsPage = () => {
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Phone</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.phone || '+20 1030153889'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.phone || 'N/A'}</div>
                   </div>
                 </div>
               )}
