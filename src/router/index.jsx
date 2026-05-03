@@ -18,6 +18,8 @@ import ViewOfferPage from '../features/proposals/ViewOfferPage';
 import MyContractsPage from '../features/contracts/MyContractsPage';
 import ContractDetailsPage from '../features/contracts/ContractDetailsPage';
 import MyProfilePage from '../features/profile/MyProfilePage';
+import SettingsPage from '../features/profile/SettingsPage';
+import ProfileSettingsPage from '../features/profile/ProfileSettingsPage';
 
 export const router = createBrowserRouter([
   {
@@ -38,7 +40,10 @@ export const router = createBrowserRouter([
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
           { path: 'profile', element: <MyProfilePage /> },
-          { path: 'settings', element: <div className="p-8">Settings Placeholder</div> }
+          { path: 'settings', element: <SettingsPage /> },
+          { path: 'settings/profile', element: <ProfileSettingsPage /> },
+          { path: 'settings/security', element: <div className="p-8 font-bold text-2xl">Password & Security Placeholder</div> },
+          { path: 'settings/billing', element: <div className="p-8 font-bold text-2xl">Get Paid Placeholder</div> }
         ]
       }
     ]
