@@ -222,6 +222,7 @@
     "deliver_btn": "Deliver",
     "note_required": "Please provide a note for this delivery.",
     "work_submitted": "Work submitted successfully!"
+  },
   "verify_email": {
     "title": "Verify your email",
     "subtitle": "We've sent a verification link to:",
