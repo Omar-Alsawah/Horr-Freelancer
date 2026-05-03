@@ -25,7 +25,7 @@ const SettingsSidebar = () => {
     },
     { 
       label: 'Password & Security', 
-      path: '/settings/security', 
+      path: '/settings/password', 
       icon: <Lock size={18} /> 
     },
     { 
