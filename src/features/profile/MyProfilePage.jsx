@@ -6,8 +6,8 @@ import {
   Edit2, 
   Plus, 
   Trash2, 
-  Linkedin, 
-  Github, 
+  Globe, 
+  Code2, 
   Search,
   Star,
   ExternalLink,
@@ -34,7 +34,16 @@ const MyProfilePage = () => {
     try {
       setLoading(true);
       const response = await profileApi.getProfile();
-      setProfile(response.data);
+      // Backend returns Result<UserProfileDto>, so we need .data.data
+      const profileData = response.data.data;
+      
+      if (profileData) {
+        setProfile({
+          ...profileData,
+          name: profileData.fullName, // Map fullName to name for component consistency
+          title: profileData.bio ? (profileData.bio.split('\n')[0] || '') : '', // Use bio as a fallback for title/bio
+        });
+      }
       setEditedFields({});
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -96,8 +105,8 @@ const MyProfilePage = () => {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border-2 border-gray-200">
-            {profile.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={profile.name} className="w-full h-full rounded-full object-cover" />
+            {profile?.avatarUrl ? (
+              <img src={profile?.avatarUrl} alt={profile?.name} className="w-full h-full rounded-full object-cover" />
             ) : (
               <User size={40} />
             )}
@@ -106,30 +115,30 @@ const MyProfilePage = () => {
             {isEditMode ? (
               <Input 
                 className="text-2xl font-bold h-auto py-1 px-2 border-primary-500"
-                value={profile.name} 
+                value={profile?.name} 
                 onChange={(e) => handleFieldChange('name', e.target.value)}
               />
             ) : (
-              <h1 className="text-3xl font-bold text-gray-900">{profile.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{profile?.name}</h1>
             )}
             <div className="flex items-center text-gray-500 gap-1 mt-1">
               <MapPin size={16} />
               {isEditMode ? (
                 <Input 
                   className="h-7 py-0.5 px-2 w-48"
-                  value={profile.location} 
+                  value={profile?.location} 
                   onChange={(e) => handleFieldChange('location', e.target.value)}
                 />
               ) : (
-                <span>{profile.location}</span>
+                <span>{profile?.location}</span>
               )}
             </div>
-            {profile.rating > 0 && (
+            {profile?.rating > 0 && (
               <div className="flex items-center gap-1 mt-1 text-yellow-500">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={14} fill={i < Math.round(profile.rating) ? "currentColor" : "none"} />
+                  <Star key={i} size={14} fill={i < Math.round(profile?.rating) ? "currentColor" : "none"} />
                 ))}
-                <span className="text-sm font-medium ml-1">({profile.rating})</span>
+                <span className="text-sm font-medium ml-1">({profile?.rating})</span>
               </div>
             )}
           </div>
@@ -161,7 +170,7 @@ const MyProfilePage = () => {
             {isEditMode ? (
               <select 
                 className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#d4af37] outline-none"
-                value={profile.availability}
+                value={profile?.availability}
                 onChange={(e) => handleFieldChange('availability', e.target.value)}
               >
                 <option value="Available">Available</option>
@@ -171,7 +180,7 @@ const MyProfilePage = () => {
             ) : (
               <p className="flex items-center gap-2 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                {profile.availability || 'Available'}
+                {profile?.availability || 'Available'}
               </p>
             )}
           </Card>
@@ -184,11 +193,11 @@ const MyProfilePage = () => {
             {isEditMode ? (
               <Input 
                 type="number"
-                value={profile.connects}
+                value={profile?.connects}
                 onChange={(e) => handleFieldChange('connects', parseInt(e.target.value) || 0)}
               />
             ) : (
-              <p className="font-bold text-lg mb-2">Connects: {profile.connects || 0}</p>
+              <p className="font-bold text-lg mb-2">Connects: {profile?.connects || 0}</p>
             )}
             {!isEditMode && <a href="#" className="text-sm text-[#d4af37] font-semibold hover:underline">View details</a>}
           </Card>
@@ -200,13 +209,13 @@ const MyProfilePage = () => {
             </div>
             {isEditMode ? (
               <Input 
-                value={profile.hoursPerWeek}
+                value={profile?.hoursPerWeek}
                 onChange={(e) => handleFieldChange('hoursPerWeek', e.target.value)}
                 placeholder="e.g. More than 30 hrs/week"
               />
             ) : (
               <>
-                <p className="font-bold">{profile.hoursPerWeek || 'More than 30 hrs/week'}</p>
+                <p className="font-bold">{profile?.hoursPerWeek || 'More than 30 hrs/week'}</p>
                 <p className="text-sm text-gray-500">Open to contract to hire</p>
               </>
             )}
@@ -242,16 +251,16 @@ const MyProfilePage = () => {
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Linkedin size={20} className="text-blue-600" />
+                <Globe size={20} className="text-blue-600" />
                 <div>
-                  <p className="text-sm font-bold">{profile.name}</p>
+                  <p className="text-sm font-bold">{profile?.name}</p>
                   {!isEditMode && <a href="#" className="text-xs text-[#d4af37] font-semibold hover:underline">View profile</a>}
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Github size={20} className="text-gray-900" />
+                <Code2 size={20} className="text-gray-900" />
                 <div>
-                  <p className="text-sm font-bold">{profile.name}</p>
+                  <p className="text-sm font-bold">{profile?.name}</p>
                   {!isEditMode && <a href="#" className="text-xs text-[#d4af37] font-semibold hover:underline">View profile</a>}
                 </div>
               </div>
@@ -268,11 +277,11 @@ const MyProfilePage = () => {
                   <Input 
                     className="text-2xl font-bold h-auto py-2 px-3 mb-4 w-full border-[#d4af37] focus:ring-[#d4af37]"
                     placeholder="Role Title"
-                    value={profile.title} 
+                    value={profile?.title} 
                     onChange={(e) => handleFieldChange('title', e.target.value)}
                   />
                 ) : (
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">{profile.title || 'No title set'}</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">{profile?.title || 'No title set'}</h2>
                 )}
               </div>
               {!isEditMode && (
@@ -295,13 +304,13 @@ const MyProfilePage = () => {
             {isEditMode ? (
               <textarea 
                 className="w-full min-h-[150px] p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#d4af37] outline-none leading-relaxed transition-all"
-                value={profile.bio} 
+                value={profile?.bio} 
                 onChange={(e) => handleFieldChange('bio', e.target.value)}
                 placeholder="Describe your professional background..."
               />
             ) : (
               <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {profile.bio || 'Add a professional summary to tell clients about your experience and goals.'}
+                {profile?.bio || 'Add a professional summary to tell clients about your experience and goals.'}
               </p>
             )}
           </section>
@@ -312,8 +321,8 @@ const MyProfilePage = () => {
               <button className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"><Plus size={18} /></button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {profile.portfolioItems?.length > 0 ? (
-                profile.portfolioItems.map((item, index) => (
+              {profile?.portfolioItems?.length > 0 ? (
+                profile?.portfolioItems.map((item, index) => (
                   <Card key={index} className="overflow-hidden group border-gray-200 hover:shadow-md transition-shadow">
                     <div className="h-40 bg-gray-100 flex items-center justify-center relative">
                       {item.imageUrl ? (
@@ -354,13 +363,13 @@ const MyProfilePage = () => {
               <Input 
                 className="w-full"
                 placeholder="Enter skills separated by commas (e.g. React, Node, SQL)"
-                value={profile.skills?.join(', ') || ''}
+                value={profile?.skills?.join(', ') || ''}
                 onChange={(e) => handleFieldChange('skills', e.target.value.split(',').map(s => s.trim()))}
               />
             ) : (
               <div className="flex flex-wrap gap-2">
-                {profile.skills?.length > 0 ? (
-                  profile.skills.map((skill, index) => (
+                {profile?.skills?.length > 0 ? (
+                  profile?.skills.map((skill, index) => (
                     <span key={index} className="px-5 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors cursor-default">
                       {skill}
                     </span>

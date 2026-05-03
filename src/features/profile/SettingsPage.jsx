@@ -33,7 +33,13 @@ const SettingsPage = () => {
     try {
       setLoading(true);
       const response = await profileApi.getProfile();
-      setProfile(response.data);
+      const profileData = response.data.data;
+      if (profileData) {
+        setProfile({
+          ...profileData,
+          name: profileData.fullName // Map for consistency
+        });
+      }
     } catch (error) {
       toast.error('Failed to load settings');
     } finally {
@@ -103,14 +109,14 @@ const SettingsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">First name</label>
                       <Input 
-                        value={profile.firstName || profile.name?.split(' ')[0] || ''} 
+                        value={profile?.firstName || profile?.name?.split(' ')[0] || ''} 
                         onChange={(e) => handleFieldChange('firstName', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Last name</label>
                       <Input 
-                        value={profile.lastName || profile.name?.split(' ')[1] || ''} 
+                        value={profile?.lastName || profile?.name?.split(' ')[1] || ''} 
                         onChange={(e) => handleFieldChange('lastName', e.target.value)}
                       />
                     </div>
@@ -119,7 +125,7 @@ const SettingsPage = () => {
                     <label className="text-sm font-semibold text-gray-700">Email</label>
                     <Input 
                       type="email"
-                      value={profile.email} 
+                      value={profile?.email} 
                       onChange={(e) => handleFieldChange('email', e.target.value)}
                     />
                   </div>
@@ -132,15 +138,15 @@ const SettingsPage = () => {
                 <div className="space-y-6 text-sm">
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">User ID</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile.id?.substring(0, 8) || 'e83b2bbd'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.id?.substring(0, 8) || 'e83b2bbd'}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Name</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile.name}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.name}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Email</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile.email}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.email}</div>
                   </div>
                   <button className="text-red-500 font-semibold hover:underline mt-4">Close my account</button>
                 </div>
@@ -170,7 +176,7 @@ const SettingsPage = () => {
                       <label className="text-sm font-semibold text-gray-700">Time Zone</label>
                       <select 
                         className="w-full p-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#d4af37]"
-                        value={profile.timezone || 'UTC+02:00 Cairo'}
+                        value={profile?.timezone || 'UTC+02:00 Cairo'}
                         onChange={(e) => handleFieldChange('timezone', e.target.value)}
                       >
                         <option>UTC+02:00 Cairo</option>
@@ -181,7 +187,7 @@ const SettingsPage = () => {
                       <label className="text-sm font-semibold text-gray-700">Country</label>
                       <select 
                         className="w-full p-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#d4af37]"
-                        value={profile.country || 'Egypt'}
+                        value={profile?.country || 'Egypt'}
                         onChange={(e) => handleFieldChange('country', e.target.value)}
                       >
                         <option>Egypt</option>
@@ -194,7 +200,7 @@ const SettingsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Address</label>
                       <Input 
-                        value={profile.address || ''} 
+                        value={profile?.address || ''} 
                         onChange={(e) => handleFieldChange('address', e.target.value)}
                       />
                     </div>
@@ -204,7 +210,7 @@ const SettingsPage = () => {
                         <span className="px-3 bg-gray-50 border-r border-gray-200 text-lg">🇪🇬</span>
                         <input 
                           className="flex-1 p-2 outline-none"
-                          value={profile.phone || ''}
+                          value={profile?.phone || ''}
                           onChange={(e) => handleFieldChange('phone', e.target.value)}
                         />
                       </div>
@@ -220,13 +226,13 @@ const SettingsPage = () => {
                 <div className="space-y-6 text-sm">
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Time Zone</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile.timezone || 'UTC+02:00 Cairo'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.timezone || 'UTC+02:00 Cairo'}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Address</div>
                     <div className="w-2/3 text-gray-900 font-bold">
-                      {profile.address ? (
-                        <p className="whitespace-pre-wrap">{profile.address}</p>
+                      {profile?.address ? (
+                        <p className="whitespace-pre-wrap">{profile?.address}</p>
                       ) : (
                         <span className="text-gray-400 italic">No address set</span>
                       )}
@@ -234,7 +240,7 @@ const SettingsPage = () => {
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Phone</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile.phone || '+20 1030153889'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.phone || '+20 1030153889'}</div>
                   </div>
                 </div>
               )}

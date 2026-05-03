@@ -23,7 +23,9 @@ const ProfileSettingsPage = () => {
     try {
       setLoading(true);
       const response = await profileApi.getProfile();
-      setProfile(response.data);
+      if (response.data && response.data.data) {
+        setProfile(response.data.data);
+      }
     } catch (error) {
       toast.error('Failed to load profile settings');
     } finally {
@@ -74,7 +76,7 @@ const ProfileSettingsPage = () => {
                 <div className="relative">
                   <select 
                     className="w-full p-3 border border-gray-200 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-[#d4af37] outline-none transition-all"
-                    value={profile.visibility || 'Public'}
+                    value={profile?.visibility || 'Public'}
                     onChange={(e) => {
                       handleFieldChange('visibility', e.target.value);
                       handleUpdate();
@@ -96,7 +98,7 @@ const ProfileSettingsPage = () => {
                 <div className="relative">
                   <select 
                     className="w-full p-3 border border-gray-200 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-[#d4af37] outline-none transition-all"
-                    value={profile.projectPreference || 'Both short-term and long-term projects'}
+                    value={profile?.projectPreference || 'Both short-term and long-term projects'}
                     onChange={(e) => {
                       handleFieldChange('projectPreference', e.target.value);
                       handleUpdate();
@@ -128,16 +130,16 @@ const ProfileSettingsPage = () => {
                     handleUpdate();
                   }}
                   className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                    profile.experienceLevel === level.id 
+                    profile?.experienceLevel === level.id 
                       ? 'border-[#d4af37] bg-yellow-50/50 shadow-sm' 
                       : 'border-gray-100 hover:border-gray-200'
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                       profile.experienceLevel === level.id ? 'border-[#d4af37]' : 'border-gray-300'
+                       profile?.experienceLevel === level.id ? 'border-[#d4af37]' : 'border-gray-300'
                     }`}>
-                      {profile.experienceLevel === level.id && <div className="w-2.5 h-2.5 rounded-full bg-[#d4af37]" />}
+                      {profile?.experienceLevel === level.id && <div className="w-2.5 h-2.5 rounded-full bg-[#d4af37]" />}
                     </div>
                     <span className="font-bold text-gray-900">{level.id}</span>
                   </div>
