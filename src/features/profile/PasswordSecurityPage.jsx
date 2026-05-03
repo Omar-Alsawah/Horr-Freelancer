@@ -47,27 +47,36 @@ const PasswordSecurityPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    
     if (!formData.currentPassword) {
       newErrors.currentPassword = 'Current password is required';
     }
+    
     if (formData.newPassword.length < 8) {
       newErrors.newPassword = 'New password must be at least 8 characters long';
     }
+    
     if (formData.newPassword !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Client-side validation
     if (!validateForm()) return;
 
+    setLoading(true);
+    setErrors({});
+
     try {
-      setLoading(true);
       await authApi.changePassword(formData);
       toast.success('Password changed successfully');
+      // Clear fields on success
       setFormData({
         currentPassword: '',
         newPassword: '',
@@ -192,7 +201,7 @@ const PasswordSecurityPage = () => {
                   disabled={loading}
                   className="bg-[#d4af37] hover:bg-[#b8962d] text-white px-8"
                 >
-                  {loading ? <Loader2 size={18} className="animate-spin mr-2" /> : null}
+                  {loading && <Loader2 size={18} className="animate-spin mr-2" />}
                   Update Password
                 </Button>
               </div>
@@ -207,7 +216,7 @@ const PasswordSecurityPage = () => {
             <p className="text-gray-500 text-sm mb-6 max-w-2xl">
               Add an extra layer of security to your account. When you log in, we'll ask for a code from your phone or an authenticator app.
             </p>
-            <Button variant="outline" className="border-gray-200 hover:bg-gray-50">
+            <Button variant="outline" className="border-gray-200 hover:bg-gray-50" disabled>
               Enable Two-Factor Authentication
             </Button>
           </Card>
