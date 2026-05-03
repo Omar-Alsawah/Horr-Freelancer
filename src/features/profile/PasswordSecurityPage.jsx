@@ -45,33 +45,26 @@ const PasswordSecurityPage = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.currentPassword) {
-      newErrors.currentPassword = 'Current password is required';
-    }
-    
-    if (formData.newPassword.length < 8) {
-      newErrors.newPassword = 'New password must be at least 8 characters long';
-    }
-    
-    if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Client-side validation
-    if (!validateForm()) return;
+    setErrors({});
+    const newErrors = {};
+    
+    if (formData.newPassword.length < 8) {
+      newErrors.newPassword = 'New password must be at least 8 characters long';
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     setLoading(true);
-    setErrors({});
 
     try {
       // Backend expects { oldPassword, newPassword }
@@ -81,25 +74,22 @@ const PasswordSecurityPage = () => {
       };
       await authApi.changePassword(payload);
       toast.success('Password changed successfully');
-      // Clear fields on success
+      
+      // Clear all fields on success
       setFormData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
     } catch (error) {
-      if (error.status === 400 && error.errors) {
-        // Map backend errors to fields
-        const fieldErrors = {};
-        Object.keys(error.errors).forEach(key => {
-          // Map "OldPassword" and "NewPassword" from backend to our local field names
-          let localKey = key.charAt(0).toLowerCase() + key.slice(1);
-          if (localKey === 'oldPassword') localKey = 'currentPassword';
-          fieldErrors[localKey] = error.errors[key][0];
-        });
-        setErrors(fieldErrors);
+      if (error.status === 401) {
+        toast.error('Session expired. Please log in again.');
+      } else if (error.status === 400) {
+        // Map 400 errors to currentPassword as per requirements
+        const errorMessage = error.data?.message || error.data?.title || (error.data?.errors && Object.values(error.data.errors)[0][0]) || 'Invalid current password';
+        setErrors({ currentPassword: errorMessage });
       } else {
-        toast.error(error.title || 'An unexpected error occurred');
+        toast.error(error.data?.title || 'An unexpected error occurred');
       }
     } finally {
       setLoading(false);
