@@ -10,12 +10,28 @@ import SettingsSidebar from './SettingsSidebar';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 
+const VisibilityEnum = {
+  'Public': 0,
+  'Private': 1,
+  'Horr Users Only': 2,
+  0: 'Public',
+  1: 'Private',
+  2: 'Horr Users Only'
+};
+
+const ExperienceLevelEnum = {
+  'Entry level': 0,
+  'Intermediate': 1,
+  'Expert': 2,
+  0: 'Entry level',
+  1: 'Intermediate',
+  2: 'Expert'
+};
+
 const ProfileSettingsPage = () => {
   const [profile, setProfile] = useState({
     visibility: 'Public',
-    projectPreference: 'Both short-term and long-term projects',
-    experienceLevel: 'Entry level',
-    categories: ['Web Development']
+    experienceLevel: 'Entry level'
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -29,14 +45,11 @@ const ProfileSettingsPage = () => {
     try {
       setLoading(true);
       const response = await profileApi.getProfile();
-      if (response.data) {
-        // Ensure we handle potential nulls from API
-        const data = response.data;
+      const data = response.data.data || response.data;
+      if (data) {
         setProfile({
-          visibility: data.visibility || 'Public',
-          projectPreference: data.projectPreference || 'Both short-term and long-term projects',
-          experienceLevel: data.experienceLevel || 'Entry level',
-          categories: data.categories || ['Web Development']
+          visibility: VisibilityEnum[data.visibility] || 'Public',
+          experienceLevel: ExperienceLevelEnum[data.experienceLevel] || 'Entry level'
         });
       }
     } catch (error) {
@@ -48,7 +61,6 @@ const ProfileSettingsPage = () => {
 
   const handleFieldChange = (field, value) => {
     setProfile(prev => ({ ...prev, [field]: value }));
-    // Clear error for this field
     if (errors[field]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -64,18 +76,22 @@ const ProfileSettingsPage = () => {
     setErrors({});
 
     try {
-      await profileApi.updateProfile(profile);
+      const payload = {
+        visibility: VisibilityEnum[profile.visibility],
+        experienceLevel: ExperienceLevelEnum[profile.experienceLevel]
+      };
+      await profileApi.updatePrivacy(payload);
       toast.success('Profile settings updated successfully');
     } catch (error) {
-      if (error.response?.status === 400 && error.response.data?.errors) {
+      if (error.status === 400 && error.errors) {
         const fieldErrors = {};
-        Object.keys(error.response.data.errors).forEach(key => {
+        Object.keys(error.errors).forEach(key => {
           const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
-          fieldErrors[camelKey] = error.response.data.errors[key][0];
+          fieldErrors[camelKey] = error.errors[key][0];
         });
         setErrors(fieldErrors);
       } else {
-        toast.error('Failed to update profile settings');
+        toast.error(error.title || 'Failed to update profile settings');
       }
     } finally {
       setIsSaving(false);
@@ -132,28 +148,6 @@ const ProfileSettingsPage = () => {
                   </div>
                   {errors.visibility && <p className="text-red-500 text-xs mt-1">{errors.visibility}</p>}
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                    Project preference 
-                    <span className="text-gray-400 text-xs italic font-normal">ⓘ</span>
-                  </label>
-                  <div className="relative">
-                    <select 
-                      className={`w-full p-3 border rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-[#d4af37] outline-none transition-all ${
-                        errors.projectPreference ? 'border-red-500' : 'border-gray-200'
-                      }`}
-                      value={profile.projectPreference}
-                      onChange={(e) => handleFieldChange('projectPreference', e.target.value)}
-                    >
-                      <option>Both short-term and long-term projects</option>
-                      <option>Short-term projects</option>
-                      <option>Long-term projects</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
-                  </div>
-                  {errors.projectPreference && <p className="text-red-500 text-xs mt-1">{errors.projectPreference}</p>}
-                </div>
               </div>
             </Card>
 
@@ -190,13 +184,10 @@ const ProfileSettingsPage = () => {
               </div>
             </Card>
 
-            {/* Categories Section */}
+            {/* Categories Section (Static for now as per ground truth) */}
             <Card className="p-8 border-gray-200 shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-800">Categories</h2>
-                <button type="button" className="text-[#d4af37] p-2 hover:bg-yellow-50 rounded-full transition-colors">
-                  <Edit2 size={18} />
-                </button>
               </div>
               <div className="space-y-4">
                 <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold inline-block">
@@ -209,32 +200,12 @@ const ProfileSettingsPage = () => {
                 </div>
               </div>
             </Card>
-
-            {/* Linked Accounts Section */}
-            <Card className="p-8 border-gray-200 shadow-sm space-y-6">
-              <h2 className="text-xl font-bold text-gray-800">Linked accounts</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  className="justify-start h-auto py-4 px-6 border-blue-100 text-blue-600 hover:bg-blue-50 font-bold"
-                >
-                  + LinkedIn
-                </Button>
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  className="justify-start h-auto py-4 px-6 border-gray-100 text-gray-400 hover:bg-gray-50 font-bold opacity-70"
-                >
-                  + GitHub
-                </Button>
-              </div>
-            </Card>
           </form>
         </main>
       </div>
     </div>
   );
 };
+
 
 export default ProfileSettingsPage;

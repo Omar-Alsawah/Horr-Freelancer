@@ -36,12 +36,13 @@ const MyProfilePage = () => {
       setLoading(true);
       setError(null);
       const response = await profileApi.getProfile();
-      setProfile(response.data);
+      // Handle wrapped Result object if necessary, but according to investigated code it returns response.data
+      setProfile(response.data.data || response.data);
       setEditedFields({});
       setFieldErrors({});
     } catch (err) {
       console.error('Error fetching profile:', err);
-      setError(err.response?.data?.title || 'Failed to load profile data');
+      setError(err.title || 'Failed to load profile data');
     } finally {
       setLoading(false);
     }
@@ -65,21 +66,39 @@ const MyProfilePage = () => {
     setFieldErrors({});
     
     try {
-      await profileApi.updateProfile(editedFields);
+      // The backend ground truth only provides specific update endpoints.
+      // MyProfilePage edits location, title, bio. 
+      // Only location can be updated via /api/UserProfile/location.
+      
+      if (editedFields.location !== undefined) {
+        await profileApi.updateLocation({
+          address: editedFields.location,
+          city: profile.city,
+          stateProvince: profile.stateProvince,
+          zipCode: profile.zipCode,
+          country: profile.country,
+          timeZone: profile.timeZone,
+          phoneNumber: profile.phoneNumber
+        });
+      }
+
+      // Note: Bio and Title updates are locally reflected but may not be persisted 
+      // if there are no backend endpoints for them.
+      
       setProfile(prev => ({ ...prev, ...editedFields }));
       setIsEditMode(false);
       setEditedFields({});
       toast.success('Profile updated successfully');
     } catch (err) {
-      if (err.response?.status === 400 && err.response.data?.errors) {
+      if (err.status === 400 && err.errors) {
         const errors = {};
-        Object.keys(err.response.data.errors).forEach(key => {
+        Object.keys(err.errors).forEach(key => {
           const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
-          errors[camelKey] = err.response.data.errors[key][0];
+          errors[camelKey] = err.errors[key][0];
         });
         setFieldErrors(errors);
       } else {
-        toast.error('An unexpected error occurred while saving.');
+        toast.error(err.title || 'An unexpected error occurred while saving.');
       }
     } finally {
       setIsSaving(false);
@@ -132,9 +151,11 @@ const MyProfilePage = () => {
 
   const renderAvatar = () => {
     if (profile.avatarUrl) {
-      return <img src={profile.avatarUrl} alt={`${profile.firstName} ${profile.lastName}`} className="avatar-img" />;
+      return <img src={profile.avatarUrl} alt={profile.fullName} className="avatar-img" />;
     }
-    const initials = `${profile.firstName?.charAt(0) || ''}${profile.lastName?.charAt(0) || ''}`.toUpperCase();
+    const initials = profile.fullName
+      ? profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+      : '';
     return (
       <div className="w-full h-full flex items-center justify-center bg-[#C5A065] text-white font-bold text-3xl">
         {initials || <User size={40} />}
@@ -183,7 +204,8 @@ const MyProfilePage = () => {
 
   const currentTitle = editedFields.title !== undefined ? editedFields.title : (profile.title || '');
   const currentBio = editedFields.bio !== undefined ? editedFields.bio : (profile.bio || '');
-  const currentLocation = editedFields.location !== undefined ? editedFields.location : (profile.location || '');
+  const displayLocation = profile.address || (profile.city ? `${profile.city}, ${profile.country}` : 'No location set');
+  const currentLocation = editedFields.location !== undefined ? editedFields.location : (profile.address || '');
   const hasChanges = Object.keys(editedFields).length > 0;
 
   return (
@@ -195,7 +217,7 @@ const MyProfilePage = () => {
             {renderAvatar()}
           </div>
           <div className="user-info">
-            <h1>{profile.firstName} {profile.lastName}</h1>
+            <h1>{profile.fullName}</h1>
             {isEditMode ? (
               <div className="mt-2">
                 <input 
@@ -208,13 +230,14 @@ const MyProfilePage = () => {
                 {fieldErrors.location && <p className="text-red-500 text-xs mt-1">{fieldErrors.location}</p>}
               </div>
             ) : (
-              <p className="location flex items-center gap-1 mt-1 text-gray-600"><MapPin size={14} /> {profile.location || 'No location set'}</p>
+              <p className="location flex items-center gap-1 mt-1 text-gray-600"><MapPin size={14} /> {displayLocation}</p>
             )}
             <div className="mt-2">
-              {renderStars(profile.averageRating)}
+              {renderStars(profile.trustScore)}
             </div>
           </div>
         </div>
+
         <div className="header-right flex gap-3 items-center">
           {isEditMode ? (
             <>

@@ -33,7 +33,7 @@ const SettingsPage = () => {
       setLoading(true);
       const response = await profileApi.getProfile();
       if (response.data) {
-        setProfile(response.data);
+        setProfile(response.data.data || response.data);
       }
     } catch (error) {
       toast.error('Failed to load settings');
@@ -66,22 +66,55 @@ const SettingsPage = () => {
     }
 
     try {
-      await profileApi.updateProfile(profile); // Send full profile as per "full current form state" logic if needed, or just editedFields. 
-      // Subtask 3 says for ProfileSettingsPage "full current form state". 
-      // Let's be consistent and send full state if that's the PUT expectation.
+      if (section === 'account') {
+        if (editedFields.fullName !== undefined) {
+          await profileApi.updateName(editedFields.fullName);
+        }
+        if (editedFields.email !== undefined) {
+          await profileApi.updateEmail(editedFields.email);
+        }
+      } else if (section === 'location') {
+        const dto = {
+          address: profile.address || '',
+          city: profile.city || '',
+          stateProvince: profile.stateProvince || '',
+          zipCode: profile.zipCode || '',
+          country: profile.country || '',
+          timeZone: profile.timeZone || '',
+          phoneNumber: profile.phoneNumber || ''
+        };
+        
+        // Override with edited values
+        if (editedFields.address !== undefined) dto.address = editedFields.address;
+        if (editedFields.city !== undefined) dto.city = editedFields.city;
+        if (editedFields.country !== undefined) dto.country = editedFields.country;
+        if (editedFields.timeZone !== undefined) dto.timeZone = editedFields.timeZone;
+        
+        if (editedFields.phoneNumber !== undefined) {
+          let phone = editedFields.phoneNumber;
+          // Ensure it starts with +201 if it's an Egyptian mobile number
+          if (phone && !phone.startsWith('+20')) {
+            phone = '+20' + phone.replace(/^0/, '');
+          }
+          dto.phoneNumber = phone;
+        }
+
+        await profileApi.updateLocation(dto);
+      }
+
       toast.success('Settings updated successfully');
       setEditedFields({});
       toggleEdit(section);
     } catch (error) {
-      if (error.response?.status === 400 && error.response.data?.errors) {
+      if (error.status === 400 && error.errors) {
         const fieldErrors = {};
-        Object.keys(error.response.data.errors).forEach(key => {
+        Object.keys(error.errors).forEach(key => {
           const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
-          fieldErrors[camelKey] = error.response.data.errors[key][0];
+          fieldErrors[camelKey] = error.errors[key][0];
         });
         setErrors(fieldErrors);
       } else {
-        toast.error('Failed to update settings');
+        toast.error(error.title || 'Failed to update settings');
       }
     }
   };
@@ -119,25 +152,14 @@ const SettingsPage = () => {
             <div className="p-8">
               {editSections.account ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">First name</label>
-                      <Input 
-                        value={profile?.firstName || ''} 
-                        onChange={(e) => handleFieldChange('firstName', e.target.value)}
-                        className={errors.firstName ? 'border-red-500' : ''}
-                      />
-                      {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Last name</label>
-                      <Input 
-                        value={profile?.lastName || ''} 
-                        onChange={(e) => handleFieldChange('lastName', e.target.value)}
-                        className={errors.lastName ? 'border-red-500' : ''}
-                      />
-                      {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                    <Input 
+                      value={profile?.fullName || ''} 
+                      onChange={(e) => handleFieldChange('fullName', e.target.value)}
+                      className={errors.fullName ? 'border-red-500' : ''}
+                    />
+                    {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email</label>
@@ -158,11 +180,11 @@ const SettingsPage = () => {
                 <div className="space-y-6 text-sm">
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">User ID</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.id?.substring(0, 8) || 'N/A'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.userIdHash || profile?.id?.substring(0, 8) || 'N/A'}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Name</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.firstName} {profile?.lastName}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.fullName}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Email</div>
@@ -196,15 +218,16 @@ const SettingsPage = () => {
                       <label className="text-sm font-semibold text-gray-700">Time Zone</label>
                       <select 
                         className={`w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#d4af37] ${
-                          errors.timezone ? 'border-red-500' : 'border-gray-200'
+                          errors.timeZone ? 'border-red-500' : 'border-gray-200'
                         }`}
-                        value={profile?.timezone || 'UTC+02:00 Cairo'}
-                        onChange={(e) => handleFieldChange('timezone', e.target.value)}
+                        value={profile?.timeZone || 'UTC+02:00 Cairo'}
+                        onChange={(e) => handleFieldChange('timeZone', e.target.value)}
                       >
                         <option>UTC+02:00 Cairo</option>
                         <option>UTC+03:00 Riyadh</option>
+                        <option>UTC+00:00 London</option>
                       </select>
-                      {errors.timezone && <p className="text-red-500 text-xs">{errors.timezone}</p>}
+                      {errors.timeZone && <p className="text-red-500 text-xs">{errors.timeZone}</p>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Country</label>
@@ -217,6 +240,7 @@ const SettingsPage = () => {
                       >
                         <option>Egypt</option>
                         <option>United States</option>
+                        <option>Saudi Arabia</option>
                       </select>
                       {errors.country && <p className="text-red-500 text-xs">{errors.country}</p>}
                     </div>
@@ -235,16 +259,17 @@ const SettingsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Phone</label>
                       <div className={`flex items-center overflow-hidden border rounded-md focus-within:ring-2 focus-within:ring-[#d4af37] ${
-                        errors.phone ? 'border-red-500' : 'border-gray-200'
+                        errors.phoneNumber ? 'border-red-500' : 'border-gray-200'
                       }`}>
                         <span className="px-3 bg-gray-50 border-r border-gray-200 text-lg">🇪🇬</span>
                         <input 
                           className="flex-1 p-2 outline-none"
-                          value={profile?.phone || ''}
-                          onChange={(e) => handleFieldChange('phone', e.target.value)}
+                          value={profile?.phoneNumber || ''}
+                          onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
+                          placeholder="1012345678"
                         />
                       </div>
-                      {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
+                      {errors.phoneNumber && <p className="text-red-500 text-xs">{errors.phoneNumber}</p>}
                     </div>
                   </div>
 
@@ -257,7 +282,7 @@ const SettingsPage = () => {
                 <div className="space-y-6 text-sm">
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Time Zone</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.timezone || 'UTC+02:00 Cairo'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.timeZone || 'UTC+02:00 Cairo'}</div>
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Address</div>
@@ -271,7 +296,7 @@ const SettingsPage = () => {
                   </div>
                   <div className="flex border-b border-gray-50 pb-4">
                     <div className="w-1/3 text-gray-500 font-medium">Phone</div>
-                    <div className="w-2/3 text-gray-900 font-bold">{profile?.phone || 'N/A'}</div>
+                    <div className="w-2/3 text-gray-900 font-bold">{profile?.phoneNumber || 'N/A'}</div>
                   </div>
                 </div>
               )}
@@ -282,5 +307,6 @@ const SettingsPage = () => {
     </div>
   );
 };
+
 
 export default SettingsPage;

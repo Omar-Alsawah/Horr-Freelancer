@@ -74,7 +74,12 @@ const PasswordSecurityPage = () => {
     setErrors({});
 
     try {
-      await authApi.changePassword(formData);
+      // Backend expects { oldPassword, newPassword }
+      const payload = {
+        oldPassword: formData.currentPassword,
+        newPassword: formData.newPassword
+      };
+      await authApi.changePassword(payload);
       toast.success('Password changed successfully');
       // Clear fields on success
       setFormData({
@@ -83,26 +88,24 @@ const PasswordSecurityPage = () => {
         confirmPassword: ''
       });
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        const problemDetails = error.response.data;
-        if (problemDetails.errors) {
-          // Map backend errors to fields
-          const fieldErrors = {};
-          Object.keys(problemDetails.errors).forEach(key => {
-            const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
-            fieldErrors[camelKey] = problemDetails.errors[key][0];
-          });
-          setErrors(fieldErrors);
-        } else {
-          toast.error(problemDetails.title || 'Failed to change password');
-        }
+      if (error.status === 400 && error.errors) {
+        // Map backend errors to fields
+        const fieldErrors = {};
+        Object.keys(error.errors).forEach(key => {
+          // Map "OldPassword" and "NewPassword" from backend to our local field names
+          let localKey = key.charAt(0).toLowerCase() + key.slice(1);
+          if (localKey === 'oldPassword') localKey = 'currentPassword';
+          fieldErrors[localKey] = error.errors[key][0];
+        });
+        setErrors(fieldErrors);
       } else {
-        toast.error('An unexpected error occurred');
+        toast.error(error.title || 'An unexpected error occurred');
       }
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="container max-w-[1100px] mx-auto pt-8 pb-16 px-4">
