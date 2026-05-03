@@ -8,25 +8,25 @@ import {
   Trash2, 
   Globe, 
   Code2, 
-  Search,
   Star,
-  ExternalLink,
-  ChevronRight,
   Loader2,
-  Video,
   Award,
   Briefcase,
   Folder
 } from 'lucide-react';
-import { profileApi } from '../../api/profile';
+import api from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import './MyProfilePage.css';
 
 const MyProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedFields, setEditedFields] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -35,23 +35,95 @@ const MyProfilePage = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await profileApi.getProfile();
-      const profileData = response.data.data;
-      
-      if (profileData) {
-        setProfile({
-          ...profileData,
-          name: profileData.fullName,
-          title: profileData.title || (profileData.bio ? (profileData.bio.split('\n')[0] || '') : 'Senior Web Developer'),
-        });
-      }
+      setError(null);
+      const response = await api.get('/api/profile');
+      setProfile(response.data);
       setEditedFields({});
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast.error('Failed to load profile');
+      setFieldErrors({});
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      setError(err.response?.data?.title || 'Failed to load profile data');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFieldChange = (field, value) => {
+    setEditedFields(prev => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleSave = async () => {
+    if (Object.keys(editedFields).length === 0) return;
+    
+    setIsSaving(true);
+    setFieldErrors({});
+    
+    try {
+      await api.put('/api/profile', editedFields);
+      setProfile(prev => ({ ...prev, ...editedFields }));
+      setIsEditMode(false);
+      setEditedFields({});
+      toast.success('Profile updated successfully');
+    } catch (err) {
+      if (err.response?.status === 400 && err.response.data?.errors) {
+        const errors = {};
+        // Map backend capitalized fields to camelCase/lowercase for frontend
+        Object.keys(err.response.data.errors).forEach(key => {
+          const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+          errors[camelKey] = err.response.data.errors[key][0];
+        });
+        setFieldErrors(errors);
+      } else {
+        toast.error('An unexpected error occurred while saving.');
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleEditMode = () => {
+    if (isEditMode) {
+      // Cancel
+      setIsEditMode(false);
+      setEditedFields({});
+      setFieldErrors({});
+    } else {
+      setIsEditMode(true);
+    }
+  };
+
+  const renderAvatar = () => {
+    if (profile.avatarUrl) {
+      return <img src={profile.avatarUrl} alt={`${profile.firstName} ${profile.lastName}`} className="avatar-img" />;
+    }
+    const initials = `${profile.firstName?.charAt(0) || ''}${profile.lastName?.charAt(0) || ''}`.toUpperCase();
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#C5A065] text-white font-bold text-3xl">
+        {initials || <User size={40} />}
+      </div>
+    );
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const numRating = Number(rating) || 0;
+    for (let i = 1; i <= 5; i++) {
+      if (i <= numRating) {
+        stars.push(<Star key={i} size={14} className="text-[#C5A065] fill-[#C5A065]" />);
+      } else if (i - 0.5 <= numRating) {
+        stars.push(<Star key={i} size={14} className="text-[#C5A065] fill-[#C5A065] opacity-50" />);
+      } else {
+        stars.push(<Star key={i} size={14} className="text-gray-300" />);
+      }
+    }
+    return <div className="flex gap-1 items-center">{stars} <span className="text-sm font-semibold ml-1">{numRating.toFixed(1)}</span></div>;
   };
 
   if (loading) {
@@ -62,35 +134,82 @@ const MyProfilePage = () => {
     );
   }
 
-  if (!profile) {
+  if (error) {
     return (
-      <div className="text-center py-20">
-        <p className="text-gray-500">Profile not found.</p>
+      <div className="container max-w-[1100px] mx-auto py-12 px-4 text-center">
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg inline-block">
+          <p className="font-semibold">Error Loading Profile</p>
+          <p className="text-sm">{error}</p>
+          <button onClick={fetchProfile} className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 rounded text-red-700 text-sm font-medium transition-colors">
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
+
+  if (!profile) return null;
+
+  const currentTitle = editedFields.title !== undefined ? editedFields.title : (profile.title || '');
+  const currentBio = editedFields.bio !== undefined ? editedFields.bio : (profile.bio || '');
+  const currentLocation = editedFields.location !== undefined ? editedFields.location : (profile.location || '');
+  const hasChanges = Object.keys(editedFields).length > 0;
 
   return (
     <div className="profile-container">
       {/* Profile Header */}
       <header className="profile-header">
         <div className="header-left">
-          <div className="avatar-container">
-            {profile.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={profile.name} className="avatar-img" />
-            ) : (
-              <User size={40} className="avatar-icon" />
-            )}
+          <div className="avatar-container overflow-hidden rounded-full">
+            {renderAvatar()}
           </div>
           <div className="user-info">
-            <h1>{profile.name}</h1>
-            <p className="location"><MapPin size={14} /> {profile.location || 'Cairo, Egypt'}</p>
+            <h1>{profile.firstName} {profile.lastName}</h1>
+            {isEditMode ? (
+              <div className="mt-2">
+                <input 
+                  type="text" 
+                  value={currentLocation}
+                  onChange={(e) => handleFieldChange('location', e.target.value)}
+                  className="p-1 border border-gray-300 rounded text-sm w-full outline-none focus:border-[#C5A065]"
+                  placeholder="Your Location"
+                />
+                {fieldErrors.location && <p className="text-red-500 text-xs mt-1">{fieldErrors.location}</p>}
+              </div>
+            ) : (
+              <p className="location flex items-center gap-1 mt-1 text-gray-600"><MapPin size={14} /> {profile.location || 'No location set'}</p>
+            )}
+            <div className="mt-2">
+              {renderStars(profile.averageRating)}
+            </div>
           </div>
         </div>
-        <div className="header-right">
-          <button className="btn btn-primary">See public view</button>
-          <button className="btn btn-outline">Profile settings</button>
-          <button className="btn-icon"><Share2 size={18} /> Share</button>
+        <div className="header-right flex gap-3 items-center">
+          {isEditMode ? (
+            <>
+              <button 
+                onClick={toggleEditMode} 
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                disabled={isSaving}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSave} 
+                disabled={!hasChanges || isSaving}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#C5A065] hover:bg-[#b8962d] rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSaving && <Loader2 size={14} className="animate-spin" />}
+                Save Changes
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={toggleEditMode} className="btn btn-outline flex items-center gap-2">
+                <Edit2 size={16} /> Edit Profile
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -100,81 +219,11 @@ const MyProfilePage = () => {
           <section className="p-card section-availability">
             <div className="section-header">
               <h2>Availability</h2>
-              <button className="edit-btn"><Edit2 size={14} /></button>
             </div>
             <p className="status">
               <span className="status-dot"></span> 
-              {profile.availability || 'Available'}
+              Available
             </p>
-          </section>
-
-          <section className="p-card section-connects">
-            <div className="section-header">
-              <h2>Connects</h2>
-              <button className="edit-btn"><Edit2 size={14} /></button>
-            </div>
-            <p className="text-bold" style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
-              Connects: {profile.connects || 0}
-            </p>
-            <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.9rem' }}>
-              View details
-            </a>
-          </section>
-
-          <section className="p-card section-video">
-            <div className="section-header">
-              <h2>Video introduction</h2>
-              <button className="add-btn"><Plus size={14} /></button>
-            </div>
-            <p className="subtext">No video added</p>
-          </section>
-
-          <section className="p-card section-hours">
-            <div className="section-header">
-              <h2>Hours per week</h2>
-              <button className="edit-btn"><Edit2 size={14} /></button>
-            </div>
-            <div>
-              <p className="text-bold">{profile.hoursPerWeek || 'More than 30 hrs/week'}</p>
-              <p className="subtext">Open to contract to hire</p>
-            </div>
-          </section>
-
-          <section className="p-card section-languages">
-            <div className="section-header">
-              <h2>Languages</h2>
-              <div className="header-actions">
-                <button className="add-btn"><Plus size={14} /></button>
-                <button className="edit-btn" style={{ marginLeft: '0.5rem' }}><Edit2 size={14} /></button>
-              </div>
-            </div>
-            <div>
-              <p>English: <span className="text-muted">Conversational</span></p>
-              <p>Arabic: <span className="text-muted">Native or Bilingual</span></p>
-            </div>
-          </section>
-
-          <section className="p-card section-verifications">
-            <div className="section-header">
-              <h2>Verifications</h2>
-            </div>
-            <div className="verification-item">
-              <p>ID: <span className="text-bold">Unverified</span></p>
-              <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.9rem' }}>
-                Verify your identity
-              </a>
-            </div>
-          </section>
-
-          <section className="p-card section-education">
-            <div className="section-header">
-              <h2>Education</h2>
-              <button className="add-btn"><Plus size={14} /></button>
-            </div>
-            <div className="education-item">
-              <p className="text-bold">Egypt-Japan University of Science and Technology (E-JUST)</p>
-              <p className="subtext">Bachelor of Computer Science (BCompSc), 2021-2025 (expected)</p>
-            </div>
           </section>
 
           <section className="p-card section-linked">
@@ -184,19 +233,7 @@ const MyProfilePage = () => {
             <div className="linked-item">
               <Globe size={20} className="social-icon" />
               <div className="linked-text">
-                <p className="text-bold">{profile.name}</p>
-                <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.8rem' }}>
-                  View profile
-                </a>
-              </div>
-            </div>
-            <div className="linked-item">
-              <Code2 size={20} className="social-icon" />
-              <div className="linked-text">
-                <p className="text-bold">{profile.name}</p>
-                <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.8rem' }}>
-                  View profile
-                </a>
+                <p className="text-bold">Website</p>
               </div>
             </div>
           </section>
@@ -206,63 +243,54 @@ const MyProfilePage = () => {
         <main className="main-content">
           <section className="p-card section-title">
             <div className="section-header">
-              <h2 className="role-title">{profile.title}</h2>
-              <button className="edit-btn"><Edit2 size={16} /></button>
-            </div>
-          </section>
-
-          <section className="p-card section-summary">
-            <div className="section-header">
-              <h2>Professional Summary</h2>
-              <button className="edit-btn"><Edit2 size={14} /></button>
-            </div>
-            <p className="summary-text">
-              {profile.bio || 'Add a professional summary to tell clients about your experience and goals.'}
-            </p>
-          </section>
-
-          <section className="p-card section-portfolio">
-            <div className="section-header">
-              <h2>Portfolio</h2>
-              <button className="add-btn"><Plus size={14} /></button>
-            </div>
-            <div className="portfolio-list">
-              {profile.portfolioItems?.length > 0 ? (
-                profile.portfolioItems.map((item, index) => (
-                  <div key={index} className="portfolio-item">
-                    <div className="portfolio-info">
-                      <p className="text-bold">{item.title}</p>
-                      <p className="subtext">{item.description}</p>
-                    </div>
-                    <div className="portfolio-actions">
-                      <a href="#" className="view-link" style={{ color: 'var(--profile-gold)' }}>View Media</a>
-                      <button className="edit-btn-small"><Edit2 size={14} /></button>
-                      <button className="delete-btn-small"><Trash2 size={14} /></button>
-                    </div>
-                  </div>
-                ))
+              {isEditMode ? (
+                <div className="w-full">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Title</label>
+                  <input 
+                    type="text" 
+                    value={currentTitle}
+                    onChange={(e) => handleFieldChange('title', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-lg font-bold outline-none focus:border-[#C5A065] focus:ring-1 focus:ring-[#C5A065]"
+                    placeholder="e.g. Senior Frontend Developer"
+                  />
+                  {fieldErrors.title && <p className="text-red-500 text-xs mt-1">{fieldErrors.title}</p>}
+                </div>
               ) : (
-                <p className="subtext italic text-center py-4">No portfolio items added yet.</p>
+                <h2 className="role-title">{profile.title || 'No title set'}</h2>
               )}
             </div>
           </section>
 
-          <section className="p-card section-history">
-            <div className="section-header">
-              <h2>Work history</h2>
+          <section className="p-card section-summary">
+            <div className="section-header mb-4">
+              <h2>Professional Summary</h2>
             </div>
-            <p className="subtext">No Work History</p>
+            {isEditMode ? (
+              <div className="w-full">
+                <textarea 
+                  value={currentBio}
+                  onChange={(e) => handleFieldChange('bio', e.target.value)}
+                  rows={4}
+                  className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-[#C5A065] focus:ring-1 focus:ring-[#C5A065] resize-none"
+                  placeholder="Write a professional summary..."
+                />
+                {fieldErrors.bio && <p className="text-red-500 text-xs mt-1">{fieldErrors.bio}</p>}
+              </div>
+            ) : (
+              <p className="summary-text whitespace-pre-wrap">
+                {profile.bio || 'Add a professional summary to tell clients about your experience and goals.'}
+              </p>
+            )}
           </section>
 
           <section className="p-card section-skills">
-            <div className="section-header">
+            <div className="section-header mb-4">
               <h2>Skills</h2>
-              <button className="edit-btn"><Edit2 size={14} /></button>
             </div>
-            <div className="skills-tags">
-              {profile.skills?.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {profile.skills && profile.skills.length > 0 ? (
                 profile.skills.map((skill, index) => (
-                  <span key={index} className="skill-tag">
+                  <span key={index} className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full border border-gray-200">
                     {skill}
                   </span>
                 ))
@@ -272,41 +300,35 @@ const MyProfilePage = () => {
             </div>
           </section>
 
-          <section className="p-card section-placeholder">
-            <div className="section-header">
-              <h2>Other experiences</h2>
-              <button className="add-btn"><Plus size={14} /></button>
+          <section className="p-card section-portfolio">
+            <div className="section-header mb-4">
+              <h2>Portfolio</h2>
             </div>
-            <div className="placeholder-content">
-              <div className="icon-circle">
-                <Folder className="placeholder-icon" size={24} />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {profile.portfolioItems && profile.portfolioItems.length > 0 ? (
+                profile.portfolioItems.map((item) => (
+                  <div key={item.id} className="border border-gray-200 rounded-xl overflow-hidden group hover:shadow-md transition-shadow">
+                    <div className="h-40 bg-gray-100 relative overflow-hidden">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <Folder size={32} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4 bg-white">
+                      <h3 className="font-bold text-gray-900 truncate">{item.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="subtext italic col-span-2 text-center py-8">No portfolio items added yet.</p>
+              )}
             </div>
           </section>
 
-          <section className="p-card section-placeholder">
-            <div className="section-header">
-              <h2>Certifications</h2>
-              <button className="add-btn"><Plus size={14} /></button>
-            </div>
-            <div className="placeholder-content">
-              <div className="icon-circle">
-                <Award className="placeholder-icon" size={24} />
-              </div>
-            </div>
-          </section>
-
-          <section className="p-card section-placeholder">
-            <div className="section-header">
-              <h2>Employment history</h2>
-              <button className="add-btn"><Plus size={14} /></button>
-            </div>
-            <div className="placeholder-content">
-              <div className="icon-circle">
-                <Briefcase className="placeholder-icon" size={24} />
-              </div>
-            </div>
-          </section>
         </main>
       </div>
     </div>
