@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, 
   MapPin, 
   Share2, 
   Edit2, 
-  Plus, 
-  Trash2, 
-  Globe, 
-  Code2, 
   Star,
   Loader2,
-  Award,
-  Briefcase,
-  Folder
+  Folder,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
 import api from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import './MyProfilePage.css';
 
 const MyProfilePage = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,6 +25,7 @@ const MyProfilePage = () => {
   const [editedFields, setEditedFields] = useState({});
   const [fieldErrors, setFieldErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [showCopyFallback, setShowCopyFallback] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -74,7 +73,6 @@ const MyProfilePage = () => {
     } catch (err) {
       if (err.response?.status === 400 && err.response.data?.errors) {
         const errors = {};
-        // Map backend capitalized fields to camelCase/lowercase for frontend
         Object.keys(err.response.data.errors).forEach(key => {
           const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
           errors[camelKey] = err.response.data.errors[key][0];
@@ -90,12 +88,45 @@ const MyProfilePage = () => {
 
   const toggleEditMode = () => {
     if (isEditMode) {
-      // Cancel
       setIsEditMode(false);
       setEditedFields({});
       setFieldErrors({});
     } else {
       setIsEditMode(true);
+    }
+  };
+
+  const handleSeePublicView = () => {
+    if (profile?.id) {
+      navigate(`/profile/${profile.id}/public`);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!profile?.id) return;
+    const url = `https://horr.app/profile/${profile.id}`;
+    
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+        toast.success('Profile link copied to clipboard');
+      } else {
+        // Fallback for insecure context or missing API
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          toast.success('Profile link copied to clipboard');
+        } catch (err) {
+          throw new Error('execCommand failed');
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (err) {
+      toast.error('Could not copy link. Please copy it manually.');
+      setShowCopyFallback(true);
     }
   };
 
@@ -205,13 +236,38 @@ const MyProfilePage = () => {
             </>
           ) : (
             <>
-              <button onClick={toggleEditMode} className="btn btn-outline flex items-center gap-2">
+              <button 
+                onClick={handleSeePublicView} 
+                className="btn btn-primary px-4 py-2 text-sm font-medium"
+                disabled={loading}
+              >
+                See public view
+              </button>
+              <button 
+                onClick={toggleEditMode} 
+                className="btn btn-outline flex items-center gap-2 px-4 py-2 text-sm font-medium"
+              >
                 <Edit2 size={16} /> Edit Profile
+              </button>
+              <button 
+                onClick={handleShare} 
+                className="btn-icon flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Share2 size={18} /> Share
               </button>
             </>
           )}
         </div>
       </header>
+
+      {showCopyFallback && (
+        <div className="container max-w-[1100px] mx-auto px-4 mt-4">
+          <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg flex items-center justify-between text-sm">
+            <span className="text-yellow-800 font-medium">Profile Link: https://horr.app/profile/{profile.id}</span>
+            <button onClick={() => setShowCopyFallback(false)} className="text-yellow-600 font-bold px-2">✕</button>
+          </div>
+        </div>
+      )}
 
       <div className="profile-layout">
         {/* Sidebar */}
