@@ -79,7 +79,8 @@
     "empty_title": "No jobs found",
     "empty_subtitle": "Try adjusting your search or filters to find what you're looking for.",
     "empty_saved_title": "No saved jobs yet",
-    "empty_saved_subtitle": "Bookmark jobs you're interested in and they'll appear here."
+    "empty_saved_subtitle": "Bookmark jobs you're interested in and they'll appear here.",
+    "complete_profile": "Complete your profile"
   },
   "job_details": {
     "not_found_title": "Job Not Found",

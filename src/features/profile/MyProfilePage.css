@@ -1,0 +1,356 @@
+/* Profile Page Specific Styles */
+
+:root {
+    --profile-card-bg: #ffffff;
+    --profile-gold: #C5A065;
+    --profile-gold-hover: #b8962e;
+    --profile-navy: #0F1E2C;
+    --profile-text-main: #1a1a1a;
+    --profile-text-muted: #6c757d;
+    --profile-border: #e9ecef;
+    --profile-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --profile-spacing: 1.5rem;
+    --radius-card: 12px;
+    --radius-btn: 20px;
+}
+
+.profile-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    font-family: 'Inter', sans-serif;
+    background-image: url('../../assets/BackGround.PNG');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    min-height: 100vh;
+}
+
+/* Profile Header */
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+    background: var(--profile-card-bg);
+    border: 1px solid var(--profile-border);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--profile-shadow);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.avatar-container {
+    width: 80px;
+    height: 80px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.avatar-icon {
+    width: 40px;
+    height: 40px;
+    color: #9ca3af;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--profile-text-main);
+}
+
+.location {
+    color: var(--profile-text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-right {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Card Styling */
+.p-card {
+    background: var(--profile-card-bg);
+    border: 1px solid var(--profile-border);
+    border-radius: 8px;
+    padding: var(--profile-spacing);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--profile-shadow);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1.4rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--profile-gold);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--profile-gold-hover);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--profile-border);
+    color: var(--profile-text-main);
+}
+
+.btn-outline:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--profile-text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Layout */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+}
+
+/* Interactive Elements */
+.edit-btn,
+.add-btn,
+.edit-btn-small,
+.delete-btn-small {
+    background: transparent;
+    border: none;
+    color: var(--profile-text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-btn:hover,
+.add-btn:hover {
+    background-color: #f3f4f6;
+    color: var(--profile-text-main);
+}
+
+/* Section Specifics */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Status & Tags */
+.status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #10b981;
+    border-radius: 50%;
+}
+
+.skills-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    background-color: #fff9e6;
+    color: #b8962e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Portfolio & Linked Accounts */
+.portfolio-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.portfolio-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--profile-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.portfolio-item:last-child {
+    border-bottom: none;
+}
+
+.portfolio-info p {
+    margin: 0;
+}
+
+.portfolio-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.linked-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.social-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.linkedin {
+    color: #0077b5;
+}
+
+.github {
+    color: #181717;
+}
+
+.view-link {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.view-link:hover {
+    text-decoration: underline;
+}
+
+.text-bold {
+    font-weight: 600;
+}
+
+.text-muted {
+    color: var(--profile-text-muted);
+}
+
+.subtext {
+    font-size: 0.85rem;
+    color: var(--profile-text-muted);
+}
+
+.summary-text {
+    line-height: 1.6;
+    margin: 0;
+}
+
+.role-title {
+    font-size: 1.5rem;
+    color: var(--profile-text-main);
+    margin: 0;
+}
+
+/* File Upload Placeholders */
+.placeholder-content {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    background: #fff9e6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--profile-gold);
+}
+
+/* Education */
+.education-item {
+    margin-bottom: 1rem;
+}
+
+.education-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .header-left {
+        flex-direction: column;
+    }
+    
+    .header-right {
+        width: 100%;
+        justify-content: center;
+    }
+}

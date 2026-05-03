@@ -12,13 +12,15 @@ import {
   Star,
   ExternalLink,
   ChevronRight,
-  Loader2
+  Loader2,
+  Video,
+  Award,
+  Briefcase,
+  Folder
 } from 'lucide-react';
 import { profileApi } from '../../api/profile';
 import { toast } from 'react-hot-toast';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Card } from '../../components/ui/card';
+import './MyProfilePage.css';
 
 const MyProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -34,14 +36,13 @@ const MyProfilePage = () => {
     try {
       setLoading(true);
       const response = await profileApi.getProfile();
-      // Backend returns Result<UserProfileDto>, so we need .data.data
       const profileData = response.data.data;
       
       if (profileData) {
         setProfile({
           ...profileData,
-          name: profileData.fullName, // Map fullName to name for component consistency
-          title: profileData.bio ? (profileData.bio.split('\n')[0] || '') : '', // Use bio as a fallback for title/bio
+          name: profileData.fullName,
+          title: profileData.title || (profileData.bio ? (profileData.bio.split('\n')[0] || '') : 'Senior Web Developer'),
         });
       }
       setEditedFields({});
@@ -53,40 +54,10 @@ const MyProfilePage = () => {
     }
   };
 
-  const handleToggleEditMode = () => {
-    if (isEditMode) {
-      // Cancelling edit
-      setEditedFields({});
-    }
-    setIsEditMode(!isEditMode);
-  };
-
-  const handleFieldChange = (field, value) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
-    setEditedFields(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSave = async () => {
-    if (Object.keys(editedFields).length === 0) {
-      setIsEditMode(false);
-      return;
-    }
-
-    try {
-      await profileApi.updateProfile(editedFields);
-      toast.success('Profile updated successfully');
-      setIsEditMode(false);
-      setEditedFields({});
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d4af37]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#C5A065]" />
       </div>
     );
   }
@@ -100,285 +71,241 @@ const MyProfilePage = () => {
   }
 
   return (
-    <div className="container max-w-[1100px] mx-auto pt-8 pb-16 px-4">
+    <div className="profile-container">
       {/* Profile Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-        <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border-2 border-gray-200">
-            {profile?.avatarUrl ? (
-              <img src={profile?.avatarUrl} alt={profile?.name} className="w-full h-full rounded-full object-cover" />
+      <header className="profile-header">
+        <div className="header-left">
+          <div className="avatar-container">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} alt={profile.name} className="avatar-img" />
             ) : (
-              <User size={40} />
+              <User size={40} className="avatar-icon" />
             )}
           </div>
-          <div className="flex flex-col gap-1">
-            {isEditMode ? (
-              <Input 
-                className="text-2xl font-bold h-auto py-1 px-2 border-primary-500"
-                value={profile?.name} 
-                onChange={(e) => handleFieldChange('name', e.target.value)}
-              />
-            ) : (
-              <h1 className="text-3xl font-bold text-gray-900">{profile?.name}</h1>
-            )}
-            <div className="flex items-center text-gray-500 gap-1 mt-1">
-              <MapPin size={16} />
-              {isEditMode ? (
-                <Input 
-                  className="h-7 py-0.5 px-2 w-48"
-                  value={profile?.location} 
-                  onChange={(e) => handleFieldChange('location', e.target.value)}
-                />
-              ) : (
-                <span>{profile?.location}</span>
-              )}
-            </div>
-            {profile?.rating > 0 && (
-              <div className="flex items-center gap-1 mt-1 text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={14} fill={i < Math.round(profile?.rating) ? "currentColor" : "none"} />
-                ))}
-                <span className="text-sm font-medium ml-1">({profile?.rating})</span>
-              </div>
-            )}
+          <div className="user-info">
+            <h1>{profile.name}</h1>
+            <p className="location"><MapPin size={14} /> {profile.location || 'Cairo, Egypt'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {isEditMode ? (
-            <>
-              <Button variant="outline" onClick={handleToggleEditMode}>Cancel</Button>
-              <Button className="bg-[#d4af37] hover:bg-[#b8962d] text-white" onClick={handleSave}>Save Changes</Button>
-            </>
-          ) : (
-            <>
-              <Button variant="primary" className="bg-[#d4af37] hover:bg-[#b8962d] text-white">See public view</Button>
-              <Button variant="outline" onClick={handleToggleEditMode}>Edit Profile</Button>
-              <Button variant="ghost" className="p-2 h-auto text-gray-500"><Share2 size={20} className="mr-2" /> Share</Button>
-            </>
-          )}
+        <div className="header-right">
+          <button className="btn btn-primary">See public view</button>
+          <button className="btn btn-outline">Profile settings</button>
+          <button className="btn-icon"><Share2 size={18} /> Share</button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
+      <div className="profile-layout">
         {/* Sidebar */}
-        <aside className="space-y-6">
-          <Card className="p-6 border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-4 text-[#d4af37]">
-              <h2 className="text-lg font-bold">Availability</h2>
-              {!isEditMode && <button className="text-gray-400 hover:text-gray-600" onClick={handleToggleEditMode}><Edit2 size={16} /></button>}
+        <aside className="sidebar">
+          <section className="p-card section-availability">
+            <div className="section-header">
+              <h2>Availability</h2>
+              <button className="edit-btn"><Edit2 size={14} /></button>
             </div>
-            {isEditMode ? (
-              <select 
-                className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#d4af37] outline-none"
-                value={profile?.availability}
-                onChange={(e) => handleFieldChange('availability', e.target.value)}
-              >
-                <option value="Available">Available</option>
-                <option value="Not Available">Not Available</option>
-                <option value="Busy">Busy</option>
-              </select>
-            ) : (
-              <p className="flex items-center gap-2 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                {profile?.availability || 'Available'}
-              </p>
-            )}
-          </Card>
+            <p className="status">
+              <span className="status-dot"></span> 
+              {profile.availability || 'Available'}
+            </p>
+          </section>
 
-          <Card className="p-6 border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-4 text-[#d4af37]">
-              <h2 className="text-lg font-bold">Connects</h2>
-              {!isEditMode && <button className="text-gray-400 hover:text-gray-600" onClick={handleToggleEditMode}><Edit2 size={16} /></button>}
+          <section className="p-card section-connects">
+            <div className="section-header">
+              <h2>Connects</h2>
+              <button className="edit-btn"><Edit2 size={14} /></button>
             </div>
-            {isEditMode ? (
-              <Input 
-                type="number"
-                value={profile?.connects}
-                onChange={(e) => handleFieldChange('connects', parseInt(e.target.value) || 0)}
-              />
-            ) : (
-              <p className="font-bold text-lg mb-2">Connects: {profile?.connects || 0}</p>
-            )}
-            {!isEditMode && <a href="#" className="text-sm text-[#d4af37] font-semibold hover:underline">View details</a>}
-          </Card>
+            <p className="text-bold" style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+              Connects: {profile.connects || 0}
+            </p>
+            <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.9rem' }}>
+              View details
+            </a>
+          </section>
 
-          <Card className="p-6 border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-4 text-[#d4af37]">
-              <h2 className="text-lg font-bold">Hours per week</h2>
-              {!isEditMode && <button className="text-gray-400 hover:text-gray-600" onClick={handleToggleEditMode}><Edit2 size={16} /></button>}
+          <section className="p-card section-video">
+            <div className="section-header">
+              <h2>Video introduction</h2>
+              <button className="add-btn"><Plus size={14} /></button>
             </div>
-            {isEditMode ? (
-              <Input 
-                value={profile?.hoursPerWeek}
-                onChange={(e) => handleFieldChange('hoursPerWeek', e.target.value)}
-                placeholder="e.g. More than 30 hrs/week"
-              />
-            ) : (
-              <>
-                <p className="font-bold">{profile?.hoursPerWeek || 'More than 30 hrs/week'}</p>
-                <p className="text-sm text-gray-500">Open to contract to hire</p>
-              </>
-            )}
-          </Card>
+            <p className="subtext">No video added</p>
+          </section>
 
-          <Card className="p-6 border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-4 text-[#d4af37]">
-              <h2 className="text-lg font-bold">Languages</h2>
-              {!isEditMode && (
-                <div className="flex gap-2">
-                  <button className="text-gray-400 hover:text-gray-600"><Plus size={16} /></button>
-                  <button className="text-gray-400 hover:text-gray-600"><Edit2 size={16} /></button>
-                </div>
-              )}
+          <section className="p-card section-hours">
+            <div className="section-header">
+              <h2>Hours per week</h2>
+              <button className="edit-btn"><Edit2 size={14} /></button>
             </div>
-            <div className="space-y-2">
-              <p><span className="font-medium">English:</span> <span className="text-gray-500">Conversational</span></p>
-              <p><span className="font-medium">Arabic:</span> <span className="text-gray-500">Native</span></p>
+            <div>
+              <p className="text-bold">{profile.hoursPerWeek || 'More than 30 hrs/week'}</p>
+              <p className="subtext">Open to contract to hire</p>
             </div>
-          </Card>
+          </section>
 
-          <Card className="p-6 border-gray-200 shadow-sm">
-            <h2 className="text-lg font-bold mb-4 text-[#d4af37]">Verifications</h2>
-            <div className="space-y-1">
-              <p className="font-medium">ID: <span className="text-gray-500">Unverified</span></p>
-              <a href="#" className="text-sm text-[#d4af37] font-semibold hover:underline">Verify your identity</a>
-            </div>
-          </Card>
-
-          <Card className="p-6 border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-4 text-[#d4af37]">
-              <h2 className="text-lg font-bold">Linked Accounts</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Globe size={20} className="text-blue-600" />
-                <div>
-                  <p className="text-sm font-bold">{profile?.name}</p>
-                  {!isEditMode && <a href="#" className="text-xs text-[#d4af37] font-semibold hover:underline">View profile</a>}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Code2 size={20} className="text-gray-900" />
-                <div>
-                  <p className="text-sm font-bold">{profile?.name}</p>
-                  {!isEditMode && <a href="#" className="text-xs text-[#d4af37] font-semibold hover:underline">View profile</a>}
-                </div>
+          <section className="p-card section-languages">
+            <div className="section-header">
+              <h2>Languages</h2>
+              <div className="header-actions">
+                <button className="add-btn"><Plus size={14} /></button>
+                <button className="edit-btn" style={{ marginLeft: '0.5rem' }}><Edit2 size={14} /></button>
               </div>
             </div>
-          </Card>
+            <div>
+              <p>English: <span className="text-muted">Conversational</span></p>
+              <p>Arabic: <span className="text-muted">Native or Bilingual</span></p>
+            </div>
+          </section>
+
+          <section className="p-card section-verifications">
+            <div className="section-header">
+              <h2>Verifications</h2>
+            </div>
+            <div className="verification-item">
+              <p>ID: <span className="text-bold">Unverified</span></p>
+              <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.9rem' }}>
+                Verify your identity
+              </a>
+            </div>
+          </section>
+
+          <section className="p-card section-education">
+            <div className="section-header">
+              <h2>Education</h2>
+              <button className="add-btn"><Plus size={14} /></button>
+            </div>
+            <div className="education-item">
+              <p className="text-bold">Egypt-Japan University of Science and Technology (E-JUST)</p>
+              <p className="subtext">Bachelor of Computer Science (BCompSc), 2021-2025 (expected)</p>
+            </div>
+          </section>
+
+          <section className="p-card section-linked">
+            <div className="section-header">
+              <h2>Linked Accounts</h2>
+            </div>
+            <div className="linked-item">
+              <Globe size={20} className="social-icon" />
+              <div className="linked-text">
+                <p className="text-bold">{profile.name}</p>
+                <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.8rem' }}>
+                  View profile
+                </a>
+              </div>
+            </div>
+            <div className="linked-item">
+              <Code2 size={20} className="social-icon" />
+              <div className="linked-text">
+                <p className="text-bold">{profile.name}</p>
+                <a href="#" className="view-link" style={{ color: 'var(--profile-gold)', fontSize: '0.8rem' }}>
+                  View profile
+                </a>
+              </div>
+            </div>
+          </section>
         </aside>
 
         {/* Main Content */}
-        <main className="space-y-6">
-          <section className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
-            <div className="flex justify-between items-start mb-6">
-              <div className="w-full">
-                {isEditMode ? (
-                  <Input 
-                    className="text-2xl font-bold h-auto py-2 px-3 mb-4 w-full border-[#d4af37] focus:ring-[#d4af37]"
-                    placeholder="Role Title"
-                    value={profile?.title} 
-                    onChange={(e) => handleFieldChange('title', e.target.value)}
-                  />
-                ) : (
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">{profile?.title || 'No title set'}</h2>
-                )}
-              </div>
-              {!isEditMode && (
-                <button className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors" onClick={handleToggleEditMode}>
-                  <Edit2 size={18} />
-                </button>
-              )}
+        <main className="main-content">
+          <section className="p-card section-title">
+            <div className="section-header">
+              <h2 className="role-title">{profile.title}</h2>
+              <button className="edit-btn"><Edit2 size={16} /></button>
             </div>
           </section>
 
-          <section className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
-            <div className="flex justify-between items-start mb-6 text-[#d4af37]">
-              <h2 className="text-xl font-bold">Professional Summary</h2>
-              {!isEditMode && (
-                <button className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors" onClick={handleToggleEditMode}>
-                  <Edit2 size={18} />
-                </button>
-              )}
+          <section className="p-card section-summary">
+            <div className="section-header">
+              <h2>Professional Summary</h2>
+              <button className="edit-btn"><Edit2 size={14} /></button>
             </div>
-            {isEditMode ? (
-              <textarea 
-                className="w-full min-h-[150px] p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#d4af37] outline-none leading-relaxed transition-all"
-                value={profile?.bio} 
-                onChange={(e) => handleFieldChange('bio', e.target.value)}
-                placeholder="Describe your professional background..."
-              />
-            ) : (
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {profile?.bio || 'Add a professional summary to tell clients about your experience and goals.'}
-              </p>
-            )}
+            <p className="summary-text">
+              {profile.bio || 'Add a professional summary to tell clients about your experience and goals.'}
+            </p>
           </section>
 
-          <section className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-6 text-[#d4af37]">
-              <h2 className="text-xl font-bold">Portfolio</h2>
-              <button className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"><Plus size={18} /></button>
+          <section className="p-card section-portfolio">
+            <div className="section-header">
+              <h2>Portfolio</h2>
+              <button className="add-btn"><Plus size={14} /></button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {profile?.portfolioItems?.length > 0 ? (
-                profile?.portfolioItems.map((item, index) => (
-                  <Card key={index} className="overflow-hidden group border-gray-200 hover:shadow-md transition-shadow">
-                    <div className="h-40 bg-gray-100 flex items-center justify-center relative">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <Search size={32} className="text-gray-300" />
-                      )}
-                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="bg-white p-1.5 rounded-full shadow-sm text-gray-600 hover:text-gray-900"><Edit2 size={14} /></button>
-                        <button className="bg-white p-1.5 rounded-full shadow-sm text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
-                      </div>
+            <div className="portfolio-list">
+              {profile.portfolioItems?.length > 0 ? (
+                profile.portfolioItems.map((item, index) => (
+                  <div key={index} className="portfolio-item">
+                    <div className="portfolio-info">
+                      <p className="text-bold">{item.title}</p>
+                      <p className="subtext">{item.description}</p>
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-gray-900 group-hover:text-[#d4af37] transition-colors">{item.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+                    <div className="portfolio-actions">
+                      <a href="#" className="view-link" style={{ color: 'var(--profile-gold)' }}>View Media</a>
+                      <button className="edit-btn-small"><Edit2 size={14} /></button>
+                      <button className="delete-btn-small"><Trash2 size={14} /></button>
                     </div>
-                  </Card>
+                  </div>
                 ))
               ) : (
-                <div className="col-span-full py-12 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                  <p className="text-gray-500 italic">No portfolio items added yet.</p>
-                  <Button variant="ghost" className="mt-2 text-[#d4af37]"><Plus size={16} className="mr-2" /> Add Item</Button>
-                </div>
+                <p className="subtext italic text-center py-4">No portfolio items added yet.</p>
               )}
             </div>
           </section>
 
-          <section className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
-            <div className="flex justify-between items-center mb-6 text-[#d4af37]">
-              <h2 className="text-xl font-bold">Skills</h2>
-              {!isEditMode && (
-                <button className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors" onClick={handleToggleEditMode}>
-                  <Edit2 size={18} />
-                </button>
+          <section className="p-card section-history">
+            <div className="section-header">
+              <h2>Work history</h2>
+            </div>
+            <p className="subtext">No Work History</p>
+          </section>
+
+          <section className="p-card section-skills">
+            <div className="section-header">
+              <h2>Skills</h2>
+              <button className="edit-btn"><Edit2 size={14} /></button>
+            </div>
+            <div className="skills-tags">
+              {profile.skills?.length > 0 ? (
+                profile.skills.map((skill, index) => (
+                  <span key={index} className="skill-tag">
+                    {skill}
+                  </span>
+                ))
+              ) : (
+                <p className="subtext italic">No skills listed.</p>
               )}
             </div>
-            {isEditMode ? (
-              <Input 
-                className="w-full"
-                placeholder="Enter skills separated by commas (e.g. React, Node, SQL)"
-                value={profile?.skills?.join(', ') || ''}
-                onChange={(e) => handleFieldChange('skills', e.target.value.split(',').map(s => s.trim()))}
-              />
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {profile?.skills?.length > 0 ? (
-                  profile?.skills.map((skill, index) => (
-                    <span key={index} className="px-5 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors cursor-default">
-                      {skill}
-                    </span>
-                  ))
-                ) : (
-                  <p className="text-gray-500 italic">No skills listed.</p>
-                )}
+          </section>
+
+          <section className="p-card section-placeholder">
+            <div className="section-header">
+              <h2>Other experiences</h2>
+              <button className="add-btn"><Plus size={14} /></button>
+            </div>
+            <div className="placeholder-content">
+              <div className="icon-circle">
+                <Folder className="placeholder-icon" size={24} />
               </div>
-            )}
+            </div>
+          </section>
+
+          <section className="p-card section-placeholder">
+            <div className="section-header">
+              <h2>Certifications</h2>
+              <button className="add-btn"><Plus size={14} /></button>
+            </div>
+            <div className="placeholder-content">
+              <div className="icon-circle">
+                <Award className="placeholder-icon" size={24} />
+              </div>
+            </div>
+          </section>
+
+          <section className="p-card section-placeholder">
+            <div className="section-header">
+              <h2>Employment history</h2>
+              <button className="add-btn"><Plus size={14} /></button>
+            </div>
+            <div className="placeholder-content">
+              <div className="icon-circle">
+                <Briefcase className="placeholder-icon" size={24} />
+              </div>
+            </div>
           </section>
         </main>
       </div>

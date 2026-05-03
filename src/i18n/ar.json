@@ -79,7 +79,8 @@
     "empty_title": "لا توجد وظائف",
     "empty_subtitle": "جرّب تعديل البحث أو الفلاتر للعثور على ما تبحث عنه.",
     "empty_saved_title": "لا توجد وظائف محفوظة بعد",
-    "empty_saved_subtitle": "احفظ الوظائف التي تهمك وستظهر هنا."
+    "empty_saved_subtitle": "احفظ الوظائف التي تهمك وستظهر هنا.",
+    "complete_profile": "أكمل ملفك الشخصي"
   },
   "job_details": {
     "not_found_title": "الوظيفة غير موجودة",

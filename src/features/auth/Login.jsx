@@ -72,10 +72,10 @@ export default function Login() {
       const payload = parseJwt(token);
       
       const userObj = {
-        userId: payload.userId || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+        userId: payload.userId || payload.sub || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
         email: payload.email || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
         role: payload.role || payload['http://schemas.microsoft.com/w2008/06/identity/claims/role'],
-        name: payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
+        name: payload.name || payload.unique_name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
       };
 
       loginAction(token, userObj);
