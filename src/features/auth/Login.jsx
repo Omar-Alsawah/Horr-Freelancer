@@ -6,6 +6,7 @@ import api from '@/api/axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function parseJwt(token) {
@@ -34,27 +35,42 @@ export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const loginAction = useAuthStore(state => state.login);
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resending, setResending] = useState(false);
 
   const handleErrorKey = (field) => {
     const key = Object.keys(fieldErrors).find(k => k.toLowerCase() === field.toLowerCase());
     return key ? fieldErrors[key] : null;
   };
 
+  const handleResend = async () => {
+    if (!unverifiedEmail) return;
+    setResending(true);
+    try {
+      await api.post(`/api/auth/resend-confirmation-email?email=${encodeURIComponent(unverifiedEmail)}`);
+      toast.success(t('verify_email.resend_success') || 'Verification email resent!');
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setFieldErrors({});
+    setUnverifiedEmail('');
     try {
-      // Backend returns the JWT token string directly: Ok(result.Data.Token)
       const res = await api.post('/api/auth/login', { email, password });
       const token = res.data;
       const payload = parseJwt(token);
       
-      // Map JWT claims to user object (handling both standard and long-form keys)
       const userObj = {
         userId: payload.userId || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
         email: payload.email || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
@@ -65,10 +81,8 @@ export default function Login() {
       loginAction(token, userObj);
       navigate('/');
     } catch (err) {
-      // If the backend rejects because email is not confirmed, redirect to verify page
       if (isEmailNotConfirmedError(err)) {
-        toast(t('auth.email_not_verified'), { icon: '📧' });
-        navigate('/verify-email', { state: { email } });
+        setUnverifiedEmail(email);
         return;
       }
       toast.error(err.title || t('common.error'));
@@ -86,6 +100,30 @@ export default function Login() {
         <CardTitle className="text-2xl text-center text-[#1e293b]">{t('auth.login')}</CardTitle>
       </CardHeader>
       <CardContent>
+        {unverifiedEmail && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-md mb-6">
+            <div className="flex gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-medium text-amber-800">
+                  {t('auth.email_not_verified') || "Your email address has not been verified yet. Please check your inbox."}
+                </h3>
+                <div className="mt-2 text-sm text-amber-700">
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-amber-700 hover:text-amber-900 font-semibold inline-flex items-center gap-1.5"
+                    onClick={handleResend}
+                    disabled={resending}
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
+                    {resending ? t('common.loading') : (t('verify_email.resend_btn') || "Didn't receive it? Resend Email.")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">{t('auth.email')}</label>
