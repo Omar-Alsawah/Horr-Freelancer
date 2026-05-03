@@ -17,6 +17,7 @@ import ViewProposalPage from '../features/proposals/ViewProposalPage';
 import ViewOfferPage from '../features/proposals/ViewOfferPage';
 import MyContractsPage from '../features/contracts/MyContractsPage';
 import ContractDetailsPage from '../features/contracts/ContractDetailsPage';
+import MyProfilePage from '../features/profile/MyProfilePage';
 
 export const router = createBrowserRouter([
   {
@@ -36,7 +37,7 @@ export const router = createBrowserRouter([
           { path: 'offers/:proposalId', element: <ViewOfferPage /> },
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
-          { path: 'profile', element: <div className="p-8">My Profile Placeholder</div> },
+          { path: 'profile', element: <MyProfilePage /> },
           { path: 'settings', element: <div className="p-8">Settings Placeholder</div> }
         ]
       }
