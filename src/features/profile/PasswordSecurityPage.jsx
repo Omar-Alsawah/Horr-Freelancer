@@ -1,0 +1,220 @@
+import React, { useState } from 'react';
+import { 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  ShieldCheck, 
+  Loader2,
+  AlertCircle
+} from 'lucide-react';
+import { authApi } from '../../api/auth';
+import { toast } from 'react-hot-toast';
+import SettingsSidebar from './SettingsSidebar';
+import { Card } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+
+const PasswordSecurityPage = () => {
+  const [formData, setFormData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleTogglePassword = (field) => {
+    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error for the field when typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.currentPassword) {
+      newErrors.currentPassword = 'Current password is required';
+    }
+    if (formData.newPassword.length < 8) {
+      newErrors.newPassword = 'New password must be at least 8 characters long';
+    }
+    if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+      await authApi.changePassword(formData);
+      toast.success('Password changed successfully');
+      setFormData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        const problemDetails = error.response.data;
+        if (problemDetails.errors) {
+          // Map backend errors to fields
+          const fieldErrors = {};
+          Object.keys(problemDetails.errors).forEach(key => {
+            const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+            fieldErrors[camelKey] = problemDetails.errors[key][0];
+          });
+          setErrors(fieldErrors);
+        } else {
+          toast.error(problemDetails.title || 'Failed to change password');
+        }
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="container max-w-[1100px] mx-auto pt-8 pb-16 px-4">
+      <div className="flex flex-col md:flex-row gap-8">
+        <SettingsSidebar />
+        
+        <main className="flex-1 space-y-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Password & Security</h1>
+
+          <Card className="p-8 border-gray-200 shadow-sm">
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-gray-800">Change Password</h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Current Password</label>
+                <div className="relative">
+                  <Input 
+                    type={showPasswords.current ? "text" : "password"}
+                    name="currentPassword"
+                    value={formData.currentPassword}
+                    onChange={handleInputChange}
+                    className={`pr-12 ${errors.currentPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => handleTogglePassword('current')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.currentPassword && (
+                  <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                    <AlertCircle size={12} /> {errors.currentPassword}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">New Password</label>
+                  <div className="relative">
+                    <Input 
+                      type={showPasswords.new ? "text" : "password"}
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleInputChange}
+                      className={`pr-12 ${errors.newPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => handleTogglePassword('new')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {errors.newPassword && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle size={12} /> {errors.newPassword}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Confirm New Password</label>
+                  <div className="relative">
+                    <Input 
+                      type={showPasswords.confirm ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className={`pr-12 ${errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => handleTogglePassword('confirm')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle size={12} /> {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="bg-[#d4af37] hover:bg-[#b8962d] text-white px-8"
+                >
+                  {loading ? <Loader2 size={18} className="animate-spin mr-2" /> : null}
+                  Update Password
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          <Card className="p-8 border-gray-200 shadow-sm border-l-4 border-l-[#d4af37]">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Two-Step Verification</h2>
+              <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider">Status: Off</span>
+            </div>
+            <p className="text-gray-500 text-sm mb-6 max-w-2xl">
+              Add an extra layer of security to your account. When you log in, we'll ask for a code from your phone or an authenticator app.
+            </p>
+            <Button variant="outline" className="border-gray-200 hover:bg-gray-50">
+              Enable Two-Factor Authentication
+            </Button>
+          </Card>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default PasswordSecurityPage;
