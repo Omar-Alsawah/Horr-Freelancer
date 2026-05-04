@@ -11,12 +11,29 @@ import {
   Globe,
   ExternalLink,
   X,
-  Search
+  Search,
+  Plus,
+  Trash2,
+  Eye,
+  Video,
+  Image as ImageIcon
 } from 'lucide-react';
 import { profileApi } from '../../api/profile';
 import { skillsApi } from '../../api/skills';
+import { portfolioApi } from '../../api/portfolio';
 import { toast } from 'react-hot-toast';
 import './MyProfilePage.css';
+
+const PortfolioSkeleton = () => (
+  <div className="border border-gray-100 rounded-xl overflow-hidden animate-pulse">
+    <div className="h-40 bg-gray-100" />
+    <div className="p-4 space-y-3">
+      <div className="h-4 bg-gray-100 rounded w-3/4" />
+      <div className="h-3 bg-gray-100 rounded w-full" />
+      <div className="h-3 bg-gray-100 rounded w-5/6" />
+    </div>
+  </div>
+);
 
 const MyProfilePage = () => {
   const navigate = useNavigate();
@@ -37,10 +54,42 @@ const MyProfilePage = () => {
   const [skillError, setSkillError] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
 
+  const [portfolio, setPortfolio] = useState([]);
+  const [isPortfolioLoading, setIsPortfolioLoading] = useState(true);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isAddingProject, setIsAddingProject] = useState(false);
+  
+  const [portfolioFormData, setPortfolioFormData] = useState({
+    title: '',
+    description: '',
+    role: '',
+    visitLink: '',
+    thumbnail: null,
+    images: [],
+    videos: []
+  });
+  const [portfolioErrors, setPortfolioErrors] = useState({});
+
   useEffect(() => {
     fetchProfile();
     fetchMySkills();
+    fetchPortfolio();
   }, []);
+
+  const fetchPortfolio = async () => {
+    try {
+      setIsPortfolioLoading(true);
+      const response = await portfolioApi.getPortfolio();
+      const data = response.data.data || response.data.value || response.data;
+      setPortfolio(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching portfolio:', err);
+    } finally {
+      setIsPortfolioLoading(false);
+    }
+  };
 
   const fetchMySkills = async () => {
     try {
@@ -232,6 +281,151 @@ const MyProfilePage = () => {
   const getProficiencyLabel = (level) => {
     const labels = { 0: 'Beginner', 1: 'Intermediate', 2: 'Advanced', 3: 'Expert' };
     return labels[level] || 'Intermediate';
+  };
+
+  const validatePortfolioFiles = (files, type, maxCount, maxSizeMB) => {
+    const errors = [];
+    if (files.length > maxCount) {
+      errors.push(`Maximum ${maxCount} ${type} allowed`);
+    }
+    Array.from(files).forEach(file => {
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        errors.push(`${file.name} is too large (max ${maxSizeMB}MB)`);
+      }
+      if (type === 'videos' && !file.type.includes('video/mp4')) {
+        errors.push(`${file.name} must be .mp4`);
+      }
+      if ((type === 'images' || type === 'thumbnail') && !file.type.match(/image\/(jpeg|png)/)) {
+        errors.push(`${file.name} must be .jpg or .png`);
+      }
+    });
+    return errors;
+  };
+
+  const handlePortfolioFileChange = (e, type) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    let maxCount = 10;
+    let maxSizeMB = 5;
+    if (type === 'thumbnail') maxCount = 1;
+    if (type === 'videos') {
+      maxCount = 2;
+      maxSizeMB = 50;
+    }
+
+    const errors = validatePortfolioFiles(files, type, maxCount, maxSizeMB);
+    if (errors.length > 0) {
+      setPortfolioErrors(prev => ({ ...prev, [type]: errors[0] }));
+      return;
+    }
+
+    setPortfolioErrors(prev => {
+      const next = { ...prev };
+      delete next[type];
+      return next;
+    });
+
+    if (type === 'thumbnail') {
+      setPortfolioFormData(prev => ({ ...prev, thumbnail: files[0] }));
+    } else if (type === 'images') {
+      setPortfolioFormData(prev => ({ ...prev, images: Array.from(files) }));
+    } else if (type === 'videos') {
+      setPortfolioFormData(prev => ({ ...prev, videos: Array.from(files) }));
+    }
+  };
+
+  const resetPortfolioForm = () => {
+    setPortfolioFormData({ title: '', description: '', role: '', visitLink: '', thumbnail: null, images: [], videos: [] });
+    setPortfolioErrors({});
+  };
+
+  const openAddPortfolioModal = () => {
+    resetPortfolioForm();
+    setIsAddingProject(true);
+    setIsEditModalOpen(true);
+  };
+
+  const openEditPortfolioModal = (project) => {
+    setPortfolioFormData({
+      title: project.title || '',
+      description: project.description || '',
+      role: project.role || '',
+      visitLink: project.visitLink || '',
+      thumbnail: null,
+      images: [],
+      videos: []
+    });
+    setSelectedProject(project);
+    setIsAddingProject(false);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSavePortfolio = async (e) => {
+    e.preventDefault();
+    if (!portfolioFormData.title || !portfolioFormData.description) {
+      setPortfolioErrors(prev => ({ ...prev, title: 'Title and description are required' }));
+      return;
+    }
+    if (isAddingProject && !portfolioFormData.thumbnail) {
+      setPortfolioErrors(prev => ({ ...prev, thumbnail: 'Thumbnail is required' }));
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', portfolioFormData.title);
+    formData.append('description', portfolioFormData.description);
+    if (portfolioFormData.role) formData.append('role', portfolioFormData.role);
+    if (portfolioFormData.visitLink) formData.append('visitLink', portfolioFormData.visitLink);
+    if (portfolioFormData.thumbnail) formData.append('thumbnail', portfolioFormData.thumbnail);
+    
+    portfolioFormData.images.forEach(img => formData.append('images', img));
+    portfolioFormData.videos.forEach(vid => formData.append('videos', vid));
+
+    try {
+      setIsSaving(true);
+      if (isAddingProject) {
+        const response = await portfolioApi.addPortfolio(formData);
+        const newItem = response.data.data || response.data.value || response.data;
+        setPortfolio(prev => [...prev, newItem]);
+        toast.success('Project added successfully');
+      } else {
+        const response = await portfolioApi.updatePortfolio(selectedProject.id, formData);
+        const updatedItem = response.data.data || response.data.value || response.data;
+        setPortfolio(prev => prev.map(item => item.id === selectedProject.id ? updatedItem : item));
+        toast.success('Project updated successfully');
+      }
+      setIsEditModalOpen(false);
+    } catch (err) {
+      if (err.status === 400 && err.errors) {
+        const errors = {};
+        Object.keys(err.errors).forEach(key => {
+          const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+          errors[camelKey] = err.errors[key][0];
+        });
+        setPortfolioErrors(errors);
+      } else {
+        toast.error('Failed to save project');
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeletePortfolio = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) return;
+    try {
+      await portfolioApi.deletePortfolio(id);
+      setPortfolio(prev => prev.filter(item => item.id !== id));
+      toast.success('Project deleted');
+    } catch (err) {
+      toast.error('Failed to delete project');
+    }
+  };
+
+  const openViewPortfolioModal = (project) => {
+    setSelectedProject(project);
+    setIsViewModalOpen(true);
   };
 
   const handleSeePublicView = () => {
@@ -645,23 +839,60 @@ const MyProfilePage = () => {
           </section>
 
           <section className="p-card section-portfolio">
-            <div className="section-header mb-4">
+            <div className="section-header mb-4 flex justify-between items-center">
               <h2>Portfolio</h2>
+              {isEditMode && (
+                <button 
+                  onClick={openAddPortfolioModal}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-[#C5A065] text-white text-xs font-bold rounded-lg hover:bg-[#b8962d] transition-colors"
+                >
+                  <Plus size={14} /> Add Project
+                </button>
+              )}
             </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profile.portfolioItems && profile.portfolioItems.length > 0 ? (
-                profile.portfolioItems.map((item) => (
-                  <div key={item.id} className="border border-gray-200 rounded-xl overflow-hidden group hover:shadow-md transition-shadow">
-                    <div className="h-40 bg-gray-100 relative overflow-hidden">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+              {isPortfolioLoading ? (
+                Array(4).fill(0).map((_, i) => <PortfolioSkeleton key={i} />)
+              ) : portfolio && portfolio.length > 0 ? (
+                portfolio.map((item) => (
+                  <div key={item.id} className="border border-gray-100 rounded-xl overflow-hidden group hover:shadow-lg transition-all bg-white relative">
+                    <div className="h-40 bg-gray-50 relative overflow-hidden">
+                      {item.thumbnailUrl ? (
+                        <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
                           <Folder size={32} />
                         </div>
                       )}
+                      
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        {isEditMode ? (
+                          <>
+                            <button 
+                              onClick={() => openEditPortfolioModal(item)}
+                              className="p-2 bg-white rounded-full text-blue-600 hover:bg-blue-50 transition-colors"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeletePortfolio(item.id)}
+                              className="p-2 bg-white rounded-full text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </>
+                        ) : (
+                          <button 
+                            onClick={() => openViewPortfolioModal(item)}
+                            className="px-4 py-2 bg-white text-gray-900 text-sm font-bold rounded-lg flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                          >
+                            <Eye size={16} /> View Details
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="p-4 bg-white">
+                    <div className="p-4">
                       <h3 className="font-bold text-gray-900 truncate">{item.title}</h3>
                       <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
                     </div>
@@ -675,6 +906,214 @@ const MyProfilePage = () => {
 
         </main>
       </div>
+
+      {/* View Modal */}
+      {isViewModalOpen && selectedProject && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsViewModalOpen(false)} />
+          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setIsViewModalOpen(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+            >
+              <X size={24} />
+            </button>
+            
+            <div className="overflow-y-auto">
+              <div className="h-64 md:h-80 relative bg-gray-900">
+                {selectedProject.thumbnailUrl && (
+                  <img src={selectedProject.thumbnailUrl} alt={selectedProject.title} className="w-full h-full object-contain" />
+                )}
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
+                  <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
+                  {selectedProject.role && <p className="text-gray-300 mt-1">{selectedProject.role}</p>}
+                </div>
+              </div>
+              
+              <div className="p-8 space-y-8">
+                <div>
+                  <h3 className="text-sm font-bold text-[#C5A065] uppercase tracking-wider mb-2">Project Description</h3>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedProject.description}</p>
+                </div>
+                
+                {selectedProject.visitLink && (
+                  <div>
+                    <h3 className="text-sm font-bold text-[#C5A065] uppercase tracking-wider mb-2">Project Link</h3>
+                    <a 
+                      href={selectedProject.visitLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      {selectedProject.visitLink} <ExternalLink size={14} />
+                    </a>
+                  </div>
+                )}
+                
+                {selectedProject.media && selectedProject.media.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-[#C5A065] uppercase tracking-wider mb-4">Media Gallery</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {selectedProject.media.map((file) => (
+                        <div key={file.id} className="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                          {file.fileType.includes('video') ? (
+                            <video controls className="w-full h-full">
+                              <source src={file.fileUrl} type="video/mp4" />
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <img src={file.fileUrl} alt="Media" className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+            {/* Add/Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
+          <form 
+            onSubmit={handleSavePortfolio}
+            className="relative bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+          >
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-xl font-bold text-gray-900">{isAddingProject ? 'Add New Project' : 'Edit Project'}</h2>
+              <button disabled={isSaving} type="button" onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="overflow-y-auto p-6 space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">Project Title *</label>
+                  <input 
+                    type="text" 
+                    className={`w-full p-2.5 border rounded-lg focus:border-[#C5A065] outline-none transition-all ${portfolioErrors.title ? 'border-red-500' : 'border-gray-300'}`}
+                    value={portfolioFormData.title}
+                    onChange={(e) => setPortfolioFormData(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="e.g. E-commerce Mobile App"
+                  />
+                  {portfolioErrors.title && <p className="text-red-500 text-xs">{portfolioErrors.title}</p>}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700">Role</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-2.5 border border-gray-300 rounded-lg focus:border-[#C5A065] outline-none transition-all"
+                      value={portfolioFormData.role}
+                      onChange={(e) => setPortfolioFormData(prev => ({ ...prev, role: e.target.value }))}
+                      placeholder="e.g. UI/UX Designer"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700">Project Link</label>
+                    <input 
+                      type="url" 
+                      className="w-full p-2.5 border border-gray-300 rounded-lg focus:border-[#C5A065] outline-none transition-all"
+                      value={portfolioFormData.visitLink}
+                      onChange={(e) => setPortfolioFormData(prev => ({ ...prev, visitLink: e.target.value }))}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">Description *</label>
+                  <textarea 
+                    rows={4}
+                    className={`w-full p-2.5 border rounded-lg focus:border-[#C5A065] outline-none transition-all resize-none ${portfolioErrors.description ? 'border-red-500' : 'border-gray-300'}`}
+                    value={portfolioFormData.description}
+                    onChange={(e) => setPortfolioFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Explain what you did and the results achieved..."
+                  />
+                  {portfolioErrors.description && <p className="text-red-500 text-xs">{portfolioErrors.description}</p>}
+                </div>
+              </div>
+              
+              <div className="space-y-4 border-t border-gray-100 pt-6">
+                <h3 className="text-sm font-bold text-gray-900 border-l-4 border-[#C5A065] pl-3">Media Uploads</h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">Cover Thumbnail * (JPG/PNG)</label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex-1 cursor-pointer">
+                        <div className={`p-4 border-2 border-dashed rounded-xl flex flex-col items-center gap-2 hover:border-[#C5A065] hover:bg-yellow-50/30 transition-all ${portfolioErrors.thumbnail ? 'border-red-200' : 'border-gray-200'}`}>
+                          <div className="p-2 bg-yellow-50 rounded-lg text-[#C5A065]">
+                            <ImageIcon size={20} />
+                          </div>
+                          <span className="text-xs font-medium text-gray-600">
+                            {portfolioFormData.thumbnail ? portfolioFormData.thumbnail.name : 'Select JPG or PNG'}
+                          </span>
+                          <input type="file" accept="image/jpeg,image/png" className="hidden" onChange={(e) => handlePortfolioFileChange(e, 'thumbnail')} />
+                        </div>
+                      </label>
+                    </div>
+                    {portfolioErrors.thumbnail && <p className="text-red-500 text-xs">{portfolioErrors.thumbnail}</p>}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase">Gallery Images (Max 10)</label>
+                      <label className="block cursor-pointer">
+                        <div className="p-4 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-[#C5A065] transition-all">
+                          <Plus size={20} className="text-gray-400" />
+                          <span className="text-xs font-medium text-gray-600">
+                            {portfolioFormData.images.length > 0 ? `${portfolioFormData.images.length} files selected` : 'Add Images'}
+                          </span>
+                          <input type="file" multiple accept="image/jpeg,image/png" className="hidden" onChange={(e) => handlePortfolioFileChange(e, 'images')} />
+                        </div>
+                      </label>
+                      {portfolioErrors.images && <p className="text-red-500 text-xs">{portfolioErrors.images}</p>}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase">Videos (Max 2, MP4)</label>
+                      <label className="block cursor-pointer">
+                        <div className="p-4 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-[#C5A065] transition-all">
+                          <Video size={20} className="text-gray-400" />
+                          <span className="text-xs font-medium text-gray-600">
+                            {portfolioFormData.videos.length > 0 ? `${portfolioFormData.videos.length} videos selected` : 'Add Videos'}
+                          </span>
+                          <input type="file" multiple accept="video/mp4" className="hidden" onChange={(e) => handlePortfolioFileChange(e, 'videos')} />
+                        </div>
+                      </label>
+                      {portfolioErrors.videos && <p className="text-red-500 text-xs">{portfolioErrors.videos}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50">
+              <button 
+                type="button"
+                disabled={isSaving}
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-6 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                disabled={isSaving}
+                className="px-8 py-2 text-sm font-bold text-white bg-[#C5A065] hover:bg-[#b8962d] rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSaving && <Loader2 size={16} className="animate-spin" />}
+                {isAddingProject ? 'Add Project' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
