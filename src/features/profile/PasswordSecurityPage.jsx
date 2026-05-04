@@ -16,12 +16,12 @@ import { Input } from '../../components/ui/input';
 
 const PasswordSecurityPage = () => {
   const [formData, setFormData] = useState({
-    currentPassword: '',
+    oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
   const [showPasswords, setShowPasswords] = useState({
-    current: false,
+    old: false,
     new: false,
     confirm: false
   });
@@ -69,7 +69,7 @@ const PasswordSecurityPage = () => {
     try {
       // Backend expects { oldPassword, newPassword }
       const payload = {
-        oldPassword: formData.currentPassword,
+        oldPassword: formData.oldPassword,
         newPassword: formData.newPassword
       };
       await authApi.changePassword(payload);
@@ -77,7 +77,7 @@ const PasswordSecurityPage = () => {
       
       // Clear all fields on success
       setFormData({
-        currentPassword: '',
+        oldPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
@@ -85,9 +85,9 @@ const PasswordSecurityPage = () => {
       if (error.status === 401) {
         toast.error('Session expired. Please log in again.');
       } else if (error.status === 400) {
-        // Map 400 errors to currentPassword as per requirements
+        // Map 400 errors to oldPassword as per requirements
         const errorMessage = error.data?.message || error.data?.title || (error.data?.errors && Object.values(error.data.errors)[0][0]) || 'Invalid current password';
-        setErrors({ currentPassword: errorMessage });
+        setErrors({ oldPassword: errorMessage });
       } else {
         toast.error(error.data?.title || 'An unexpected error occurred');
       }
@@ -115,23 +115,23 @@ const PasswordSecurityPage = () => {
                 <label className="text-sm font-semibold text-gray-700">Current Password</label>
                 <div className="relative">
                   <Input 
-                    type={showPasswords.current ? "text" : "password"}
-                    name="currentPassword"
-                    value={formData.currentPassword}
+                    type={showPasswords.old ? "text" : "password"}
+                    name="oldPassword"
+                    value={formData.oldPassword}
                     onChange={handleInputChange}
-                    className={`pr-12 ${errors.currentPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`pr-12 ${errors.oldPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
                   />
                   <button 
                     type="button"
-                    onClick={() => handleTogglePassword('current')}
+                    onClick={() => handleTogglePassword('old')}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPasswords.old ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {errors.currentPassword && (
+                {errors.oldPassword && (
                   <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                    <AlertCircle size={12} /> {errors.currentPassword}
+                    <AlertCircle size={12} /> {errors.oldPassword}
                   </p>
                 )}
               </div>

@@ -418,12 +418,14 @@ const MyProfilePage = () => {
             </div>
             {isEditMode ? (
               <div className="w-full">
+                {/* TODO: No dedicated backend endpoint exists for updating 'bio'. Disabling save for now. */}
                 <textarea 
                   value={currentBio}
                   onChange={(e) => handleFieldChange('bio', e.target.value)}
                   rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-[#C5A065] focus:ring-1 focus:ring-[#C5A065] resize-none"
-                  placeholder="Write a professional summary..."
+                  disabled={true}
+                  className="w-full p-3 border border-gray-300 rounded-lg outline-none bg-gray-100 text-gray-500 cursor-not-allowed resize-none"
+                  placeholder="Bio updates are currently not supported by the API."
                 />
                 {fieldErrors.bio && <p className="text-red-500 text-xs mt-1">{fieldErrors.bio}</p>}
               </div>
