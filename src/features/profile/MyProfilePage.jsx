@@ -9,9 +9,12 @@ import {
   Loader2,
   Folder,
   Globe,
-  ExternalLink
+  ExternalLink,
+  X,
+  Search
 } from 'lucide-react';
 import { profileApi } from '../../api/profile';
+import { skillsApi } from '../../api/skills';
 import { toast } from 'react-hot-toast';
 import './MyProfilePage.css';
 
@@ -26,10 +29,38 @@ const MyProfilePage = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [showCopyFallback, setShowCopyFallback] = useState(false);
+  
+  const [mySkills, setMySkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
+  const [selectedSkillId, setSelectedSkillId] = useState('');
+  const [selectedProficiency, setSelectedProficiency] = useState(1);
+  const [skillError, setSkillError] = useState('');
+  const [skillSearch, setSkillSearch] = useState('');
 
   useEffect(() => {
     fetchProfile();
+    fetchMySkills();
   }, []);
+
+  const fetchMySkills = async () => {
+    try {
+      const response = await skillsApi.getMySkills();
+      const data = response.data.data || response.data.value || response.data;
+      setMySkills(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching skills:', err);
+    }
+  };
+
+  const fetchAllSkills = async () => {
+    try {
+      const response = await skillsApi.getAllSkills();
+      const data = response.data.data || response.data.value || response.data;
+      setAllSkills(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching all skills:', err);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -152,9 +183,55 @@ const MyProfilePage = () => {
       setIsEditMode(false);
       setEditedFields({});
       setFieldErrors({});
+      setSkillError('');
     } else {
       setIsEditMode(true);
+      if (allSkills.length === 0) {
+        fetchAllSkills();
+      }
     }
+  };
+
+  const handleAddSkill = async () => {
+    if (!selectedSkillId) {
+      setSkillError('Please select a skill');
+      return;
+    }
+    
+    setSkillError('');
+    try {
+      const response = await skillsApi.addSkill({
+        skillId: selectedSkillId,
+        proficiencyLevel: parseInt(selectedProficiency, 10)
+      });
+      const newSkill = response.data.data || response.data.value || response.data;
+      setMySkills(prev => [...prev, newSkill]);
+      setSelectedSkillId('');
+      setSkillSearch('');
+      setSelectedProficiency(1);
+      toast.success('Skill added');
+    } catch (err) {
+      if (err.status === 409) {
+        setSkillError('You already have this skill');
+      } else {
+        toast.error('Failed to add skill');
+      }
+    }
+  };
+
+  const handleRemoveSkill = async (skillId) => {
+    try {
+      await skillsApi.removeSkill(skillId);
+      setMySkills(prev => prev.filter(s => s.skillId !== skillId));
+      toast.success('Skill removed');
+    } catch (err) {
+      toast.error('Failed to remove skill');
+    }
+  };
+
+  const getProficiencyLabel = (level) => {
+    const labels = { 0: 'Beginner', 1: 'Intermediate', 2: 'Advanced', 3: 'Expert' };
+    return labels[level] || 'Intermediate';
   };
 
   const handleSeePublicView = () => {
@@ -486,12 +563,80 @@ const MyProfilePage = () => {
             <div className="section-header mb-4">
               <h2>Skills</h2>
             </div>
+            
+            {isEditMode && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="text-sm font-semibold mb-3">Add New Skill</h3>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  <div className="md:col-span-5 relative">
+                    <input 
+                      type="text" 
+                      placeholder="Search skills..." 
+                      className="w-full p-2 text-sm border border-gray-300 rounded focus:border-[#C5A065] outline-none"
+                      value={skillSearch}
+                      onChange={(e) => setSkillSearch(e.target.value)}
+                    />
+                    {skillSearch && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto">
+                        {allSkills
+                          .filter(s => s.name.toLowerCase().includes(skillSearch.toLowerCase()))
+                          .map(skill => (
+                            <div 
+                              key={skill.id} 
+                              className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                              onClick={() => {
+                                setSelectedSkillId(skill.id);
+                                setSkillSearch(skill.name);
+                              }}
+                            >
+                              {skill.name}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                  <div className="md:col-span-4">
+                    <select 
+                      className="w-full p-2 text-sm border border-gray-300 rounded focus:border-[#C5A065] outline-none bg-white"
+                      value={selectedProficiency}
+                      onChange={(e) => setSelectedProficiency(e.target.value)}
+                    >
+                      <option value={0}>Beginner</option>
+                      <option value={1}>Intermediate</option>
+                      <option value={2}>Advanced</option>
+                      <option value={3}>Expert</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-3">
+                    <button 
+                      onClick={handleAddSkill}
+                      className="w-full p-2 bg-[#C5A065] text-white text-sm font-medium rounded hover:bg-[#b8962d] transition-colors"
+                    >
+                      Add Skill
+                    </button>
+                  </div>
+                </div>
+                {skillError && <p className="text-red-500 text-xs mt-2">{skillError}</p>}
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
-              {profile.skills && profile.skills.length > 0 ? (
-                profile.skills.map((skill, index) => (
-                  <span key={index} className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full border border-gray-200">
-                    {skill}
-                  </span>
+              {mySkills && mySkills.length > 0 ? (
+                mySkills.map((skill) => (
+                  <div 
+                    key={skill.skillId} 
+                    className="px-3 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-full border border-gray-200 flex items-center gap-2"
+                  >
+                    <span>{skill.skillName} • {getProficiencyLabel(skill.proficiencyLevel)}</span>
+                    {isEditMode && (
+                      <X 
+                        size={14} 
+                        className="cursor-pointer text-gray-400 hover:text-red-500" 
+                        onClick={() => handleRemoveSkill(skill.skillId)}
+                      />
+                    )}
+                  </div>
                 ))
               ) : (
                 <p className="subtext italic">No skills listed.</p>

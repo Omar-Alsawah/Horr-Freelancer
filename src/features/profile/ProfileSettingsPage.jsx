@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Loader2,
   ChevronDown,
-  Edit2
+  Edit2,
+  X,
+  Search
 } from 'lucide-react';
 import { profileApi } from '../../api/profile';
+import { skillsApi } from '../../api/skills';
 import { toast } from 'react-hot-toast';
 import SettingsSidebar from './SettingsSidebar';
 import { Card } from '../../components/ui/card';
@@ -38,9 +41,80 @@ const ProfileSettingsPage = () => {
   const [editedFields, setEditedFields] = useState({});
   const [errors, setErrors] = useState({});
 
+  const [mySkills, setMySkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
+  const [selectedSkillId, setSelectedSkillId] = useState('');
+  const [selectedProficiency, setSelectedProficiency] = useState(1);
+  const [skillError, setSkillError] = useState('');
+  const [skillSearch, setSkillSearch] = useState('');
+
   useEffect(() => {
     fetchProfile();
+    fetchMySkills();
+    fetchAllSkills();
   }, []);
+
+  const fetchMySkills = async () => {
+    try {
+      const response = await skillsApi.getMySkills();
+      const data = response.data.data || response.data.value || response.data;
+      setMySkills(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to load my skills');
+    }
+  };
+
+  const fetchAllSkills = async () => {
+    try {
+      const response = await skillsApi.getAllSkills();
+      const data = response.data.data || response.data.value || response.data;
+      setAllSkills(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to load all skills');
+    }
+  };
+
+  const handleAddSkill = async () => {
+    if (!selectedSkillId) {
+      setSkillError('Please select a skill');
+      return;
+    }
+    
+    setSkillError('');
+    try {
+      const response = await skillsApi.addSkill({
+        skillId: selectedSkillId,
+        proficiencyLevel: parseInt(selectedProficiency, 10)
+      });
+      const newSkill = response.data.data || response.data.value || response.data;
+      setMySkills(prev => [...prev, newSkill]);
+      setSelectedSkillId('');
+      setSkillSearch('');
+      setSelectedProficiency(1);
+      toast.success('Skill added');
+    } catch (err) {
+      if (err.status === 409) {
+        setSkillError('You already have this skill');
+      } else {
+        toast.error('Failed to add skill');
+      }
+    }
+  };
+
+  const handleRemoveSkill = async (skillId) => {
+    try {
+      await skillsApi.removeSkill(skillId);
+      setMySkills(prev => prev.filter(s => s.skillId !== skillId));
+      toast.success('Skill removed');
+    } catch (err) {
+      toast.error('Failed to remove skill');
+    }
+  };
+
+  const getProficiencyLabel = (level) => {
+    const labels = { 0: 'Beginner', 1: 'Intermediate', 2: 'Advanced', 3: 'Expert' };
+    return labels[level] || 'Intermediate';
+  };
 
   const fetchProfile = async () => {
     try {
@@ -315,6 +389,90 @@ const ProfileSettingsPage = () => {
                   <option>Expert</option>
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+              </div>
+            </Card>
+
+            {/* Skills Management Section */}
+            <Card className="p-8 border-gray-200 shadow-sm space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">Skills</h2>
+              </div>
+              
+              <div className="p-6 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
+                <h3 className="text-sm font-bold text-gray-700">Add New Skill</h3>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                  <div className="md:col-span-5 relative">
+                    <input 
+                      type="text" 
+                      placeholder="Search skills..." 
+                      className="w-full p-3 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#d4af37] outline-none transition-all"
+                      value={skillSearch}
+                      onChange={(e) => setSkillSearch(e.target.value)}
+                    />
+                    {skillSearch && (
+                      <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                        {allSkills
+                          .filter(s => s.name.toLowerCase().includes(skillSearch.toLowerCase()))
+                          .map(skill => (
+                            <div 
+                              key={skill.id} 
+                              className="p-3 hover:bg-yellow-50 cursor-pointer text-sm transition-colors"
+                              onClick={() => {
+                                setSelectedSkillId(skill.id);
+                                setSkillSearch(skill.name);
+                              }}
+                            >
+                              {skill.name}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                  <div className="md:col-span-4 relative">
+                    <select 
+                      className="w-full p-3 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#d4af37] outline-none appearance-none cursor-pointer bg-white"
+                      value={selectedProficiency}
+                      onChange={(e) => setSelectedProficiency(e.target.value)}
+                    >
+                      <option value={0}>Beginner</option>
+                      <option value={1}>Intermediate</option>
+                      <option value={2}>Advanced</option>
+                      <option value={3}>Expert</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                  <div className="md:col-span-3">
+                    <Button 
+                      type="button"
+                      onClick={handleAddSkill}
+                      className="w-full h-full bg-[#d4af37] hover:bg-[#b8962d] text-white"
+                    >
+                      Add Skill
+                    </Button>
+                  </div>
+                </div>
+                {skillError && <p className="text-red-500 text-xs font-medium">{skillError}</p>}
+              </div>
+
+              <div className="flex flex-wrap gap-3 mt-4">
+                {mySkills.length > 0 ? (
+                  mySkills.map((skill) => (
+                    <div 
+                      key={skill.skillId} 
+                      className="px-4 py-2 bg-white border border-gray-200 text-gray-800 text-sm font-semibold rounded-full flex items-center gap-3 shadow-sm group hover:border-[#d4af37] transition-all"
+                    >
+                      <span>{skill.skillName} • <span className="text-[#d4af37]">{getProficiencyLabel(skill.proficiencyLevel)}</span></span>
+                      <X 
+                        size={14} 
+                        className="cursor-pointer text-gray-400 hover:text-red-500 transition-colors" 
+                        onClick={() => handleRemoveSkill(skill.skillId)}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic text-sm py-4">No skills added yet.</p>
+                )}
               </div>
             </Card>
           </form>
