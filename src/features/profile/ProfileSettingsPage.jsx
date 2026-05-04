@@ -20,12 +20,14 @@ const VisibilityEnum = {
 };
 
 const ExperienceLevelEnum = {
-  'Entry level': 0,
+  'Beginner': 0,
   'Intermediate': 1,
-  'Expert': 2,
-  0: 'Entry level',
+  'Advanced': 2,
+  'Expert': 3,
+  0: 'Beginner',
   1: 'Intermediate',
-  2: 'Expert'
+  2: 'Advanced',
+  3: 'Expert'
 };
 
 const ProfileSettingsPage = () => {
@@ -49,7 +51,7 @@ const ProfileSettingsPage = () => {
         const processedData = {
           ...data,
           visibility: VisibilityEnum[data.visibility] || 'Public',
-          experienceLevel: ExperienceLevelEnum[data.experienceLevel] || 'Entry level'
+          experienceLevel: ExperienceLevelEnum[data.experienceLevel] || 'Beginner'
         };
         setProfile(processedData);
         setOriginalProfile(processedData);
@@ -120,13 +122,18 @@ const ProfileSettingsPage = () => {
         await profileApi.updateBio(profile.bio);
       }
 
-      // 6. Privacy update
-      const privacyFields = ['visibility', 'experienceLevel'];
+      // 6. Experience Level update
+      if (editedFields.experienceLevel !== undefined && profile.experienceLevel !== originalProfile.experienceLevel) {
+        const levelInt = ExperienceLevelEnum[profile.experienceLevel];
+        await profileApi.updateExperienceLevel(levelInt);
+      }
+
+      // 7. Privacy update
+      const privacyFields = ['visibility'];
       const hasPrivacyChanges = privacyFields.some(field => editedFields[field] !== undefined && profile[field] !== originalProfile[field]);
       if (hasPrivacyChanges) {
         const privacyDto = {
-          visibility: VisibilityEnum[profile.visibility],
-          experienceLevel: ExperienceLevelEnum[profile.experienceLevel]
+          visibility: VisibilityEnum[profile.visibility]
         };
         await profileApi.updatePrivacy(privacyDto);
       }
@@ -294,32 +301,20 @@ const ProfileSettingsPage = () => {
             <Card className="p-8 border-gray-200 shadow-sm space-y-6">
               <h2 className="text-xl font-bold text-gray-800">Experience level</h2>
               {errors.experienceLevel && <p className="text-red-500 text-sm">{errors.experienceLevel}</p>}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { id: 'Entry level', desc: 'I am relatively new to this field' },
-                  { id: 'Intermediate', desc: 'I have substantial experience in this field' },
-                  { id: 'Expert', desc: 'I have comprehensive and deep expertise in this field' }
-                ].map((level) => (
-                  <div 
-                    key={level.id}
-                    onClick={() => handleFieldChange('experienceLevel', level.id)}
-                    className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                      profile.experienceLevel === level.id 
-                        ? 'border-[#d4af37] bg-yellow-50/50 shadow-sm' 
-                        : 'border-gray-100 hover:border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                         profile.experienceLevel === level.id ? 'border-[#d4af37]' : 'border-gray-300'
-                      }`}>
-                        {profile.experienceLevel === level.id && <div className="w-2.5 h-2.5 rounded-full bg-[#d4af37]" />}
-                      </div>
-                      <span className="font-bold text-gray-900">{level.id}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 leading-relaxed">{level.desc}</p>
-                  </div>
-                ))}
+              <div className="relative">
+                <select 
+                  className={`w-full p-3 border rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-[#d4af37] outline-none transition-all ${
+                    errors.experienceLevel ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                  value={profile.experienceLevel}
+                  onChange={(e) => handleFieldChange('experienceLevel', e.target.value)}
+                >
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                  <option>Expert</option>
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
               </div>
             </Card>
           </form>

@@ -120,6 +120,11 @@ const MyProfilePage = () => {
         await profileApi.updateBio(editedFields.bio);
       }
 
+      // 6. Update Experience Level if changed
+      if (editedFields.experienceLevel !== undefined && editedFields.experienceLevel !== profile.experienceLevel) {
+        await profileApi.updateExperienceLevel(parseInt(editedFields.experienceLevel, 10));
+      }
+
       // Success: update local state and show toast
       setProfile(prev => ({ ...prev, ...editedFields }));
       setIsEditMode(false);
@@ -243,6 +248,7 @@ const MyProfilePage = () => {
 
   const currentBio = editedFields.bio !== undefined ? editedFields.bio : (profile.bio || '');
   const currentTitle = editedFields.title !== undefined ? editedFields.title : (profile.title || '');
+  const currentExperienceLevel = editedFields.experienceLevel !== undefined ? editedFields.experienceLevel : (profile.experienceLevel !== undefined ? profile.experienceLevel : 0);
   const currentAddress = editedFields.address !== undefined ? editedFields.address : (profile.address || '');
   const currentPhoneNumber = editedFields.phoneNumber !== undefined ? editedFields.phoneNumber : (profile.phoneNumber || '');
   
@@ -426,9 +432,26 @@ const MyProfilePage = () => {
               <div className="section-header">
                 <h2>Experience</h2>
               </div>
-              <p className="text-sm font-medium text-gray-700">
-                {profile.experienceLevel === 0 ? 'Entry Level' : profile.experienceLevel === 1 ? 'Intermediate' : 'Expert'}
-              </p>
+              {isEditMode ? (
+                <div className="mt-2">
+                  <select 
+                    value={currentExperienceLevel}
+                    onChange={(e) => handleFieldChange('experienceLevel', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded text-sm outline-none focus:border-[#C5A065] bg-white cursor-pointer"
+                  >
+                    <option value={0}>Beginner</option>
+                    <option value={1}>Intermediate</option>
+                    <option value={2}>Advanced</option>
+                    <option value={3}>Expert</option>
+                  </select>
+                </div>
+              ) : (
+                <p className="text-sm font-medium text-gray-700">
+                  {profile.experienceLevel === 0 ? 'Beginner' : 
+                   profile.experienceLevel === 1 ? 'Intermediate' : 
+                   profile.experienceLevel === 2 ? 'Advanced' : 'Expert'}
+                </p>
+              )}
             </section>
           )}
         </aside>

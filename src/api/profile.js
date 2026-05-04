@@ -15,6 +15,9 @@ export const profileApi = {
   updateBio: (bio) => api.patch('/api/UserProfile/bio', bio, {
     headers: { 'Content-Type': 'text/plain' }
   }),
+  updateExperienceLevel: (level) => api.patch('/api/UserProfile/experience-level', level, {
+    headers: { 'Content-Type': 'application/json' }
+  }),
   getPrivacy: () => api.get('/api/UserProfile/privacy'),
   updatePrivacy: (data) => api.patch('/api/UserProfile/privacy', data),
   addPaymentMethod: (data) => api.post('/api/UserProfile/payment-method', data)
