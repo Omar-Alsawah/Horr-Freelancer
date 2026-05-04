@@ -76,18 +76,18 @@ const MyProfilePage = () => {
     
     try {
       // 1. Update Name if changed
-      if (editedFields.fullName !== undefined) {
+      if (editedFields.fullName !== undefined && editedFields.fullName !== profile.fullName) {
         await profileApi.updateName(editedFields.fullName);
       }
 
       // 2. Update Email if changed
-      if (editedFields.email !== undefined) {
+      if (editedFields.email !== undefined && editedFields.email !== profile.email) {
         await profileApi.updateEmail(editedFields.email);
       }
 
       // 3. Update Location/Phone if changed
       const locationFields = ['address', 'city', 'stateProvince', 'zipCode', 'country', 'timeZone', 'phoneNumber'];
-      const hasLocationChanges = locationFields.some(field => editedFields[field] !== undefined);
+      const hasLocationChanges = locationFields.some(field => editedFields[field] !== undefined && editedFields[field] !== profile[field]);
       
       if (hasLocationChanges) {
         // Validate Phone Number if present
@@ -230,7 +230,7 @@ const MyProfilePage = () => {
 
   const currentFullName = editedFields.fullName !== undefined ? editedFields.fullName : (profile.fullName || '');
   const currentEmail = editedFields.email !== undefined ? editedFields.email : (profile.email || '');
-  const currentTitle = editedFields.title !== undefined ? editedFields.title : (profile.title || '');
+
   const currentBio = editedFields.bio !== undefined ? editedFields.bio : (profile.bio || '');
   const currentAddress = editedFields.address !== undefined ? editedFields.address : (profile.address || '');
   const currentPhoneNumber = editedFields.phoneNumber !== undefined ? editedFields.phoneNumber : (profile.phoneNumber || '');
@@ -410,202 +410,7 @@ const MyProfilePage = () => {
 
         {/* Main Content */}
         <main className="main-content">
-          <section className="p-card section-title">
-            <div className="section-header">
-              {isEditMode ? (
-                <div className="w-full">
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Professional Title</label>
-                  <input 
-                    type="text" 
-                    value={currentTitle}
-                    onChange={(e) => handleFieldChange('title', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-lg font-bold outline-none focus:border-[#C5A065] focus:ring-1 focus:ring-[#C5A065]"
-                    placeholder="e.g. Senior Frontend Developer"
-                  />
-                  {fieldErrors.title && <p className="text-red-500 text-xs mt-1">{fieldErrors.title}</p>}
-                </div>
-              ) : (
-                <h2 className="role-title">{profile.title || 'No title set'}</h2>
-              )}
-            </div>
-          </section>
 
-          <section className="p-card section-summary">
-            <div className="section-header mb-4">
-              <h2>Professional Summary</h2>
-            </div>
-            {isEditMode ? (
-              <div className="w-full">
-                <textarea 
-                  value={currentBio}
-                  onChange={(e) => handleFieldChange('bio', e.target.value)}
-                  rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-[#C5A065] focus:ring-1 focus:ring-[#C5A065] resize-none"
-                  placeholder="Write a professional summary..."
-                />
-                {fieldErrors.bio && <p className="text-red-500 text-xs mt-1">{fieldErrors.bio}</p>}
-              </div>
-            ) : (
-              <p className="summary-text whitespace-pre-wrap">
-                {profile.bio || 'Add a professional summary to tell clients about your experience and goals.'}
-              </p>
-            )}
-          </section>
-
-          <section className="p-card section-skills">
-            <div className="section-header mb-4">
-              <h2>Skills</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {profile.skills && profile.skills.length > 0 ? (
-                profile.skills.map((skill, index) => (
-                  <span key={index} className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full border border-gray-200">
-                    {skill}
-                  </span>
-                ))
-              ) : (
-                <p className="subtext italic">No skills listed.</p>
-              )}
-            </div>
-          </section>
-
-          <section className="p-card section-portfolio">
-            <div className="section-header mb-4">
-              <h2>Portfolio</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profile.portfolioItems && profile.portfolioItems.length > 0 ? (
-                profile.portfolioItems.map((item) => (
-                  <div key={item.id} className="border border-gray-200 rounded-xl overflow-hidden group hover:shadow-md transition-shadow">
-                    <div className="h-40 bg-gray-100 relative overflow-hidden">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <Folder size={32} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4 bg-white">
-                      <h3 className="font-bold text-gray-900 truncate">{item.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="subtext italic col-span-2 text-center py-8">No portfolio items added yet.</p>
-              )}
-            </div>
-          </section>
-
-        </main>
-      </div>
-    </div>
-  );
-};
-
-
-        <div className="header-right flex gap-3 items-center">
-          {isEditMode ? (
-            <>
-              <button 
-                onClick={toggleEditMode} 
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                disabled={isSaving}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleSave} 
-                disabled={!hasChanges || isSaving}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#C5A065] hover:bg-[#b8962d] rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {isSaving && <Loader2 size={14} className="animate-spin" />}
-                Save Changes
-              </button>
-            </>
-          ) : (
-            <>
-              <button 
-                onClick={handleSeePublicView} 
-                className="btn btn-primary px-4 py-2 text-sm font-medium"
-                disabled={loading}
-              >
-                See public view
-              </button>
-              <button 
-                onClick={toggleEditMode} 
-                className="btn btn-outline flex items-center gap-2 px-4 py-2 text-sm font-medium"
-              >
-                <Edit2 size={16} /> Edit Profile
-              </button>
-              <button 
-                onClick={handleShare} 
-                className="btn-icon flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Share2 size={18} /> Share
-              </button>
-            </>
-          )}
-        </div>
-      </header>
-
-      {showCopyFallback && (
-        <div className="container max-w-[1100px] mx-auto px-4 mt-4">
-          <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg flex items-center justify-between text-sm">
-            <span className="text-yellow-800 font-medium">Profile Link: https://horr.app/profile/{profile.id}</span>
-            <button onClick={() => setShowCopyFallback(false)} className="text-yellow-600 font-bold px-2">✕</button>
-          </div>
-        </div>
-      )}
-
-      <div className="profile-layout">
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <section className="p-card section-availability">
-            <div className="section-header">
-              <h2>Availability</h2>
-            </div>
-            <p className="status">
-              <span className="status-dot"></span> 
-              Available
-            </p>
-          </section>
-
-          <section className="p-card section-linked">
-            <div className="section-header">
-              <h2>Linked Accounts</h2>
-            </div>
-            <div className="linked-item">
-              <Globe size={20} className="social-icon" />
-              <div className="linked-text">
-                <p className="text-bold">Website</p>
-              </div>
-            </div>
-          </section>
-        </aside>
-
-        {/* Main Content */}
-        <main className="main-content">
-          <section className="p-card section-title">
-            <div className="section-header">
-              {isEditMode ? (
-                <div className="w-full">
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Title</label>
-                  <input 
-                    type="text" 
-                    value={currentTitle}
-                    onChange={(e) => handleFieldChange('title', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-lg font-bold outline-none focus:border-[#C5A065] focus:ring-1 focus:ring-[#C5A065]"
-                    placeholder="e.g. Senior Frontend Developer"
-                  />
-                  {fieldErrors.title && <p className="text-red-500 text-xs mt-1">{fieldErrors.title}</p>}
-                </div>
-              ) : (
-                <h2 className="role-title">{profile.title || 'No title set'}</h2>
-              )}
-            </div>
-          </section>
 
           <section className="p-card section-summary">
             <div className="section-header mb-4">

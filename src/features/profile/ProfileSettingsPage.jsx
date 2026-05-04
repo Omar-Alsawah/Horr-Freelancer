@@ -30,6 +30,7 @@ const ExperienceLevelEnum = {
 
 const ProfileSettingsPage = () => {
   const [profile, setProfile] = useState(null);
+  const [originalProfile, setOriginalProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editedFields, setEditedFields] = useState({});
@@ -45,11 +46,13 @@ const ProfileSettingsPage = () => {
       const response = await profileApi.getProfile();
       const data = response.data.data || response.data.value || response.data;
       if (data) {
-        setProfile({
+        const processedData = {
           ...data,
           visibility: VisibilityEnum[data.visibility] || 'Public',
           experienceLevel: ExperienceLevelEnum[data.experienceLevel] || 'Entry level'
-        });
+        };
+        setProfile(processedData);
+        setOriginalProfile(processedData);
       }
       setEditedFields({});
     } catch (error) {
@@ -82,18 +85,18 @@ const ProfileSettingsPage = () => {
       // Route each changed group to its correct PATCH endpoint
       
       // 1. Name update
-      if (editedFields.fullName !== undefined) {
-        await profileApi.updateName(editedFields.fullName);
+      if (editedFields.fullName !== undefined && profile.fullName !== originalProfile.fullName) {
+        await profileApi.updateName(profile.fullName);
       }
 
       // 2. Email update
-      if (editedFields.email !== undefined) {
-        await profileApi.updateEmail(editedFields.email);
+      if (editedFields.email !== undefined && profile.email !== originalProfile.email) {
+        await profileApi.updateEmail(profile.email);
       }
 
       // 3. Location update
       const locationFields = ['address', 'city', 'stateProvince', 'zipCode', 'country', 'timeZone', 'phoneNumber'];
-      const hasLocationChanges = locationFields.some(field => editedFields[field] !== undefined);
+      const hasLocationChanges = locationFields.some(field => editedFields[field] !== undefined && profile[field] !== originalProfile[field]);
       if (hasLocationChanges) {
         const locationDto = {
           address: profile.address || '',
@@ -109,7 +112,7 @@ const ProfileSettingsPage = () => {
 
       // 4. Privacy update
       const privacyFields = ['visibility', 'experienceLevel'];
-      const hasPrivacyChanges = privacyFields.some(field => editedFields[field] !== undefined);
+      const hasPrivacyChanges = privacyFields.some(field => editedFields[field] !== undefined && profile[field] !== originalProfile[field]);
       if (hasPrivacyChanges) {
         const privacyDto = {
           visibility: VisibilityEnum[profile.visibility],
@@ -119,6 +122,7 @@ const ProfileSettingsPage = () => {
       }
 
       toast.success('Settings updated successfully');
+      setOriginalProfile({ ...profile });
       setEditedFields({});
     } catch (error) {
       if (error.status === 400 && error.errors) {
