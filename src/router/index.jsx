@@ -21,6 +21,7 @@ import MyProfilePage from '../features/profile/MyProfilePage';
 import SettingsPage from '../features/profile/SettingsPage';
 import ProfileSettingsPage from '../features/profile/ProfileSettingsPage';
 import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
+import PublicProfilePage from '../features/profile/PublicProfilePage';
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
           { path: 'profile', element: <MyProfilePage /> },
+          { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'settings/profile', element: <ProfileSettingsPage /> },
           { path: 'settings/password', element: <PasswordSecurityPage /> },

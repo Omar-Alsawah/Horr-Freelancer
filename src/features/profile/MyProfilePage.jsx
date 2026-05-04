@@ -429,8 +429,8 @@ const MyProfilePage = () => {
   };
 
   const handleSeePublicView = () => {
-    if (profile?.id) {
-      navigate(`/profile/${profile.id}/public`);
+    if (profile?.userIdHash) {
+      navigate(`/profile/${profile.userIdHash}/public`);
     }
   };
 
@@ -643,7 +643,7 @@ const MyProfilePage = () => {
               <button 
                 onClick={handleSeePublicView} 
                 className="btn btn-primary px-4 py-2 text-sm font-medium"
-                disabled={loading}
+                disabled={loading || !profile?.userIdHash}
               >
                 See public view
               </button>
@@ -973,7 +973,9 @@ const MyProfilePage = () => {
             </div>
           </div>
         </div>
-            {/* Add/Edit Modal */}
+      )}
+
+      {/* Add/Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)} />
