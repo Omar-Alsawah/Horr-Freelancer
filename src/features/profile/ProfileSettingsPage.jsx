@@ -110,7 +110,17 @@ const ProfileSettingsPage = () => {
         await profileApi.updateLocation(locationDto);
       }
 
-      // 4. Privacy update
+      // 4. Title update
+      if (editedFields.title !== undefined && profile.title !== originalProfile.title) {
+        await profileApi.updateTitle(profile.title);
+      }
+
+      // 5. Bio update
+      if (editedFields.bio !== undefined && profile.bio !== originalProfile.bio) {
+        await profileApi.updateBio(profile.bio);
+      }
+
+      // 6. Privacy update
       const privacyFields = ['visibility', 'experienceLevel'];
       const hasPrivacyChanges = privacyFields.some(field => editedFields[field] !== undefined && profile[field] !== originalProfile[field]);
       if (hasPrivacyChanges) {
@@ -194,6 +204,31 @@ const ProfileSettingsPage = () => {
                     onChange={(e) => handleFieldChange('email', e.target.value)}
                   />
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">Professional Title</label>
+                  <input 
+                    type="text" 
+                    className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#d4af37] outline-none transition-all ${
+                      errors.title ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    value={profile.title || ''}
+                    onChange={(e) => handleFieldChange('title', e.target.value)}
+                    placeholder="e.g. Senior Full Stack Developer"
+                  />
+                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">Professional Summary</label>
+                  <textarea 
+                    className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#d4af37] outline-none transition-all min-h-[120px] ${
+                      errors.bio ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    value={profile.bio || ''}
+                    onChange={(e) => handleFieldChange('bio', e.target.value)}
+                    placeholder="Describe your background, skills, and achievements..."
+                  />
+                  {errors.bio && <p className="text-red-500 text-xs mt-1">{errors.bio}</p>}
                 </div>
               </div>
             </Card>

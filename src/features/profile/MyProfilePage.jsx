@@ -110,6 +110,16 @@ const MyProfilePage = () => {
         await profileApi.updateLocation(locationDto);
       }
 
+      // 4. Update Title if changed
+      if (editedFields.title !== undefined && editedFields.title !== profile.title) {
+        await profileApi.updateTitle(editedFields.title);
+      }
+
+      // 5. Update Bio if changed
+      if (editedFields.bio !== undefined && editedFields.bio !== profile.bio) {
+        await profileApi.updateBio(editedFields.bio);
+      }
+
       // Success: update local state and show toast
       setProfile(prev => ({ ...prev, ...editedFields }));
       setIsEditMode(false);
@@ -232,6 +242,7 @@ const MyProfilePage = () => {
   const currentEmail = editedFields.email !== undefined ? editedFields.email : (profile.email || '');
 
   const currentBio = editedFields.bio !== undefined ? editedFields.bio : (profile.bio || '');
+  const currentTitle = editedFields.title !== undefined ? editedFields.title : (profile.title || '');
   const currentAddress = editedFields.address !== undefined ? editedFields.address : (profile.address || '');
   const currentPhoneNumber = editedFields.phoneNumber !== undefined ? editedFields.phoneNumber : (profile.phoneNumber || '');
   
@@ -273,8 +284,22 @@ const MyProfilePage = () => {
             ) : (
               <>
                 <h1>{profile.fullName}</h1>
+                <p className="text-lg font-semibold text-gray-700">{profile.title}</p>
                 <p className="text-sm text-gray-500">{profile.email}</p>
               </>
+            )}
+
+            {isEditMode && (
+              <div className="mt-2">
+                <input 
+                  type="text" 
+                  value={currentTitle}
+                  onChange={(e) => handleFieldChange('title', e.target.value)}
+                  className="p-2 border border-gray-300 rounded text-lg font-semibold w-full outline-none focus:border-[#C5A065]"
+                  placeholder="Professional Title"
+                />
+                {fieldErrors.title && <p className="text-red-500 text-xs mt-1">{fieldErrors.title}</p>}
+              </div>
             )}
             
             {isEditMode ? (
@@ -418,14 +443,12 @@ const MyProfilePage = () => {
             </div>
             {isEditMode ? (
               <div className="w-full">
-                {/* TODO: No dedicated backend endpoint exists for updating 'bio'. Disabling save for now. */}
                 <textarea 
                   value={currentBio}
                   onChange={(e) => handleFieldChange('bio', e.target.value)}
-                  rows={4}
-                  disabled={true}
-                  className="w-full p-3 border border-gray-300 rounded-lg outline-none bg-gray-100 text-gray-500 cursor-not-allowed resize-none"
-                  placeholder="Bio updates are currently not supported by the API."
+                  rows={6}
+                  className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-[#C5A065] resize-y"
+                  placeholder="Tell clients about your experience and goals..."
                 />
                 {fieldErrors.bio && <p className="text-red-500 text-xs mt-1">{fieldErrors.bio}</p>}
               </div>
