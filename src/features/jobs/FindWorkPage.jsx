@@ -10,6 +10,10 @@ import JobCard from './JobCard';
 import JobCardSkeleton from './JobCardSkeleton';
 import EmptyState from './EmptyState';
 import Pagination from './Pagination';
+import { profileApi } from '../../api/profile';
+import { skillsApi } from '../../api/skills';
+import { portfolioApi } from '../../api/portfolio';
+import { calculateProfileCompletion, getMissingProfileCriteria } from '../../utils/profileCompletion';
 
 export default function FindWorkPage() {
   const { t } = useTranslation();
@@ -24,6 +28,10 @@ export default function FindWorkPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [savedJobIds, setSavedJobIds] = useState(new Set());
+
+  const [completionScore, setCompletionScore] = useState(0);
+  const [missingCriteria, setMissingCriteria] = useState([]);
+  const [completionLoading, setCompletionLoading] = useState(true);
 
   const debouncedKeyword = useDebounce(keyword, 400);
   const pageSize = 10;
@@ -49,6 +57,34 @@ export default function FindWorkPage() {
 
   // Reset to page 1 when filters change
   useEffect(() => { setPage(1); }, [debouncedKeyword, jobType, sortBy]);
+
+  useEffect(() => {
+    const fetchCompletionData = async () => {
+      setCompletionLoading(true);
+      try {
+        const [profileRes, skillsRes, portfolioRes] = await Promise.allSettled([
+          profileApi.getProfile(),
+          skillsApi.getMySkills(),
+          portfolioApi.getPortfolio()
+        ]);
+
+        const profileData = profileRes.status === 'fulfilled' ? profileRes.value.data : null;
+        const skillsData = skillsRes.status === 'fulfilled' ? skillsRes.value.data : [];
+        const portfolioData = portfolioRes.status === 'fulfilled' ? portfolioRes.value.data : [];
+
+        const score = calculateProfileCompletion(profileData, skillsData, portfolioData);
+        setCompletionScore(score);
+        
+        const missing = getMissingProfileCriteria(profileData, skillsData, portfolioData);
+        setMissingCriteria(missing);
+      } catch (error) {
+        console.error('Failed to fetch completion data', error);
+      } finally {
+        setCompletionLoading(false);
+      }
+    };
+    fetchCompletionData();
+  }, []);
 
   const handleToggleSave = async (jobId) => {
     const wasSaved = savedJobIds.has(jobId);
@@ -175,15 +211,35 @@ export default function FindWorkPage() {
           <a href="#" className="profile-name">{user?.name || 'User'}</a>
           <div className="profile-title">{user?.role || 'Freelancer'}</div>
           <div className="progress-container">
-            <div className="progress-label">
-              <span className="promo-link" style={{ fontSize: '0.8rem', cursor: 'pointer' }}>
+            <div className="progress-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span className="promo-link" onClick={() => navigate('/profile')} style={{ fontSize: '0.8rem', cursor: 'pointer' }}>
                 {t('jobs.complete_profile')}
               </span>
-              <span>40%</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
+                {completionLoading ? '...' : `${completionScore}% Complete`}
+              </span>
             </div>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: '40%' }}></div>
+            <div className="progress-bar" style={{ backgroundColor: '#e0e0e0', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
+              <div className="progress-fill" style={{ width: `${completionScore}%`, backgroundColor: '#4caf50', height: '100%', transition: 'width 0.3s ease' }}></div>
             </div>
+            {!completionLoading && missingCriteria.length > 0 && (
+              <div className="missing-criteria" style={{ marginTop: '0.8rem', fontSize: '0.8rem' }}>
+                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                  {missingCriteria.map(item => (
+                    <li key={item.id} style={{ marginBottom: '0.4rem' }}>
+                      <span onClick={() => navigate(item.link)} className="promo-link" style={{ cursor: 'pointer', color: '#1e88e5', textDecoration: 'none' }}>
+                        + {item.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {!completionLoading && missingCriteria.length === 0 && (
+              <div style={{ marginTop: '0.8rem', fontSize: '0.8rem', color: '#4caf50', fontWeight: 'bold' }}>
+                Your profile is 100% complete 🎉
+              </div>
+            )}
           </div>
         </div>
 

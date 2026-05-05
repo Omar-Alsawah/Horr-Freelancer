@@ -29,6 +29,11 @@ const SettingsSidebar = () => {
       icon: <Lock size={18} /> 
     },
     { 
+      label: 'Identity Verification', 
+      path: '/settings/verification', 
+      icon: <ShieldCheck size={18} /> 
+    },
+    { 
       label: 'Get Paid', 
       path: '/settings/billing', 
       icon: <CreditCard size={18} /> 

@@ -13,15 +13,6 @@ import SettingsSidebar from './SettingsSidebar';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 
-const VisibilityEnum = {
-  'Public': 0,
-  'Private': 1,
-  'Horr Users Only': 2,
-  0: 'Public',
-  1: 'Private',
-  2: 'Horr Users Only'
-};
-
 const ExperienceLevelEnum = {
   'Beginner': 0,
   'Intermediate': 1,
@@ -124,7 +115,6 @@ const ProfileSettingsPage = () => {
       if (data) {
         const processedData = {
           ...data,
-          visibility: VisibilityEnum[data.visibility] || 'Public',
           experienceLevel: ExperienceLevelEnum[data.experienceLevel] || 'Beginner'
         };
         setProfile(processedData);
@@ -199,17 +189,7 @@ const ProfileSettingsPage = () => {
       // 6. Experience Level update
       if (editedFields.experienceLevel !== undefined && profile.experienceLevel !== originalProfile.experienceLevel) {
         const levelInt = ExperienceLevelEnum[profile.experienceLevel];
-        await profileApi.updateExperienceLevel({ experienceLevel: levelInt });
-      }
-
-      // 7. Privacy update
-      const privacyFields = ['visibility'];
-      const hasPrivacyChanges = privacyFields.some(field => editedFields[field] !== undefined && profile[field] !== originalProfile[field]);
-      if (hasPrivacyChanges) {
-        const privacyDto = {
-          visibility: VisibilityEnum[profile.visibility]
-        };
-        await profileApi.updatePrivacy(privacyDto);
+        await profileApi.updateExperienceLevel(levelInt);
       }
 
       toast.success('Settings updated successfully');
@@ -341,31 +321,6 @@ const ProfileSettingsPage = () => {
                     placeholder="+201..."
                   />
                   {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
-                </div>
-              </div>
-            </Card>
-
-            {/* Visibility Section */}
-            <Card className="p-8 border-gray-200 shadow-sm space-y-6">
-              <h2 className="text-xl font-bold text-gray-800">Privacy</h2>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Profile Visibility</label>
-                  <div className="relative">
-                    <select 
-                      className={`w-full p-3 border rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-[#d4af37] outline-none transition-all ${
-                        errors.visibility ? 'border-red-500' : 'border-gray-200'
-                      }`}
-                      value={profile.visibility}
-                      onChange={(e) => handleFieldChange('visibility', e.target.value)}
-                    >
-                      <option>Public</option>
-                      <option>Private</option>
-                      <option>Horr Users Only</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
-                  </div>
-                  {errors.visibility && <p className="text-red-500 text-xs mt-1">{errors.visibility}</p>}
                 </div>
               </div>
             </Card>

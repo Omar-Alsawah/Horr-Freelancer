@@ -22,6 +22,7 @@ import SettingsPage from '../features/profile/SettingsPage';
 import ProfileSettingsPage from '../features/profile/ProfileSettingsPage';
 import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
 import PublicProfilePage from '../features/profile/PublicProfilePage';
+import VerificationPage from '../features/verification/VerificationPage';
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
           { path: 'settings', element: <SettingsPage /> },
           { path: 'settings/profile', element: <ProfileSettingsPage /> },
           { path: 'settings/password', element: <PasswordSecurityPage /> },
+          { path: 'settings/verification', element: <VerificationPage /> },
           { path: 'settings/billing', element: <div className="p-8 font-bold text-2xl">Get Paid Placeholder</div> }
         ]
       }
