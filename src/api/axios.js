@@ -1,8 +1,16 @@
 import axios from 'axios';
 
+export const BASE_URL = 'https://localhost:7070';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5200',
+  baseURL: BASE_URL,
 });
+
+export const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BASE_URL}${path}`;
+};
 
 api.interceptors.request.use(
   (config) => {
@@ -26,7 +34,7 @@ api.interceptors.response.use(
       window.location.href = '/login';
       return Promise.reject({ title: 'Session expired. Please log in again.', status: 401 });
     }
-    
+
     if (error.response && error.response.data) {
       const data = error.response.data;
       if (data.status && data.title) {

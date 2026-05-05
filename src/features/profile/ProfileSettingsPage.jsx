@@ -199,7 +199,7 @@ const ProfileSettingsPage = () => {
       // 6. Experience Level update
       if (editedFields.experienceLevel !== undefined && profile.experienceLevel !== originalProfile.experienceLevel) {
         const levelInt = ExperienceLevelEnum[profile.experienceLevel];
-        await profileApi.updateExperienceLevel(levelInt);
+        await profileApi.updateExperienceLevel({ experienceLevel: levelInt });
       }
 
       // 7. Privacy update
@@ -213,8 +213,7 @@ const ProfileSettingsPage = () => {
       }
 
       toast.success('Settings updated successfully');
-      setOriginalProfile({ ...profile });
-      setEditedFields({});
+      await fetchProfile();
     } catch (error) {
       if (error.status === 400 && error.errors) {
         const fieldErrors = {};

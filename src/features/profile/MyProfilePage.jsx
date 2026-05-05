@@ -21,6 +21,7 @@ import {
 import { profileApi } from '../../api/profile';
 import { skillsApi } from '../../api/skills';
 import { portfolioApi } from '../../api/portfolio';
+import { getImageUrl } from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import './MyProfilePage.css';
 
@@ -201,14 +202,24 @@ const MyProfilePage = () => {
       }
 
       // 6. Update Experience Level if changed
-      if (editedFields.experienceLevel !== undefined && editedFields.experienceLevel !== profile.experienceLevel) {
-        await profileApi.updateExperienceLevel(parseInt(editedFields.experienceLevel, 10));
+      if (editedFields.experienceLevel !== undefined || editedFields.yearsOfExperience !== undefined) {
+        const levelToSave = editedFields.experienceLevel !== undefined 
+          ? parseInt(editedFields.experienceLevel, 10) 
+          : getLevelValue(profile.experienceLevel);
+          
+        const yearsToSave = editedFields.yearsOfExperience !== undefined 
+          ? parseInt(editedFields.yearsOfExperience, 10) 
+          : profile.yearsOfExperience;
+
+        await profileApi.updateExperienceLevel({ 
+          experienceLevel: levelToSave, 
+          yearsOfExperience: yearsToSave 
+        });
       }
 
       // Success: update local state and show toast
-      setProfile(prev => ({ ...prev, ...editedFields }));
+      await fetchProfile();
       setIsEditMode(false);
-      setEditedFields({});
       toast.success('Profile updated successfully');
     } catch (err) {
       if (err.status === 400 && err.errors) {
@@ -463,7 +474,7 @@ const MyProfilePage = () => {
 
   const renderAvatar = () => {
     if (profile.avatarUrl) {
-      return <img src={profile.avatarUrl} alt={profile.fullName} className="avatar-img" />;
+      return <img src={getImageUrl(profile.avatarUrl)} alt={profile.fullName} className="avatar-img" />;
     }
     const initials = profile.fullName
       ? profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
@@ -519,7 +530,14 @@ const MyProfilePage = () => {
 
   const currentBio = editedFields.bio !== undefined ? editedFields.bio : (profile.bio || '');
   const currentTitle = editedFields.title !== undefined ? editedFields.title : (profile.title || '');
-  const currentExperienceLevel = editedFields.experienceLevel !== undefined ? editedFields.experienceLevel : (profile.experienceLevel !== undefined ? profile.experienceLevel : 0);
+  const getLevelValue = (level) => {
+    if (typeof level === 'number') return level;
+    const map = { 'Beginner': 0, 'Intermediate': 1, 'Advanced': 2, 'Expert': 3 };
+    return map[level] ?? 0;
+  };
+
+  const currentExperienceLevel = editedFields.experienceLevel !== undefined ? editedFields.experienceLevel : (profile.experienceLevel !== undefined ? getLevelValue(profile.experienceLevel) : 0);
+  const currentYearsOfExperience = editedFields.yearsOfExperience !== undefined ? editedFields.yearsOfExperience : (profile.yearsOfExperience !== undefined ? profile.yearsOfExperience : '');
   const currentAddress = editedFields.address !== undefined ? editedFields.address : (profile.address || '');
   const currentPhoneNumber = editedFields.phoneNumber !== undefined ? editedFields.phoneNumber : (profile.phoneNumber || '');
   
@@ -704,24 +722,45 @@ const MyProfilePage = () => {
                 <h2>Experience</h2>
               </div>
               {isEditMode ? (
-                <div className="mt-2">
-                  <select 
-                    value={currentExperienceLevel}
-                    onChange={(e) => handleFieldChange('experienceLevel', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded text-sm outline-none focus:border-[#C5A065] bg-white cursor-pointer"
-                  >
-                    <option value={0}>Beginner</option>
-                    <option value={1}>Intermediate</option>
-                    <option value={2}>Advanced</option>
-                    <option value={3}>Expert</option>
-                  </select>
+                <div className="mt-2 space-y-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Level</label>
+                    <select 
+                      value={currentExperienceLevel}
+                      onChange={(e) => handleFieldChange('experienceLevel', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded focus:border-[#C5A065] outline-none text-sm"
+                    >
+                      <option value={0}>Beginner</option>
+                      <option value={1}>Intermediate</option>
+                      <option value={2}>Advanced</option>
+                      <option value={3}>Expert</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Years</label>
+                    <input 
+                      type="number"
+                      min="0"
+                      value={currentYearsOfExperience}
+                      onChange={(e) => handleFieldChange('yearsOfExperience', e.target.value)}
+                      placeholder="e.g. 5"
+                      className="w-full p-2 border border-gray-300 rounded focus:border-[#C5A065] outline-none text-sm"
+                    />
+                  </div>
                 </div>
               ) : (
-                <p className="text-sm font-medium text-gray-700">
-                  {profile.experienceLevel === 0 ? 'Beginner' : 
-                   profile.experienceLevel === 1 ? 'Intermediate' : 
-                   profile.experienceLevel === 2 ? 'Advanced' : 'Expert'}
-                </p>
+                <div className="mt-2">
+                  <p className="text-sm font-medium text-gray-900">
+                    {profile.experienceLevel === 0 || profile.experienceLevel === 'Beginner' ? 'Beginner' : 
+                     profile.experienceLevel === 1 || profile.experienceLevel === 'Intermediate' ? 'Intermediate' : 
+                     profile.experienceLevel === 2 || profile.experienceLevel === 'Advanced' ? 'Advanced' : 'Expert'}
+                  </p>
+                  {profile.yearsOfExperience !== undefined && profile.yearsOfExperience !== null && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {profile.yearsOfExperience} {profile.yearsOfExperience === 1 ? 'year' : 'years'} of professional experience
+                    </p>
+                  )}
+                </div>
               )}
             </section>
           )}
@@ -859,7 +898,7 @@ const MyProfilePage = () => {
                   <div key={item.id} className="border border-gray-100 rounded-xl overflow-hidden group hover:shadow-lg transition-all bg-white relative">
                     <div className="h-40 bg-gray-50 relative overflow-hidden">
                       {item.thumbnailUrl ? (
-                        <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={getImageUrl(item.thumbnailUrl)} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300">
                           <Folder size={32} />
@@ -922,7 +961,7 @@ const MyProfilePage = () => {
             <div className="overflow-y-auto">
               <div className="h-64 md:h-80 relative bg-gray-900">
                 {selectedProject.thumbnailUrl && (
-                  <img src={selectedProject.thumbnailUrl} alt={selectedProject.title} className="w-full h-full object-contain" />
+                  <img src={getImageUrl(selectedProject.thumbnailUrl)} alt={selectedProject.title} className="w-full h-full object-contain" />
                 )}
                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
                   <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
@@ -958,11 +997,11 @@ const MyProfilePage = () => {
                         <div key={file.id} className="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
                           {file.fileType.includes('video') ? (
                             <video controls className="w-full h-full">
-                              <source src={file.fileUrl} type="video/mp4" />
+                              <source src={getImageUrl(file.fileUrl)} type="video/mp4" />
                               Your browser does not support the video tag.
                             </video>
                           ) : (
-                            <img src={file.fileUrl} alt="Media" className="w-full h-full object-cover" />
+                            <img src={getImageUrl(file.fileUrl)} alt="Media" className="w-full h-full object-cover" />
                           )}
                         </div>
                       ))}
