@@ -440,14 +440,14 @@ const MyProfilePage = () => {
   };
 
   const handleSeePublicView = () => {
-    if (profile?.userIdHash) {
-      navigate(`/profile/${profile.userIdHash}/public`);
+    if (profile?.id) {
+      navigate(`/profile/${profile.id}/public`);
     }
   };
 
   const handleShare = async () => {
     if (!profile?.id) return;
-    const url = `${window.location.origin}/profile/${profile.id}`;
+    const url = `https://horr.app/profile/${profile.id}`;
     
     try {
       if (navigator.clipboard && window.isSecureContext) {
@@ -456,15 +456,24 @@ const MyProfilePage = () => {
       } else {
         const textArea = document.createElement("textarea");
         textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
         document.body.appendChild(textArea);
+        textArea.focus();
         textArea.select();
         try {
-          document.execCommand('copy');
-          toast.success('Profile link copied to clipboard');
+          const successful = document.execCommand('copy');
+          if (successful) {
+            toast.success('Profile link copied to clipboard');
+          } else {
+            throw new Error('copy command unsuccessful');
+          }
         } catch (err) {
           throw new Error('execCommand failed');
+        } finally {
+          document.body.removeChild(textArea);
         }
-        document.body.removeChild(textArea);
       }
     } catch (err) {
       toast.error('Could not copy link. Please copy it manually.');
@@ -661,7 +670,7 @@ const MyProfilePage = () => {
               <button 
                 onClick={handleSeePublicView} 
                 className="btn btn-primary px-4 py-2 text-sm font-medium"
-                disabled={loading || !profile?.userIdHash}
+                disabled={loading || !profile?.id}
               >
                 See public view
               </button>
@@ -685,7 +694,7 @@ const MyProfilePage = () => {
       {showCopyFallback && (
         <div className="container max-w-[1100px] mx-auto px-4 mt-4">
           <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg flex items-center justify-between text-sm">
-            <span className="text-yellow-800 font-medium">Profile Link: {window.location.origin}/profile/{profile.id}</span>
+            <span className="text-yellow-800 font-medium">Profile Link: https://horr.app/profile/{profile.id}</span>
             <button onClick={() => setShowCopyFallback(false)} className="text-yellow-600 font-bold px-2">✕</button>
           </div>
         </div>
