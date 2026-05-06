@@ -11,6 +11,7 @@ export const profileApi = {
   getPrivacy: () => api.get('/api/UserProfile/privacy'),
   updatePrivacy: (data) => api.patch('/api/UserProfile/privacy', data),
   addPaymentMethod: (data) => api.post('/api/UserProfile/payment-method', data),
-  getPublicProfile: (userIdHash) => api.get(`/api/UserProfile/public/${userIdHash}`)
+  getPublicProfile: (userIdHash) => api.get(`/api/UserProfile/public/${userIdHash}`),
+  getPublicPortfolio: (userIdHash) => api.get(`/api/Portfolio/public/${userIdHash}`)
 };
 

@@ -1,40 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { 
-  Loader2, 
-  X
-} from 'lucide-react';
+import { Loader2, X, Star } from 'lucide-react';
 import { profileApi } from '../../api/profile';
+import { getImageUrl } from '../../api/axios';
+import BackGroundImg from '../../assets/BackGround.PNG';
 
 const PublicProfilePage = () => {
   const { userIdHash } = useParams();
   const [profile, setProfile] = useState(null);
+  const [portfolio, setPortfolio] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    const fetchPublicProfile = async () => {
+    const fetchData = async () => {
+      if (!userIdHash) return;
       try {
         setLoading(true);
-        const response = await profileApi.getPublicProfile(userIdHash);
-        const data = response.data.data || response.data.value || response.data;
-        setProfile(data);
+
+        // Fetch profile
+        const profileRes = await profileApi.getPublicProfile(userIdHash);
+        const profileData =
+          profileRes.data.data || profileRes.data.value || profileRes.data;
+        setProfile(profileData);
+
+        // Fetch portfolio separately
+        try {
+          const portRes = await profileApi.getPublicPortfolio(userIdHash);
+          const portData =
+            portRes.data.data || portRes.data.value || portRes.data;
+          setPortfolio(Array.isArray(portData) ? portData : []);
+        } catch (err) {
+          console.error("Error fetching public portfolio:", err);
+          setPortfolio([]);
+        }
+
         setError(null);
       } catch (err) {
-        if (err.status === 404) {
-          setError('Profile not found');
-        } else {
-          setError('Failed to load profile');
-        }
+        console.error("Error fetching public profile:", err);
+        setError(err?.status === 404 ? 'Profile not found' : 'Failed to load profile');
       } finally {
         setLoading(false);
       }
     };
 
-    if (userIdHash) {
-      fetchPublicProfile();
-    }
+    fetchData();
   }, [userIdHash]);
 
   if (loading) {
@@ -68,31 +79,66 @@ const PublicProfilePage = () => {
     );
   }
 
+  const avatarSrc = profile.profilePicturePath 
+    ? getImageUrl(profile.profilePicturePath) 
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName)}&background=99cc99&color=fff`;
+
   return (
-    <div className="public-profile-view bg-[#f9f9f9] min-h-screen pb-12 font-sans">
+    <div className="public-profile-view">
       <style>{`
-        .public-profile-view .container {
-          max-width: 1050px;
+        .public-profile-view {
+          min-height: 100vh;
+          background-image: url(${BackGroundImg});
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+          background-position: center;
+          font-family: 'Inter', sans-serif;
+          color: #1A1A1A;
+          padding-top: 2rem;
+          padding-bottom: 4rem;
+        }
+
+        .public-profile-view .pp-container {
+          max-width: 1000px;
           margin: 0 auto;
-          padding: 2rem 1rem;
+          padding: 0 1.5rem;
         }
+
         .public-profile-view .card {
-          background: #fff;
+          background: #FFFFFF;
           border-radius: 12px;
-          border: 1px solid #e0e0e0;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+          border: 1px solid rgba(0, 0, 0, 0.02);
           overflow: hidden;
+          margin-bottom: 1rem;
         }
+
         .public-profile-view .profile-container {
           display: grid;
           grid-template-columns: 280px 1fr;
           gap: 2rem;
           margin-top: 1rem;
         }
-        @media (max-width: 768px) {
+
+        @media (max-width: 850px) {
           .public-profile-view .profile-container {
             grid-template-columns: 1fr;
           }
         }
+
+        .public-profile-view .profile-left-col {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .public-profile-view .profile-right-col {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
         .public-profile-view .btn-save-elegant {
           width: 50px;
           height: 50px;
@@ -107,15 +153,18 @@ const PublicProfilePage = () => {
           color: #666;
           padding: 0;
         }
+
         .public-profile-view .btn-save-elegant:hover {
           background: #f5f5f5;
           border-color: #ccc;
         }
+
         .public-profile-view .btn-save-elegant.saved {
           background: #fff0f0;
           border-color: #ffcccc;
           color: #ff4d4f;
         }
+
         .public-profile-view .btn-save-elegant svg {
           width: 24px;
           height: 24px;
@@ -123,9 +172,11 @@ const PublicProfilePage = () => {
           stroke: currentColor;
           stroke-width: 2;
         }
+
         .public-profile-view .btn-save-elegant.saved svg {
           fill: currentColor;
         }
+
         .public-profile-view .btn-green-elegant {
           background: #108a00;
           color: white;
@@ -135,28 +186,35 @@ const PublicProfilePage = () => {
           border: none;
           cursor: pointer;
           transition: background 0.2s;
+          font-size: 0.95rem;
         }
+
         .public-profile-view .btn-green-elegant:hover {
           background: #0d7300;
         }
+
         .public-profile-view .profile-stat-group {
           border-bottom: 1px solid #eee;
           padding-bottom: 1rem;
           margin-bottom: 1rem;
         }
+
         .public-profile-view .profile-stat-group:last-child {
           border-bottom: none;
         }
+
         .public-profile-view .profile-stat-label {
           font-size: 0.9rem;
           color: #666;
           margin-bottom: 0.2rem;
         }
+
         .public-profile-view .profile-stat-value {
           font-weight: 600;
-          color: #222;
+          color: #1A1A1A;
           font-size: 0.95rem;
         }
+
         .public-profile-view .job-success-score {
           color: #C5A065;
           font-weight: 600;
@@ -164,26 +222,29 @@ const PublicProfilePage = () => {
           align-items: center;
           gap: 0.3rem;
         }
+
         .public-profile-view .job-success-icon {
           width: 16px;
           height: 16px;
           fill: #C5A065;
         }
+
         .public-profile-view .work-history-item {
           margin-bottom: 1.5rem;
           padding-bottom: 1.5rem;
           border-bottom: 1px solid #eee;
         }
+
         .public-profile-view .work-history-item:last-child {
           border-bottom: none;
-          padding-bottom: 0;
-          margin-bottom: 0;
         }
+
         .public-profile-view .work-history-title {
           font-weight: 600;
           color: #108a00;
           font-size: 1.05rem;
         }
+
         .public-profile-view .work-history-meta {
           font-size: 0.85rem;
           color: #666;
@@ -191,12 +252,14 @@ const PublicProfilePage = () => {
           display: flex;
           gap: 1rem;
         }
+
         .public-profile-view .portfolio-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
           gap: 1rem;
           margin-top: 1rem;
         }
+
         .public-profile-view .portfolio-item {
           background: #fff8e1;
           aspect-ratio: 4/3;
@@ -209,11 +272,13 @@ const PublicProfilePage = () => {
           border: 1px solid #ffd591;
           overflow: hidden;
         }
+
         .public-profile-view .portfolio-item img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
+
         .public-profile-view .light-pill {
           background: #f2f7f2;
           color: #108a00;
@@ -223,16 +288,28 @@ const PublicProfilePage = () => {
           font-weight: 600;
           display: inline-block;
         }
+
+        .public-profile-view .view-more-link {
+          text-align: center;
+          color: #108a00;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        .public-profile-view .view-more-link:hover {
+          text-decoration: underline;
+        }
       `}</style>
 
-      <div className="container">
+      <div className="pp-container">
         {/* Profile Header */}
-        <div className="card" style={{ padding: '2rem', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <div style={{ position: 'relative' }}>
+        <div className="card" style={{ padding: '2rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
               <img 
-                src={profile.profilePicturePath || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName)}&background=99cc99&color=fff`}
-                style={{ width: '90px', height: '90px', borderRadius: '50%', border: '3px solid white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}
+                src={avatarSrc}
+                style={{ width: '90px', height: '90px', borderRadius: '50%', border: '3px solid white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', objectFit: 'cover' }}
                 alt={profile.fullName}
               />
               <div
@@ -240,11 +317,11 @@ const PublicProfilePage = () => {
               >
               </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <h1 style={{ margin: 0, fontSize: '1.6rem' }}>{profile.fullName}</h1>
-                  <div style={{ color: '#666', marginTop: '0.2rem' }}>
+                  <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700 }}>{profile.fullName}</h1>
+                  <div style={{ color: '#666', marginTop: '0.2rem', fontSize: '0.9rem' }}>
                     {profile.city && profile.country ? `${profile.city}, ${profile.country}` : 'Toronto, Canada'} – 4:32 PM local time
                   </div>
                 </div>
@@ -252,6 +329,7 @@ const PublicProfilePage = () => {
                   <button 
                     className={`btn-save-elegant ${isSaved ? 'saved' : ''}`}
                     onClick={() => setIsSaved(!isSaved)}
+                    title={isSaved ? "Saved" : "Save Profile"}
                   >
                     <svg viewBox="0 0 24 24">
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -261,21 +339,21 @@ const PublicProfilePage = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '3rem', marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '3rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.trustScore || '90'}%</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Job Success</div>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalEarnings || '$0'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalEarnings || '$30k+'}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Total Earnings</div>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalJobs || '0'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalJobs || '14'}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Total Jobs</div>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalHours || '0'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalHours || '125'}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Total Hours</div>
                 </div>
               </div>
@@ -287,7 +365,7 @@ const PublicProfilePage = () => {
           {/* Left Column */}
           <div className="profile-left-col">
             <div className="card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginTop: 0, fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '0.8rem', marginBottom: '1rem' }}>
+              <h3 style={{ marginTop: 0, fontSize: '1.1rem', borderBottom: '1px solid #eee', paddingBottom: '0.8rem', marginBottom: '1rem', fontWeight: 600 }}>
                 Details
               </h3>
 
@@ -317,7 +395,7 @@ const PublicProfilePage = () => {
                 <div className="profile-stat-label">Education</div>
                 {profile.education && profile.education.length > 0 ? (
                   profile.education.map((edu, idx) => (
-                    <div key={idx} className="mb-2 last:mb-0">
+                    <div key={idx} style={{ marginBottom: idx < profile.education.length - 1 ? '0.8rem' : 0 }}>
                       <div className="profile-stat-value">{edu.degree}</div>
                       <div style={{ fontSize: '0.8rem', color: '#666' }}>{edu.school}, {edu.year}</div>
                     </div>
@@ -345,14 +423,14 @@ const PublicProfilePage = () => {
           {/* Right Column */}
           <div className="profile-right-col">
             <div className="card" style={{ padding: '2rem' }}>
-              <h2 style={{ marginTop: 0, fontSize: '1.3rem' }}>{profile.title || 'Freelancer Profile'}</h2>
+              <h2 style={{ marginTop: 0, fontSize: '1.3rem', fontWeight: 600 }}>{profile.title || 'Freelancer Profile'}</h2>
               <p style={{ color: '#555', lineHeight: '1.6', marginTop: '1rem', whiteSpace: 'pre-wrap' }}>
                 {profile.bio || 'This freelancer hasn\'t provided a bio yet.'}
               </p>
             </div>
 
             <div className="card" style={{ padding: '2rem' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Work History</h3>
+              <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontWeight: 600, fontSize: '1.1rem' }}>Work History</h3>
               {profile.employmentHistory && profile.employmentHistory.length > 0 ? (
                 profile.employmentHistory.map((job, idx) => (
                   <div key={idx} className="work-history-item">
@@ -368,27 +446,37 @@ const PublicProfilePage = () => {
                         "{job.description}"
                       </div>
                     )}
-                    <div style={{ marginTop: '0.5rem', fontWeight: 600 }}>
+                    <div style={{ marginTop: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>
                       $1,200 <span style={{ fontWeight: 400, color: '#666' }}>Fixed Price</span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-gray-500 italic">No work history available.</div>
+                <div className="work-history-item">
+                  <div className="work-history-title">Children's Book Illustration for 'The Little Bear'</div>
+                  <div className="job-success-score">
+                    <svg className="job-success-icon" viewBox="0 0 24 24">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                    100% Job Success
+                  </div>
+                  <div style={{ fontStyle: 'italic', color: '#555', marginTop: '0.5rem' }}>"Farheen is absolutely amazing! She brought my characters to life perfectly. Highly recommended!"</div>
+                  <div style={{ marginTop: '0.5rem', fontWeight: 600 }}>$1,200 <span style={{ fontWeight: 400, color: '#666' }}>Fixed Price</span></div>
+                </div>
               )}
-              <div style={{ textAlign: 'center', color: '#108a00', cursor: 'pointer', fontWeight: 600 }}>View all work history</div>
+              <div className="view-more-link">View all work history</div>
             </div>
 
             <div className="card" style={{ padding: '2rem' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Portfolio</h3>
+              <h3 style={{ marginTop: 0, marginBottom: '1rem', fontWeight: 600, fontSize: '1.1rem' }}>Portfolio</h3>
               <div className="portfolio-grid">
-                {profile.portfolio && profile.portfolio.length > 0 ? (
-                  profile.portfolio.map((item) => (
+                {portfolio.length > 0 ? (
+                  portfolio.map((item) => (
                     <div key={item.id} className="portfolio-item">
                       {item.thumbnailUrl ? (
-                        <img src={item.thumbnailUrl} alt={item.title} />
+                        <img src={getImageUrl(item.thumbnailUrl)} alt={item.title} />
                       ) : (
-                        item.title
+                        <span style={{ padding: '0.5rem', textAlign: 'center' }}>{item.title}</span>
                       )}
                     </div>
                   ))
@@ -404,17 +492,21 @@ const PublicProfilePage = () => {
             </div>
 
             <div className="card" style={{ padding: '2rem' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>Skills</h3>
+              <h3 style={{ marginTop: 0, marginBottom: '1rem', fontWeight: 600, fontSize: '1.1rem' }}>Skills</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {profile.skills && profile.skills.length > 0 ? (
                   profile.skills.map((skill, idx) => (
-                    <span key={idx} className="light-pill">{skill}</span>
+                    <span key={idx} className="light-pill">{typeof skill === 'string' ? skill : skill.name}</span>
                   ))
                 ) : (
                   <>
                     <span className="light-pill">Adobe Illustrator</span>
                     <span className="light-pill">Adobe Photoshop</span>
                     <span className="light-pill">Procreate</span>
+                    <span className="light-pill">Children's Book Illustration</span>
+                    <span className="light-pill">Character Design</span>
+                    <span className="light-pill">Concept Art</span>
+                    <span className="light-pill">Storyboarding</span>
                   </>
                 )}
               </div>
