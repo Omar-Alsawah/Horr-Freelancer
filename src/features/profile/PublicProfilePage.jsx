@@ -322,7 +322,7 @@ const PublicProfilePage = () => {
                 <div>
                   <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700 }}>{profile.fullName}</h1>
                   <div style={{ color: '#666', marginTop: '0.2rem', fontSize: '0.9rem' }}>
-                    {profile.city && profile.country ? `${profile.city}, ${profile.country}` : 'Toronto, Canada'} – 4:32 PM local time
+                    {profile.city && profile.country ? `${profile.city}, ${profile.country}` : (profile.city || profile.country || 'Location not specified')}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -341,19 +341,19 @@ const PublicProfilePage = () => {
 
               <div style={{ display: 'flex', gap: '3rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.trustScore || '90'}%</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.trustScore || '0'}%</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Job Success</div>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalEarnings || '$30k+'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalEarnings || '$0'}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Total Earnings</div>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalJobs || '14'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalJobs || '0'}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Total Jobs</div>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalHours || '125'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.totalHours || '0'}</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Total Hours</div>
                 </div>
               </div>
@@ -372,9 +372,11 @@ const PublicProfilePage = () => {
               <div className="profile-stat-group">
                 <div className="profile-stat-label">Hours per week</div>
                 <div className="profile-stat-value">
-                  {profile.availability || 'More than 30 hrs/week'}
+                  {profile.availability || 'Not specified'}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>Open to contract to hire</div>
+                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>
+                  {profile.title || 'Freelancer'}
+                </div>
               </div>
 
               <div className="profile-stat-group">
@@ -384,10 +386,7 @@ const PublicProfilePage = () => {
                     <div key={idx} className="profile-stat-value">{lang.name}: {lang.level}</div>
                   ))
                 ) : (
-                  <>
-                    <div className="profile-stat-value">English: Fluent</div>
-                    <div className="profile-stat-value">French: Conversational</div>
-                  </>
+                  <div className="profile-stat-value text-gray-400 italic">No languages specified</div>
                 )}
               </div>
 
@@ -396,25 +395,32 @@ const PublicProfilePage = () => {
                 {profile.education && profile.education.length > 0 ? (
                   profile.education.map((edu, idx) => (
                     <div key={idx} style={{ marginBottom: idx < profile.education.length - 1 ? '0.8rem' : 0 }}>
-                      <div className="profile-stat-value">{edu.degree}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#666' }}>{edu.school}, {edu.year}</div>
+                      <div className="profile-stat-value">
+                        {edu.degree}{edu.fieldOfStudy ? `, ${edu.fieldOfStudy}` : ''}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#666' }}>
+                        {edu.school}, {edu.year || (edu.dateEnd ? new Date(edu.dateEnd).getFullYear() : '')}
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <>
-                    <div className="profile-stat-value">Bachelor of Fine Arts</div>
-                    <div style={{ fontSize: '0.8rem', color: '#666' }}>University of Toronto, 2018</div>
-                  </>
+                  <div className="profile-stat-value text-gray-400 italic">No education specified</div>
                 )}
               </div>
 
               <div className="profile-stat-group">
                 <div className="profile-stat-label">Verification</div>
                 <div className="profile-stat-value" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#108a00" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg> ID Verified
+                  {profile.isVerified ? (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#108a00" strokeWidth="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                      </svg> ID Verified
+                    </>
+                  ) : (
+                    <span className="text-gray-400">ID Not Verified</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -435,36 +441,20 @@ const PublicProfilePage = () => {
                 profile.employmentHistory.map((job, idx) => (
                   <div key={idx} className="work-history-item">
                     <div className="work-history-title">{job.title}</div>
-                    <div className="job-success-score">
-                      <svg className="job-success-icon" viewBox="0 0 24 24">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                      </svg>
-                      100% Job Success
+                    <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.2rem' }}>
+                      {job.company} • {job.fromDate ? new Date(job.fromDate).toLocaleDateString() : ''} - {job.toDate ? new Date(job.toDate).toLocaleDateString() : 'Present'}
                     </div>
                     {job.description && (
-                      <div style={{ fontStyle: 'italic', color: '#555', marginTop: '0.5rem' }}>
+                      <div style={{ fontStyle: 'italic', color: '#555', marginTop: '0.5rem', fontSize: '0.9rem' }}>
                         "{job.description}"
                       </div>
                     )}
-                    <div style={{ marginTop: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>
-                      $1,200 <span style={{ fontWeight: 400, color: '#666' }}>Fixed Price</span>
-                    </div>
                   </div>
                 ))
               ) : (
-                <div className="work-history-item">
-                  <div className="work-history-title">Children's Book Illustration for 'The Little Bear'</div>
-                  <div className="job-success-score">
-                    <svg className="job-success-icon" viewBox="0 0 24 24">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    100% Job Success
-                  </div>
-                  <div style={{ fontStyle: 'italic', color: '#555', marginTop: '0.5rem' }}>"Farheen is absolutely amazing! She brought my characters to life perfectly. Highly recommended!"</div>
-                  <div style={{ marginTop: '0.5rem', fontWeight: 600 }}>$1,200 <span style={{ fontWeight: 400, color: '#666' }}>Fixed Price</span></div>
-                </div>
+                <div className="text-gray-400 italic py-4">No work history provided yet.</div>
               )}
-              <div className="view-more-link">View all work history</div>
+
             </div>
 
             <div className="card" style={{ padding: '2rem' }}>
@@ -481,12 +471,7 @@ const PublicProfilePage = () => {
                     </div>
                   ))
                 ) : (
-                  <>
-                    <div className="portfolio-item">Book Cover A</div>
-                    <div className="portfolio-item">Character Set B</div>
-                    <div className="portfolio-item">Scene Illustration C</div>
-                    <div className="portfolio-item">Story Board D</div>
-                  </>
+                  <div className="text-gray-400 italic py-4 col-span-full">No portfolio items added yet.</div>
                 )}
               </div>
             </div>
@@ -499,15 +484,7 @@ const PublicProfilePage = () => {
                     <span key={idx} className="light-pill">{typeof skill === 'string' ? skill : skill.name}</span>
                   ))
                 ) : (
-                  <>
-                    <span className="light-pill">Adobe Illustrator</span>
-                    <span className="light-pill">Adobe Photoshop</span>
-                    <span className="light-pill">Procreate</span>
-                    <span className="light-pill">Children's Book Illustration</span>
-                    <span className="light-pill">Character Design</span>
-                    <span className="light-pill">Concept Art</span>
-                    <span className="light-pill">Storyboarding</span>
-                  </>
+                  <div className="text-gray-400 italic">No skills listed yet.</div>
                 )}
               </div>
             </div>

@@ -2,6 +2,7 @@ import api from './axios';
 
 export const profileApi = {
   getProfile: () => api.get('/api/UserProfile'),
+  getFreelancerDetails: () => api.get('/api/UserProfile/freelancer-details'),
   updateName: (fullName) => api.patch('/api/UserProfile/name', JSON.stringify(fullName)),
   updateEmail: (email) => api.patch('/api/UserProfile/email', JSON.stringify(email)),
   updateLocation: (data) => api.patch('/api/UserProfile/location', data),

@@ -48,15 +48,16 @@ const SettingsPage = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await profileApi.getProfile();
+      const response = await profileApi.getFreelancerDetails();
       const data = response.data.data || response.data.value || response.data;
       if (data) {
         setProfile({
           ...data,
           experienceLevel: ExperienceLevelEnum[data.experienceLevel] || 'Beginner',
-          languages: data.languages || [],
-          education: data.education || [],
-          employmentHistory: data.employmentHistory || []
+          languages: Array.isArray(data.languages) ? data.languages : [],
+          education: Array.isArray(data.education) ? data.education : [],
+          experienceDetails: Array.isArray(data.experienceDetails) ? data.experienceDetails : [],
+          employmentHistory: Array.isArray(data.employmentHistory) ? data.employmentHistory : []
         });
       }
     } catch (error) {
@@ -149,7 +150,11 @@ const SettingsPage = () => {
           dateStart: e.dateStart || null, 
           dateEnd: e.dateEnd || null 
         })),
-        experienceDetails: profile.experienceDetails || [],
+        experienceDetails: (profile.experienceDetails || []).map(exp => ({
+          id: exp.id || 0,
+          subject: exp.subject,
+          description: exp.description
+        })),
         employmentHistory: profile.employmentHistory ? profile.employmentHistory.map(e => ({
           id: e.id || null,
           company: e.company,
