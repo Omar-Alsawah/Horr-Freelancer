@@ -20,11 +20,7 @@ export default function VerificationPage() {
       const res = await verificationApi.getMyStatus();
       setStatusData(res.data);
     } catch (err) {
-      if (err.status === 404) {
-        setStatusData(null);
-      } else {
-        toast.error(err.title || t('common.error'));
-      }
+      toast.error(err.title || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -95,7 +91,7 @@ export default function VerificationPage() {
       fetchStatus(); // Refresh status to show Pending
     } catch (err) {
       if (err.status === 409) {
-        toast.error(err.title || 'Submission conflict');
+        toast.error(err.title || 'You already have a pending verification request.');
       } else {
         toast.error(err.title || t('common.error'));
       }

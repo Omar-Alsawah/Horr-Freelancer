@@ -29,27 +29,31 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status || 0;
+    
+    if (status === 401) {
       localStorage.removeItem('horr_token');
       window.location.href = '/login';
       return Promise.reject({ title: 'Session expired. Please log in again.', status: 401 });
     }
 
-    if (error.response && error.response.data) {
+    let title = error.message || 'Network error';
+    let errors = null;
+
+    if (error.response?.data) {
       const data = error.response.data;
-      if (data.status && data.title) {
-        return Promise.reject({
-          title: data.title,
-          status: data.status,
-          errors: data.errors || null
-        });
+      if (typeof data === 'string') {
+        title = data;
+      } else if (data.title) {
+        title = data.title;
+        errors = data.errors || null;
       }
     }
 
     return Promise.reject({
-      title: error.message || 'Network error',
-      status: 0,
-      errors: null
+      title,
+      status,
+      errors
     });
   }
 );
