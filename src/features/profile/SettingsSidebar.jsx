@@ -14,7 +14,7 @@ const SettingsSidebar = () => {
 
   const menuItems = [
     { 
-      label: 'Contact info', 
+      label: 'Profile Details', 
       path: '/settings', 
       icon: <User size={18} /> 
     },
