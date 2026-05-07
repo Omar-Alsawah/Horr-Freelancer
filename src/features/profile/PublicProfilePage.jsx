@@ -321,6 +321,7 @@ const PublicProfilePage = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700 }}>{profile.fullName}</h1>
+                  <p style={{ margin: '0.1rem 0', fontSize: '1.1rem', fontWeight: 600, color: '#333' }}>{profile.title}</p>
                   <div style={{ color: '#666', marginTop: '0.2rem', fontSize: '0.9rem' }}>
                     {profile.city && profile.country ? `${profile.city}, ${profile.country}` : (profile.city || profile.country || 'Location not specified')}
                   </div>
@@ -375,7 +376,7 @@ const PublicProfilePage = () => {
                   {profile.availability || 'Not specified'}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>
-                  {profile.title || 'Freelancer'}
+                  Open to contract to hire
                 </div>
               </div>
 
@@ -429,9 +430,9 @@ const PublicProfilePage = () => {
           {/* Right Column */}
           <div className="profile-right-col">
             <div className="card" style={{ padding: '2rem' }}>
-              <h2 style={{ marginTop: 0, fontSize: '1.3rem', fontWeight: 600 }}>{profile.title || 'Freelancer Profile'}</h2>
+              <h2 style={{ marginTop: 0, fontSize: '1.3rem', fontWeight: 600 }}>Professional Summary</h2>
               <p style={{ color: '#555', lineHeight: '1.6', marginTop: '1rem', whiteSpace: 'pre-wrap' }}>
-                {profile.bio || 'This freelancer hasn\'t provided a bio yet.'}
+                {profile.bio || 'This freelancer hasn\'t provided a professional summary yet.'}
               </p>
             </div>
 
