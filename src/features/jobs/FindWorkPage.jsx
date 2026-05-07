@@ -13,6 +13,7 @@ import Pagination from './Pagination';
 import { profileApi } from '../../api/profile';
 import { skillsApi } from '../../api/skills';
 import { portfolioApi } from '../../api/portfolio';
+import { verificationApi } from '../../api/verification';
 import { calculateProfileCompletion, getMissingProfileCriteria } from '../../utils/profileCompletion';
 
 export default function FindWorkPage() {
@@ -32,6 +33,7 @@ export default function FindWorkPage() {
   const [completionScore, setCompletionScore] = useState(0);
   const [missingCriteria, setMissingCriteria] = useState([]);
   const [completionLoading, setCompletionLoading] = useState(true);
+  const [verificationStatus, setVerificationStatus] = useState(null); // null, 0=Pending, 1=Approved, 2=Rejected
 
   const debouncedKeyword = useDebounce(keyword, 400);
   const pageSize = 10;
@@ -62,19 +64,30 @@ export default function FindWorkPage() {
     const fetchCompletionData = async () => {
       setCompletionLoading(true);
       try {
-        const [profileRes, skillsRes, portfolioRes] = await Promise.allSettled([
+        const [profileRes, skillsRes, portfolioRes, verificationRes] = await Promise.allSettled([
           profileApi.getProfile(),
           skillsApi.getMySkills(),
-          portfolioApi.getPortfolio()
+          portfolioApi.getPortfolio(),
+          verificationApi.getMyStatus()
         ]);
 
-        const profileData = profileRes.status === 'fulfilled' ? profileRes.value.data : null;
-        const skillsData = skillsRes.status === 'fulfilled' ? skillsRes.value.data : [];
-        const portfolioData = portfolioRes.status === 'fulfilled' ? portfolioRes.value.data : [];
+        const profileResData = profileRes.status === 'fulfilled' ? profileRes.value.data : null;
+        const profileData = profileResData?.data || profileResData;
+        
+        const skillsResData = skillsRes.status === 'fulfilled' ? skillsRes.value.data : [];
+        const skillsData = skillsResData?.data || skillsResData;
+        
+        const portfolioResData = portfolioRes.status === 'fulfilled' ? portfolioRes.value.data : [];
+        const portfolioData = portfolioResData?.data || portfolioResData;
+        
+        const verificationResData = verificationRes.status === 'fulfilled' ? verificationRes.value.data : null;
+        const verificationData = verificationResData?.data || verificationResData;
+
+        setVerificationStatus(verificationData ? verificationData.status : null);
 
         const score = calculateProfileCompletion(profileData, skillsData, portfolioData);
         setCompletionScore(score);
-        
+
         const missing = getMissingProfileCriteria(profileData, skillsData, portfolioData);
         setMissingCriteria(missing);
       } catch (error) {
@@ -234,25 +247,28 @@ export default function FindWorkPage() {
                   ))}
                 </ul>
               </div>
-            )}
-            {!completionLoading && missingCriteria.length === 0 && (
-              <div style={{ marginTop: '0.8rem', fontSize: '0.8rem', color: '#4caf50', fontWeight: 'bold' }}>
-                Your profile is 100% complete 🎉
-              </div>
-            )}
-          </div>
+             )}
+           </div>
         </div>
 
         {/* Identity Verification */}
-        <div className="card promo-card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Identity verification
-          </h3>
-          <p className="promo-text">
-            Increase your profile visibility in search results and win more work with an ID Verified Badge.
-          </p>
-          <a href="#" className="promo-link">Get ID Verified</a>
-        </div>
+        {verificationStatus !== 0 && verificationStatus !== 1 && (
+          <div className="card promo-card">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              Identity verification
+            </h3>
+            <p className="promo-text">
+              Increase your profile visibility in search results and win more work with an ID Verified Badge.
+            </p>
+            <span 
+              onClick={() => navigate('/settings/verification')} 
+              className="promo-link" 
+              style={{ cursor: 'pointer', color: '#d4af37', fontWeight: '600' }}
+            >
+              Get ID Verified
+            </span>
+          </div>
+        )}
       </aside>
     </div>
   );
