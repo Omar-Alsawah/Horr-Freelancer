@@ -5,7 +5,9 @@ import {
   EyeOff, 
   ShieldCheck, 
   Loader2,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle,
+  Trash2
 } from 'lucide-react';
 import { authApi } from '../../api/auth';
 import { toast } from 'react-hot-toast';
@@ -27,6 +29,7 @@ const PasswordSecurityPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const handleTogglePassword = (field) => {
     setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
@@ -93,6 +96,26 @@ const PasswordSecurityPage = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [closingAccount, setClosingAccount] = useState(false);
+
+  const handleCloseAccount = async () => {
+    setClosingAccount(true);
+    try {
+      await authApi.closeAccount();
+      toast.success('Your account has been closed.');
+      // Clear auth and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    } catch (error) {
+      if (error.status === 401) {
+        toast.error('Session expired. Please log in again.');
+      } else {
+        toast.error(error.data?.message || 'Failed to close account. Please contact support.');
+      }
+      setClosingAccount(false);
     }
   };
 
@@ -213,6 +236,57 @@ const PasswordSecurityPage = () => {
               Enable Two-Factor Authentication
             </Button>
           </Card>
+
+          {/* Danger Zone — Close My Account */}
+          <Card className="p-8 border-red-200 shadow-sm border-l-4 border-l-red-500 bg-red-50/30">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle size={20} className="text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-red-700">Danger Zone</h2>
+                <p className="text-xs text-red-500 font-medium">Irreversible actions</p>
+              </div>
+            </div>
+            <p className="text-gray-600 text-sm mb-6 max-w-2xl">
+              Once you close your account, all of your data — including your profile, proposals, contracts, and payment history — will be permanently deleted. This action cannot be undone.
+            </p>
+
+            {!showCloseConfirm ? (
+              <Button 
+                type="button"
+                variant="outline"
+                onClick={() => setShowCloseConfirm(true)}
+                className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-400 transition-colors"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Close My Account
+              </Button>
+            ) : (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg space-y-4">
+                <p className="text-sm font-semibold text-red-700">
+                  Are you sure you want to close your account? This action is permanent and cannot be reversed.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    onClick={handleCloseAccount}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Yes, Close My Account
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCloseConfirm(false)}
+                    className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
         </main>
       </div>
     </div>
@@ -220,3 +294,4 @@ const PasswordSecurityPage = () => {
 };
 
 export default PasswordSecurityPage;
+

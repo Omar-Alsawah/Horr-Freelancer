@@ -241,5 +241,40 @@
     "success_title": "تم تأكيد البريد الإلكتروني!",
     "success_subtitle": "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن الدخول إلى حسابك.",
     "redirect_msg": "سيتم توجيهك لتسجيل الدخول خلال {{seconds}} ثانية..."
+  },
+  "billing": {
+    "pageTitle": "الفوترة والمدفوعات",
+    "outstandingBalance": "الرصيد المتاح",
+    "approxUsd": "≈ {{amount}} دولار أمريكي",
+    "conversionRate": "سعر التحويل: 1 دولار = 47.85 ج.م",
+    "depositTitle": "تقديم طلب إيداع",
+    "depositDescription": "قم بتقديم طلب إيداع عبر تقديم المبلغ ورقم الإيصال وصورة إيصال الدفع.",
+    "amountLabel": "المبلغ (ج.م)",
+    "amountPlaceholder": "أدخل مبلغ الإيداع",
+    "receiptNumberLabel": "رقم الإيصال",
+    "receiptNumberPlaceholder": "أدخل رقم الإيصال",
+    "receiptPhotoLabel": "صورة الإيصال",
+    "receiptPhotoHint": "الصيغ المقبولة: JPG, JPEG, PNG",
+    "chooseFile": "اختر ملف",
+    "submitDeposit": "تقديم طلب الإيداع",
+    "depositSubmitted": "تم تقديم طلب الإيداع بنجاح!",
+    "validation": {
+      "amountRequired": "المبلغ مطلوب ويجب أن يكون أكبر من 0.",
+      "receiptNumberRequired": "رقم الإيصال مطلوب.",
+      "receiptPhotoRequired": "صورة الإيصال مطلوبة.",
+      "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بـ JPG و JPEG و PNG."
+    },
+    "historyTitle": "سجل طلبات الإيداع",
+    "colAmount": "المبلغ",
+    "colReceiptNumber": "رقم الإيصال",
+    "colStatus": "الحالة",
+    "colSubmittedDate": "تاريخ التقديم",
+    "colAdminNote": "ملاحظة المسؤول",
+    "statusPending": "قيد الانتظار",
+    "statusApproved": "مُوافق عليه",
+    "statusRejected": "مرفوض",
+    "emptyTitle": "لا توجد طلبات إيداع بعد",
+    "emptySubtitle": "قم بتقديم طلب إيداع وسيظهر هنا.",
+    "submitting": "جاري التقديم..."
   }
 }

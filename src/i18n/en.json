@@ -241,5 +241,40 @@
     "success_title": "Email Verified!",
     "success_subtitle": "Your email has been successfully verified. You can now access your account.",
     "redirect_msg": "Redirecting to login in {{seconds}} seconds..."
+  },
+  "billing": {
+    "pageTitle": "Billing & payments",
+    "outstandingBalance": "Outstanding balance",
+    "approxUsd": "≈ {{amount}} USD",
+    "conversionRate": "Conversion rate: 1 USD = 47.85 EGP",
+    "depositTitle": "Submit a Deposit Request",
+    "depositDescription": "Submit a deposit request by providing the amount, receipt number, and a photo of your payment receipt.",
+    "amountLabel": "Amount (EGP)",
+    "amountPlaceholder": "Enter deposit amount",
+    "receiptNumberLabel": "Receipt Number",
+    "receiptNumberPlaceholder": "Enter receipt number",
+    "receiptPhotoLabel": "Receipt Photo",
+    "receiptPhotoHint": "Accepted formats: JPG, JPEG, PNG",
+    "chooseFile": "Choose file",
+    "submitDeposit": "Submit Deposit Request",
+    "depositSubmitted": "Deposit request submitted successfully!",
+    "validation": {
+      "amountRequired": "Amount is required and must be greater than 0.",
+      "receiptNumberRequired": "Receipt number is required.",
+      "receiptPhotoRequired": "Receipt photo is required.",
+      "invalidFileType": "Invalid file type. Only JPG, JPEG, and PNG are allowed."
+    },
+    "historyTitle": "Deposit Request History",
+    "colAmount": "Amount",
+    "colReceiptNumber": "Receipt Number",
+    "colStatus": "Status",
+    "colSubmittedDate": "Submitted Date",
+    "colAdminNote": "Admin Note",
+    "statusPending": "Pending",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "emptyTitle": "No deposit requests yet",
+    "emptySubtitle": "Submit a deposit request and it will appear here.",
+    "submitting": "Submitting..."
   }
 }

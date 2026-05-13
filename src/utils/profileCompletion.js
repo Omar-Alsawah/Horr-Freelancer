@@ -20,7 +20,7 @@ export function getMissingProfileCriteria(profile, skills, portfolio) {
   if (!profile?.fullName) missing.push({ id: 'fullName', label: 'Add your full name', link: '/profile' });
   if (!profile?.title) missing.push({ id: 'title', label: 'Add a professional title', link: '/profile' });
   if (!profile?.bio) missing.push({ id: 'bio', label: 'Write your bio', link: '/profile' });
-  if (!profile?.city || !profile?.country) missing.push({ id: 'location', label: 'Add your location', link: '/settings/profile' });
+  if (!profile?.city || !profile?.country) missing.push({ id: 'location', label: 'Add your location', link: '/settings' });
   
   const skillsList = Array.isArray(skills) ? skills : (skills?.data || []);
   const portfolioList = Array.isArray(portfolio) ? portfolio : (portfolio?.data || []);

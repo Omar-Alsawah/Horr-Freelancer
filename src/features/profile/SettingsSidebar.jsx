@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   User, 
-  Settings as SettingsIcon, 
   ShieldCheck, 
   CreditCard, 
   MapPin,
@@ -17,11 +16,6 @@ const SettingsSidebar = () => {
       label: 'Profile Details', 
       path: '/settings', 
       icon: <User size={18} /> 
-    },
-    { 
-      label: 'Profile Settings', 
-      path: '/settings/profile', 
-      icon: <SettingsIcon size={18} /> 
     },
     { 
       label: 'Password & Security', 
