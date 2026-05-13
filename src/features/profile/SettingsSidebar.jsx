@@ -5,7 +5,8 @@ import {
   ShieldCheck, 
   CreditCard, 
   MapPin,
-  Lock
+  Lock,
+  ArrowUpRight
 } from 'lucide-react';
 
 const SettingsSidebar = () => {
@@ -31,6 +32,11 @@ const SettingsSidebar = () => {
       label: 'Get Paid', 
       path: '/settings/billing', 
       icon: <CreditCard size={18} /> 
+    },
+    { 
+      label: 'Withdrawals', 
+      path: '/billing/withdrawals', 
+      icon: <ArrowUpRight size={18} /> 
     }
   ];
 

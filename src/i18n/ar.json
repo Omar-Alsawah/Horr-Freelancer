@@ -262,7 +262,10 @@
       "amountRequired": "المبلغ مطلوب ويجب أن يكون أكبر من 0.",
       "receiptNumberRequired": "رقم الإيصال مطلوب.",
       "receiptPhotoRequired": "صورة الإيصال مطلوبة.",
-      "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بـ JPG و JPEG و PNG."
+      "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بـ JPG و JPEG و PNG.",
+      "instapayRequired": "اسم المستخدم لإنستاباي مطلوب.",
+      "bankRequired": "تفاصيل الحساب البنكي مطلوبة.",
+      "eWalletRequired": "رقم المحفظة الإلكترونية مطلوب."
     },
     "historyTitle": "سجل طلبات الإيداع",
     "colAmount": "المبلغ",
@@ -275,6 +278,33 @@
     "statusRejected": "مرفوض",
     "emptyTitle": "لا توجد طلبات إيداع بعد",
     "emptySubtitle": "قم بتقديم طلب إيداع وسيظهر هنا.",
-    "submitting": "جاري التقديم..."
+    "submitting": "جاري التقديم...",
+
+    "withdrawalsTitle": "السحوبات",
+    "availableBalance": "الرصيد المتاح",
+    "withdrawalSchedule": "جدول السحب",
+    "scheduleSetupText": "لم تقم بإعداد جدول زمني بعد.",
+    "setSchedule": "إعداد الجدول",
+    "withdrawalMethods": "طرق السحب",
+    "addMethod": "إضافة طريقة",
+    "requestWithdrawalTitle": "طلب سحب رصيد",
+    "methodLabel": "طريقة التحويل",
+    "methods": {
+      "instapay": "إنستاباي",
+      "bankTransfer": "تحويل بنكي",
+      "eWallet": "محفظة إلكترونية"
+    },
+    "instapayUsername": "الاسم في إنستاباي (Username)",
+    "bankAccountDetails": "تفاصيل الحساب البنكي",
+    "eWalletNumber": "رقم المحفظة الإلكترونية",
+    "submitWithdrawal": "تقديم طلب السحب",
+    "insufficientBalance": "الرصيد غير كافٍ لقيمة هذا السحب.",
+    "withdrawalSubmitted": "تم تقديم طلب السحب بنجاح!",
+    "withdrawalHistoryTitle": "سجل طلبات السحب",
+    "colMethod": "الطريقة",
+    "colDetail": "التفاصيل",
+    "methodInstapay": "إنستاباي",
+    "methodBank": "تحويل بنكي",
+    "methodEWallet": "إلكترونية"
   }
 }

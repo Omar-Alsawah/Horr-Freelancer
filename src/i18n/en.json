@@ -262,7 +262,10 @@
       "amountRequired": "Amount is required and must be greater than 0.",
       "receiptNumberRequired": "Receipt number is required.",
       "receiptPhotoRequired": "Receipt photo is required.",
-      "invalidFileType": "Invalid file type. Only JPG, JPEG, and PNG are allowed."
+      "invalidFileType": "Invalid file type. Only JPG, JPEG, and PNG are allowed.",
+      "instapayRequired": "InstaPay username is required.",
+      "bankRequired": "Bank account details are required.",
+      "eWalletRequired": "E-Wallet number is required."
     },
     "historyTitle": "Deposit Request History",
     "colAmount": "Amount",
@@ -275,6 +278,33 @@
     "statusRejected": "Rejected",
     "emptyTitle": "No deposit requests yet",
     "emptySubtitle": "Submit a deposit request and it will appear here.",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+
+    "withdrawalsTitle": "Withdrawals",
+    "availableBalance": "Available Balance",
+    "withdrawalSchedule": "Withdrawal Schedule",
+    "scheduleSetupText": "You haven't set up a schedule yet.",
+    "setSchedule": "Set Schedule",
+    "withdrawalMethods": "Withdrawal Methods",
+    "addMethod": "Add a Method",
+    "requestWithdrawalTitle": "Request Withdrawal",
+    "methodLabel": "Transfer method",
+    "methods": {
+      "instapay": "InstaPay",
+      "bankTransfer": "Bank Transfer",
+      "eWallet": "E-Wallet"
+    },
+    "instapayUsername": "InstaPay Username",
+    "bankAccountDetails": "Bank Account Details",
+    "eWalletNumber": "E-Wallet Number",
+    "submitWithdrawal": "Submit Withdrawal",
+    "insufficientBalance": "Insufficient balance for this withdrawal amount.",
+    "withdrawalSubmitted": "Withdrawal request submitted successfully!",
+    "withdrawalHistoryTitle": "Withdrawal History",
+    "colMethod": "Method",
+    "colDetail": "Details",
+    "methodInstapay": "InstaPay",
+    "methodBank": "Bank Transfer",
+    "methodEWallet": "E-Wallet"
   }
 }

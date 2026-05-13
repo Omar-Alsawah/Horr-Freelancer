@@ -21,9 +21,8 @@ import MyProfilePage from '../features/profile/MyProfilePage';
 import SettingsPage from '../features/profile/SettingsPage';
 
 import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
-import PublicProfilePage from '../features/profile/PublicProfilePage';
-import VerificationPage from '../features/verification/VerificationPage';
 import BillingPage from '../features/billing/BillingPage';
+import WithdrawalsPage from '../features/billing/WithdrawalsPage';
 
 export const router = createBrowserRouter([
   {
@@ -50,7 +49,8 @@ export const router = createBrowserRouter([
           { path: 'settings/password', element: <PasswordSecurityPage /> },
           { path: 'settings/verification', element: <VerificationPage /> },
           { path: 'settings/billing', element: <BillingPage /> },
-          { path: 'billing', element: <BillingPage /> }
+          { path: 'billing', element: <BillingPage /> },
+          { path: 'billing/withdrawals', element: <WithdrawalsPage /> }
         ]
       }
     ]
