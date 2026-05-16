@@ -9,7 +9,7 @@ function parseJwt(token) {
     return {
       userId: payload.userId || payload.sub || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
       email: payload.email || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-      role: payload.role || payload['http://schemas.microsoft.com/w2008/06/identity/claims/role'],
+      role: payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
       name: payload.name || payload.unique_name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
     };
   } catch (e) { return null; }
@@ -23,8 +23,9 @@ export const useAuthStore = create((set) => ({
   token: initialToken,
   role: initialUser?.role || null,
   isAuthenticated: !!initialToken,
-  login: (token, user) => {
+  login: (token) => {
     localStorage.setItem('horr_token', token);
+    const user = parseJwt(token);
     set({ token, user, role: user?.role, isAuthenticated: true });
   },
   logout: () => {

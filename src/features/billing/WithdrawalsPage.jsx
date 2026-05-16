@@ -152,8 +152,33 @@ const WithdrawalsPage = () => {
       
     } catch (err) {
       const errorTitle = err.title || '';
-      if (err.status === 400 && errorTitle.toLowerCase().includes('insufficient')) {
-        setFormErrors(prev => ({ ...prev, amount: t('billing.insufficientBalance') }));
+      
+      // If backend returns ValidationProblemDetails, real errors are in err.errors
+      if (err.errors) {
+        const parsedErrors = {};
+        let hasInsufficient = false;
+        
+        Object.entries(err.errors).forEach(([key, val]) => {
+          const lowerKey = key.toLowerCase();
+          const msg = Array.isArray(val) ? val[0] : val;
+          if (msg.toLowerCase().includes('insufficient')) {
+            hasInsufficient = true;
+          }
+          parsedErrors[lowerKey] = msg;
+        });
+
+        // Special handling for the insufficient balance translation
+        if (hasInsufficient) {
+          parsedErrors.amount = t('billing.insufficientBalance') || 'Insufficient balance for this withdrawal amount.';
+        }
+
+        setFormErrors(prev => ({ ...prev, ...parsedErrors }));
+        return; // Don't show toast if we mapped it to fields
+      }
+      
+      // Fallback for simple string errors
+      if (errorTitle.toLowerCase().includes('insufficient')) {
+        setFormErrors(prev => ({ ...prev, amount: t('billing.insufficientBalance') || 'Insufficient balance for this withdrawal amount.' }));
       } else {
         toast.error(errorTitle || t('errors.unexpected'));
       }

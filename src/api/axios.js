@@ -49,6 +49,8 @@ api.interceptors.response.use(
       } else if (data.title) {
         title = data.title;
         errors = data.errors || null;
+      } else if (data.message) {
+        title = data.message;
       }
     }
 

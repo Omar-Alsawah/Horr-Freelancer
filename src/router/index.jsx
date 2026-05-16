@@ -23,6 +23,9 @@ import SettingsPage from '../features/profile/SettingsPage';
 import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
 import BillingPage from '../features/billing/BillingPage';
 import WithdrawalsPage from '../features/billing/WithdrawalsPage';
+import PublicProfilePage from '../features/profile/PublicProfilePage';
+import VerificationPage from '../features/verification/VerificationPage';
+
 
 export const router = createBrowserRouter([
   {
