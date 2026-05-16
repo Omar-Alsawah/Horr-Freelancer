@@ -25,6 +25,7 @@ import PublicProfilePage from '../features/profile/PublicProfilePage';
 import VerificationPage from '../features/verification/VerificationPage';
 import DeliverySubmitPage from '../features/contracts/DeliverySubmitPage';
 import DeliveryReviewPage from '../features/contracts/DeliveryReviewPage';
+import MilestoneFundingPage from '../features/contracts/MilestoneFundingPage';
 
 export const router = createBrowserRouter([
   {
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
           { path: 'offers/:proposalId', element: <ViewOfferPage /> },
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
+          { path: 'contracts/:contractId/milestones', element: <MilestoneFundingPage /> },
           { path: 'contracts/:contractId/deliver', element: <DeliverySubmitPage /> },
           { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
           { path: 'contracts/:contractId/deliveries/:deliveryId', element: <DeliveryReviewPage /> },

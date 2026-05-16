@@ -268,6 +268,34 @@
       "revisionRequested": "Revision Requested"
     }
   },
+  "milestone": {
+    "pageTitle": "Milestone Funding",
+    "walletBalance": "Your wallet: {{balance}}",
+    "totalFunded": "Total Funded",
+    "totalValue": "Contract Value",
+    "title": "Title",
+    "description": "Description",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "fund": "Fund",
+    "funding": "Funding...",
+    "fundSuccess": "Milestone funded successfully",
+    "insufficientBalance": "Insufficient wallet balance. Please top up your wallet.",
+    "status": {
+      "unfunded": "Unfunded",
+      "funded": "Funded",
+      "delivered": "Delivered",
+      "released": "Released"
+    },
+    "modal": {
+      "title": "Fund Milestone",
+      "amount": "Milestone Amount",
+      "fee": "Service Fee (5.5%)",
+      "total": "Total Charge",
+      "confirm": "Confirm Funding",
+      "cancel": "Cancel"
+    }
+  },
   "verify_email": {
     "title": "Verify your email",
     "subtitle": "We've sent a verification link to:",
