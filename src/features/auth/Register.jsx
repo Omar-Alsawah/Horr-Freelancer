@@ -22,7 +22,8 @@ export default function Register() {
   const loginAction = useAuthStore(state => state.login);
 
   const [form, setForm] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     role: 'Freelancer',
@@ -97,15 +98,22 @@ export default function Register() {
           {/* Primary Fields — 2 columns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.name')}</label>
-              <Input value={form.fullName} onChange={update('fullName')} className={inputCls('fullName')} required />
-              <FieldError field="fullName" />
+              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.first_name')}</label>
+              <Input value={form.firstName} onChange={update('firstName')} className={inputCls('firstName')} required />
+              <FieldError field="firstName" />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.email')}</label>
-              <Input type="email" value={form.email} onChange={update('email')} className={inputCls('email')} required />
-              <FieldError field="email" />
+              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.last_name')}</label>
+              <Input value={form.lastName} onChange={update('lastName')} className={inputCls('lastName')} required />
+              <FieldError field="lastName" />
             </div>
+          </div>
+
+          {/* Email — full width */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.email')}</label>
+            <Input type="email" value={form.email} onChange={update('email')} className={inputCls('email')} required />
+            <FieldError field="email" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
