@@ -318,6 +318,31 @@
     "clientView": "عرض العميل",
     "freelancerView": "عرض المستقل"
   },
+  "disputes": {
+    "pageTitle": "إدارة النزاعات",
+    "openCount": "إجمالي النزاعات المفتوحة: {{count}}",
+    "noOpenDisputes": "لا توجد نزاعات مفتوحة",
+    "contractTitle": "العقد",
+    "reason": "السبب",
+    "openedBy": "تم الفتح بواسطة",
+    "dateOpened": "تاريخ الفتح",
+    "daysOpen": "مفتوح منذ {{days}} أيام",
+    "amountAtStake": "المبلغ المتنازع عليه",
+    "freelancerName": "المستقل",
+    "clientName": "العميل",
+    "attachments": "المرفقات",
+    "adminNotes": "ملاحظات المسؤول (مطلوب)",
+    "notesRequired": "ملاحظات الحل مطلوبة",
+    "releaseToFreelancer": "الإفراج للمستقل",
+    "refundToClient": "استرداد للعميل",
+    "resolving": "جاري الحل...",
+    "resolvedFreelancer": "تم حل النزاع — تم الإفراج عن الأموال للمستقل",
+    "resolvedClient": "تم حل النزاع — تم استرداد الأموال للعميل",
+    "status": {
+      "open": "مفتوح",
+      "underReview": "قيد المراجعة"
+    }
+  },
   "verify_email": {
     "title": "تأكيد بريدك الإلكتروني",
     "subtitle": "لقد أرسلنا رابط تأكيد إلى:",

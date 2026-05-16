@@ -318,6 +318,31 @@
     "clientView": "Client View",
     "freelancerView": "Freelancer View"
   },
+  "disputes": {
+    "pageTitle": "Dispute Management",
+    "openCount": "Total Open Disputes: {{count}}",
+    "noOpenDisputes": "No open disputes",
+    "contractTitle": "Contract",
+    "reason": "Reason",
+    "openedBy": "Opened By",
+    "dateOpened": "Date Opened",
+    "daysOpen": "{{days}} days open",
+    "amountAtStake": "Amount at Stake",
+    "freelancerName": "Freelancer",
+    "clientName": "Client",
+    "attachments": "Attachments",
+    "adminNotes": "Admin Notes (Required)",
+    "notesRequired": "Resolution notes are required",
+    "releaseToFreelancer": "Release to Freelancer",
+    "refundToClient": "Refund to Client",
+    "resolving": "Resolving...",
+    "resolvedFreelancer": "Dispute resolved — funds have been released to freelancer",
+    "resolvedClient": "Dispute resolved — funds have been refunded to client",
+    "status": {
+      "open": "Open",
+      "underReview": "Under Review"
+    }
+  },
   "verify_email": {
     "title": "Verify your email",
     "subtitle": "We've sent a verification link to:",
