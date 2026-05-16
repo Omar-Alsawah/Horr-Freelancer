@@ -1,26 +1,29 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, Plus, Trash2, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { Loader2, Plus, Trash2, CheckCircle2, AlertTriangle, Info, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
+import { useAuthStore } from '../../store/authStore';
 
 function formatCurrency(amount, lang) {
   if (amount == null) return '';
   const n = Number(amount);
-  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG').format(n)} ج.م`;
-  return `$${new Intl.NumberFormat('en-US').format(n)}`; // Assuming USD or similar default generic format. Alternatively, could inherit EGP formatting from prior. We'll use EGP logic if it's the standard.
+  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ج.م`;
+  return `$${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
 }
 
 export default function DeliverySubmitPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const role = useAuthStore(state => state.role);
   const { contractId, milestoneId } = useParams();
   
   const [contract, setContract] = useState(null);
   const [milestone, setMilestone] = useState(null);
   
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [validationError, setValidationError] = useState('');
@@ -29,25 +32,35 @@ export default function DeliverySubmitPage() {
   const [deliveryNote, setDeliveryNote] = useState('');
   const [attachments, setAttachments] = useState([]); // { id: string, type: 'FILE' | 'LINK', file: File | null, link: string }
 
-  useEffect(() => {
-    async function loadContract() {
-      try {
-        const res = await contractsApi.getContract(contractId);
-        const data = res.data;
-        setContract(data);
-        
-        if (milestoneId && data.milestones) {
-          const m = data.milestones.find(m => m.id.toString() === milestoneId);
-          if (m) setMilestone(m);
-        }
-      } catch (err) {
-        toast.error(err.title || t('common.error'));
-      } finally {
-        setLoading(false);
+  const loadContract = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await contractsApi.getContract(contractId);
+      const data = res.data;
+      setContract(data);
+      
+      if (milestoneId && data.milestones) {
+        const m = data.milestones.find(m => m.id.toString() === milestoneId);
+        if (m) setMilestone(m);
       }
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+      setError(true);
+    } finally {
+      setLoading(false);
     }
-    loadContract();
-  }, [contractId, milestoneId, t]);
+  };
+
+  useEffect(() => {
+    if (role === 'Freelancer') {
+      loadContract();
+    }
+  }, [contractId, milestoneId, t, role]);
+
+  if (role !== 'Freelancer') {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const addAttachmentRow = () => {
     setAttachments(prev => [
@@ -111,21 +124,32 @@ export default function DeliverySubmitPage() {
     }
   };
 
-  if (loading) {
+  if (error) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-8 w-8 text-primary-gold" />
+      <div className="max-w-4xl mx-auto my-12 p-8 bg-red-50 rounded-xl border border-red-200 text-center flex flex-col items-center">
+        <AlertTriangle className="w-16 h-16 text-red-400 mb-4" />
+        <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
+        <button 
+          onClick={loadContract}
+          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t('common.retry', 'Retry')}
+        </button>
       </div>
     );
   }
 
-  if (!contract) {
+  if (loading) {
     return (
-      <div className="max-w-4xl mx-auto mt-8 p-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-800">{t('common.error')}</h2>
+      <div className="max-w-4xl mx-auto my-8 p-6 space-y-6">
+        <div className="h-32 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
+        <div className="h-64 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
       </div>
     );
   }
+
+  if (!contract) return null;
 
   const submitDisabled = !contract.escrowFunded || isSubmitting || isSuccess;
 
@@ -154,12 +178,14 @@ export default function DeliverySubmitPage() {
             </div>
             <div>
               <span className="font-semibold text-gray-700">{t('delivery.amountLabel')} </span>
-              <span className="text-gray-900">{milestone.amount}</span>
+              <span className="text-gray-900">{formatCurrency(milestone.amount, i18n.language)}</span>
             </div>
             {milestone.deadline && (
               <div>
                 <span className="font-semibold text-gray-700">{t('delivery.deadlineLabel')} </span>
-                <span className="text-gray-900">{new Date(milestone.deadline).toLocaleDateString()}</span>
+                <span className="text-gray-900">
+                  {new Date(milestone.deadline).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
               </div>
             )}
           </div>

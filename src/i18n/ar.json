@@ -343,6 +343,27 @@
       "underReview": "قيد المراجعة"
     }
   },
+  "revisions": {
+    "pageTitle": "قائمة المراجعات",
+    "activeCaseload": "لديك {{count}} حالات نشطة",
+    "takeCase": "تولى هذه الحالة",
+    "taking": "جاري التولي...",
+    "taken": "مأخوذة",
+    "caseAccepted": "تم قبول الحالة. يمكنك الآن مراجعة التسليم.",
+    "endpointNotReady": "هذه الميزة غير متوفرة بعد. يرجى المحاولة لاحقاً.",
+    "noRequests": "لا توجد طلبات مراجعة في الوقت الحالي",
+    "myCases": "حالاتي النشطة",
+    "contractTitle": "العقد",
+    "reason": "السبب",
+    "amountAtStake": "المبلغ",
+    "dateRequested": "وقت الطلب",
+    "status": {
+      "pending": "قيد الانتظار",
+      "accepted": "مقبولة"
+    },
+    "errorLoading": "فشل تحميل المراجعات.",
+    "retry": "إعادة المحاولة"
+  },
   "verify_email": {
     "title": "تأكيد بريدك الإلكتروني",
     "subtitle": "لقد أرسلنا رابط تأكيد إلى:",

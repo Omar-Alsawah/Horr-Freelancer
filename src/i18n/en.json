@@ -343,6 +343,27 @@
       "underReview": "Under Review"
     }
   },
+  "revisions": {
+    "pageTitle": "Revision Queue",
+    "activeCaseload": "You have {{count}} active cases",
+    "takeCase": "Take This Case",
+    "taking": "Taking...",
+    "taken": "Taken",
+    "caseAccepted": "Case accepted. You can now review the delivery.",
+    "endpointNotReady": "This feature is not yet available. Please try again later.",
+    "noRequests": "No revision requests at this time",
+    "myCases": "My Active Cases",
+    "contractTitle": "Contract",
+    "reason": "Reason",
+    "amountAtStake": "Amount",
+    "dateRequested": "Requested",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted"
+    },
+    "errorLoading": "Failed to load revisions.",
+    "retry": "Retry"
+  },
   "verify_email": {
     "title": "Verify your email",
     "subtitle": "We've sent a verification link to:",

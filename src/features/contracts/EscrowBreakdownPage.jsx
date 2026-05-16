@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, AlertTriangle, ArrowRight, ShieldCheck, Banknote, Wallet, Receipt, PackageOpen } from 'lucide-react';
+import { Loader2, AlertTriangle, ArrowRight, ShieldCheck, Banknote, Wallet, Receipt, PackageOpen, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { walletApi } from '../../api/wallet';
 import { useAuthStore } from '../../store/authStore';
@@ -10,8 +10,8 @@ import { useAuthStore } from '../../store/authStore';
 function formatCurrency(amount, lang) {
   if (amount == null) return '';
   const n = Number(amount);
-  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG').format(n)} ج.م`;
-  return `$${new Intl.NumberFormat('en-US').format(n)}`;
+  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ج.م`;
+  return `$${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
 }
 
 export default function EscrowBreakdownPage() {
@@ -22,45 +22,65 @@ export default function EscrowBreakdownPage() {
   const [escrow, setEscrow] = useState(null);
   const [walletBalance, setWalletBalance] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const promises = [contractsApi.getEscrow(contractId)];
+      if (role === 'Freelancer') {
+        promises.push(walletApi.getWalletBalance());
+      }
+      const results = await Promise.all(promises);
+      setEscrow(results[0].data);
+      if (role === 'Freelancer' && results[1]) {
+        setWalletBalance(results[1].data?.balance ?? 0);
+      }
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const promises = [contractsApi.getEscrow(contractId)];
-        if (role === 'Freelancer') {
-          promises.push(walletApi.getWalletBalance());
-        }
-
-        const results = await Promise.all(promises);
-        setEscrow(results[0].data);
-
-        if (role === 'Freelancer' && results[1]) {
-          setWalletBalance(results[1].data?.balance ?? 0);
-        }
-      } catch (err) {
-        toast.error(err.title || t('common.error'));
-      } finally {
-        setLoading(false);
-      }
+    if (role === 'Freelancer' || role === 'Client') {
+      loadData();
     }
-    loadData();
   }, [contractId, role, t]);
+
+  if (role !== 'Freelancer' && role !== 'Client') {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto my-12 p-8 bg-red-50 rounded-xl border border-red-200 text-center flex flex-col items-center">
+        <AlertTriangle className="w-16 h-16 text-red-400 mb-4" />
+        <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
+        <button 
+          onClick={loadData}
+          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t('common.retry', 'Retry')}
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-8 w-8 text-primary-gold" />
+      <div className="max-w-5xl mx-auto my-8 p-6 space-y-8">
+        <div className="h-48 bg-gray-200 animate-pulse rounded-2xl border border-gray-200"></div>
+        <div className="h-64 bg-gray-200 animate-pulse rounded-2xl border border-gray-200"></div>
       </div>
     );
   }
 
-  if (!escrow) {
-    return (
-      <div className="max-w-4xl mx-auto mt-8 p-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-800">{t('common.error')}</h2>
-      </div>
-    );
-  }
+  if (!escrow) return null;
 
   const { totalFunded, totalReleased, totalRefunded, platformEarned, currentlyHeld, transactions } = escrow;
 

@@ -1,21 +1,26 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, AlertCircle, Clock, ChevronDown, ChevronUp, FileText, Link as LinkIcon, DollarSign, User } from 'lucide-react';
+import { Loader2, AlertCircle, Clock, ChevronDown, ChevronUp, FileText, Link as LinkIcon, DollarSign, User, RefreshCw } from 'lucide-react';
 import { disputesApi } from '../../api/disputes';
+import { useAuthStore } from '../../store/authStore';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 function formatCurrency(amount, lang) {
   if (amount == null) return '';
   const n = Number(amount);
-  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG').format(n)} ج.م`;
-  return `$${new Intl.NumberFormat('en-US').format(n)}`;
+  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ج.م`;
+  return `$${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
 }
 
 export default function DisputeManagementPage() {
   const { t, i18n } = useTranslation();
+  const role = useAuthStore(state => state.role);
 
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Detail panel state
   const [activeDisputeId, setActiveDisputeId] = useState(null);
@@ -23,19 +28,29 @@ export default function DisputeManagementPage() {
   const [notesError, setNotesError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function fetchDisputes() {
-      try {
-        const response = await disputesApi.getAdminDisputes();
-        setDisputes(response.data || []);
-      } catch (err) {
-        toast.error(err.title || t('common.error'));
-      } finally {
-        setLoading(false);
-      }
+  const fetchDisputes = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const response = await disputesApi.getAdminDisputes();
+      setDisputes(response.data || []);
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+      setError(true);
+    } finally {
+      setLoading(false);
     }
-    fetchDisputes();
-  }, [t]);
+  };
+
+  useEffect(() => {
+    if (role === 'Admin') {
+      fetchDisputes();
+    }
+  }, [t, role]);
+
+  if (role !== 'Admin') {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const handleRowClick = (id) => {
     if (activeDisputeId === id) {
@@ -81,20 +96,27 @@ export default function DisputeManagementPage() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    if (status === 'Open') {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">{t('disputes.status.open')}</span>;
-    }
-    if (status === 'UnderReview') {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{t('disputes.status.underReview')}</span>;
-    }
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>;
-  };
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto my-12 p-8 bg-red-50 rounded-xl border border-red-200 text-center flex flex-col items-center">
+        <AlertCircle className="w-16 h-16 text-red-400 mb-4" />
+        <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
+        <button 
+          onClick={fetchDisputes}
+          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t('common.retry', 'Retry')}
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-8 w-8 text-primary-gold" />
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="h-20 bg-gray-200 animate-pulse rounded-lg border border-gray-200 mb-5"></div>
+        <div className="h-96 bg-gray-200 animate-pulse rounded-xl border border-gray-200"></div>
       </div>
     );
   }
@@ -157,7 +179,7 @@ export default function DisputeManagementPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(dispute.status)}
+                          <StatusBadge status={dispute.status} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-gray-400">
                           {isActive ? <ChevronUp className="w-5 h-5 ml-auto" /> : <ChevronDown className="w-5 h-5 ml-auto" />}

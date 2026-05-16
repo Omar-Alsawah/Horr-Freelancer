@@ -1,51 +1,64 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, PlusCircle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, PlusCircle, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { walletApi } from '../../api/wallet';
+import { useAuthStore } from '../../store/authStore';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 function formatCurrency(amount, lang) {
   if (amount == null) return '';
   const n = Number(amount);
-  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG').format(n)} ج.م`;
-  return `$${new Intl.NumberFormat('en-US').format(n)}`;
+  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ج.م`;
+  return `$${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
 }
 
 export default function MilestoneFundingPage() {
   const { t, i18n } = useTranslation();
   const { contractId } = useParams();
+  const role = useAuthStore(state => state.role);
 
   const [contract, setContract] = useState(null);
   const [milestones, setMilestones] = useState([]);
   const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Modal State
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [contractRes, walletRes] = await Promise.all([
-          contractsApi.getContract(contractId),
-          walletApi.getWalletBalance()
-        ]);
-        
-        setContract(contractRes.data);
-        setMilestones(contractRes.data.milestones || []);
-        // The structure might be { balance: 0 } based on requirements
-        setWalletBalance(walletRes.data?.balance ?? 0);
-      } catch (err) {
-        toast.error(err.title || t('common.error'));
-      } finally {
-        setLoading(false);
-      }
+  const loadData = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const [contractRes, walletRes] = await Promise.all([
+        contractsApi.getContract(contractId),
+        walletApi.getWalletBalance()
+      ]);
+      
+      setContract(contractRes.data);
+      setMilestones(contractRes.data.milestones || []);
+      setWalletBalance(walletRes.data?.balance ?? 0);
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+      setError(true);
+    } finally {
+      setLoading(false);
     }
-    loadData();
-  }, [contractId, t]);
+  };
+
+  useEffect(() => {
+    if (role === 'Client') {
+      loadData();
+    }
+  }, [contractId, t, role]);
+
+  if (role !== 'Client') {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const handleFundConfirm = async () => {
     if (!selectedMilestone) return;
@@ -86,39 +99,40 @@ export default function MilestoneFundingPage() {
     }
   };
 
-  if (loading) {
+  if (error) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-8 w-8 text-primary-gold" />
+      <div className="max-w-5xl mx-auto my-12 p-8 bg-red-50 rounded-xl border border-red-200 text-center flex flex-col items-center">
+        <AlertCircle className="w-16 h-16 text-red-400 mb-4" />
+        <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
+        <button 
+          onClick={loadData}
+          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t('common.retry', 'Retry')}
+        </button>
       </div>
     );
   }
 
-  if (!contract) {
+  if (loading) {
     return (
-      <div className="max-w-4xl mx-auto mt-8 p-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-800">{t('common.error')}</h2>
+      <div className="max-w-5xl mx-auto my-8 p-6 space-y-6">
+        <div className="h-32 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
+        <div className="space-y-4">
+          <div className="h-32 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
+          <div className="h-32 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
+        </div>
       </div>
     );
   }
+
+  if (!contract) return null;
 
   // Calculate generic totals dynamically off local state map
   const totalFunded = milestones
     .filter(m => m.status !== 'Unfunded')
     .reduce((sum, m) => sum + Number(m.amount), 0);
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Funded':
-        return <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">{t('milestone.status.funded')}</span>;
-      case 'Delivered':
-        return <span className="bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">{t('milestone.status.delivered')}</span>;
-      case 'Released':
-        return <span className="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">{t('milestone.status.released')}</span>;
-      default:
-        return <span className="bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full">{t('milestone.status.unfunded')}</span>;
-    }
-  };
 
   return (
     <div className="max-w-5xl mx-auto my-8 p-6 space-y-6">
@@ -160,7 +174,7 @@ export default function MilestoneFundingPage() {
                 <div className="flex justify-between md:block mb-2">
                   <h3 className="text-lg font-semibold text-gray-900">{milestone.title}</h3>
                   <div className="md:hidden">
-                    {getStatusBadge(milestone.status)}
+                    <StatusBadge status={milestone.status} />
                   </div>
                 </div>
                 {milestone.description && (
@@ -175,7 +189,7 @@ export default function MilestoneFundingPage() {
                   {milestone.dueDate && (
                     <div>
                       <span className="text-gray-500 font-medium">{t('milestone.dueDate')}: </span>
-                      <span className="text-gray-900">{new Date(milestone.dueDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</span>
+                      <span className="text-gray-900">{new Date(milestone.dueDate).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
                   )}
                 </div>
@@ -183,7 +197,7 @@ export default function MilestoneFundingPage() {
               
               <div className="mt-4 md:mt-0 md:ml-6 flex items-center justify-between md:flex-col md:items-end gap-3 min-w-[120px]">
                 <div className="hidden md:block">
-                  {getStatusBadge(milestone.status)}
+                  <StatusBadge status={milestone.status} />
                 </div>
                 {milestone.status === 'Unfunded' && (
                   <button

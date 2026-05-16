@@ -28,6 +28,7 @@ import DeliveryReviewPage from '../features/contracts/DeliveryReviewPage';
 import MilestoneFundingPage from '../features/contracts/MilestoneFundingPage';
 import EscrowBreakdownPage from '../features/contracts/EscrowBreakdownPage';
 import DisputeManagementPage from '../features/admin/DisputeManagementPage';
+import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
 
 export const router = createBrowserRouter([
   {

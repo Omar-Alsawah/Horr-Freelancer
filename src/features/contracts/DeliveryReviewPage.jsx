@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, FileText, Link as LinkIcon, CheckCircle2, AlertCircle, Clock, XCircle, Search } from 'lucide-react';
+import { Loader2, FileText, Link as LinkIcon, CheckCircle2, AlertCircle, Clock, XCircle, Search, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
+import { useAuthStore } from '../../store/authStore';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 function formatCurrency(amount, lang) {
   if (amount == null) return '';
   const n = Number(amount);
-  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG').format(n)} ج.م`;
-  return `$${new Intl.NumberFormat('en-US').format(n)}`;
+  if (lang === 'ar') return `${new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} ج.م`;
+  return `$${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
 }
 
 function CountdownTimer({ deadline, autoApprovesText }) {
@@ -50,28 +52,40 @@ function CountdownTimer({ deadline, autoApprovesText }) {
 export default function DeliveryReviewPage() {
   const { t, i18n } = useTranslation();
   const { contractId, deliveryId } = useParams();
+  const role = useAuthStore(state => state.role);
   
   const [delivery, setDelivery] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   
   const [activeAction, setActiveAction] = useState(null); // 'APPROVE' | 'REVISION' | 'DISPUTE'
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadDelivery() {
-      try {
-        const res = await contractsApi.getDelivery(contractId, deliveryId);
-        setDelivery(res.data);
-      } catch (err) {
-        toast.error(err.title || t('common.error'));
-      } finally {
-        setLoading(false);
-      }
+  const loadDelivery = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await contractsApi.getDelivery(contractId, deliveryId);
+      setDelivery(res.data);
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+      setError(true);
+    } finally {
+      setLoading(false);
     }
-    loadDelivery();
-  }, [contractId, deliveryId, t]);
+  };
+
+  useEffect(() => {
+    if (role === 'Client') {
+      loadDelivery();
+    }
+  }, [contractId, deliveryId, t, role]);
+
+  if (role !== 'Client') {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const toggleAction = (action) => {
     if (activeAction === action) {
@@ -133,36 +147,34 @@ export default function DeliveryReviewPage() {
     }
   };
 
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto my-12 p-8 bg-red-50 rounded-xl border border-red-200 text-center flex flex-col items-center">
+        <AlertTriangle className="w-16 h-16 text-red-400 mb-4" />
+        <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
+        <button 
+          onClick={loadDelivery}
+          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t('common.retry', 'Retry')}
+        </button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-8 w-8 text-primary-gold" />
+      <div className="max-w-3xl mx-auto my-8 p-6 space-y-6">
+        <div className="h-48 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
+        <div className="h-64 bg-gray-200 animate-pulse rounded-lg border border-gray-200"></div>
       </div>
     );
   }
 
-  if (!delivery) {
-    return (
-      <div className="max-w-3xl mx-auto mt-8 p-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-800">{t('common.error')}</h2>
-      </div>
-    );
-  }
+  if (!delivery) return null;
 
   const isPending = delivery.status === 'Pending';
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Approved':
-        return <span className="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">{t('delivery.status.approved')}</span>;
-      case 'Disputed':
-        return <span className="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">{t('delivery.status.disputed')}</span>;
-      case 'RevisionRequested':
-        return <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">{t('delivery.status.revisionRequested')}</span>;
-      default:
-        return <span className="bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full">{t('delivery.status.pending')}</span>;
-    }
-  };
 
   return (
     <div className="max-w-3xl mx-auto my-8 p-6 space-y-6">
@@ -180,7 +192,7 @@ export default function DeliveryReviewPage() {
             )}
           </div>
           <div>
-            {getStatusBadge(delivery.status)}
+            <StatusBadge status={delivery.status} />
           </div>
         </div>
 
