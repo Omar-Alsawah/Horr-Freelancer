@@ -296,6 +296,28 @@
       "cancel": "إلغاء"
     }
   },
+  "escrow": {
+    "pageTitle": "تفاصيل الضمان المالي",
+    "currentlyHeld": "المحتجز حالياً في الضمان",
+    "totalFunded": "العميل قام بالتمويل",
+    "totalReleased": "استلمه المستقل",
+    "totalRefunded": "تم استرداده للعميل",
+    "platformEarned": "رسوم المنصة",
+    "totalSpent": "إجمالي المنفق",
+    "stillLocked": "لا يزال محتجزاً في الضمان",
+    "yourWalletBalance": "رصيد محفظتك",
+    "earningsNote": "ستظهر أرباحك في محفظتك بعد الإفراج",
+    "mathMismatchWarning": "أرقام الضمان المالي المبلّغ عنها من الخادم غير متطابقة. يرجى الاتصال بالدعم.",
+    "noTransactions": "لم يتم العثور على معاملات لهذا الضمان المالي.",
+    "transaction": {
+      "type": "النوع",
+      "amount": "المبلغ",
+      "date": "التاريخ",
+      "description": "الوصف"
+    },
+    "clientView": "عرض العميل",
+    "freelancerView": "عرض المستقل"
+  },
   "verify_email": {
     "title": "تأكيد بريدك الإلكتروني",
     "subtitle": "لقد أرسلنا رابط تأكيد إلى:",

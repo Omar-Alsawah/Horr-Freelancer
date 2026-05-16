@@ -296,6 +296,28 @@
       "cancel": "Cancel"
     }
   },
+  "escrow": {
+    "pageTitle": "Escrow Breakdown",
+    "currentlyHeld": "Currently Held in Escrow",
+    "totalFunded": "Client Funded",
+    "totalReleased": "Freelancer Received",
+    "totalRefunded": "Client Refunded",
+    "platformEarned": "Platform Fee",
+    "totalSpent": "Total Spent",
+    "stillLocked": "Still Locked in Escrow",
+    "yourWalletBalance": "Your Wallet Balance",
+    "earningsNote": "Your earnings will appear in your wallet after release",
+    "mathMismatchWarning": "The escrow figures reported by the server do not add up. Please contact support.",
+    "noTransactions": "No transactions found for this escrow.",
+    "transaction": {
+      "type": "Type",
+      "amount": "Amount",
+      "date": "Date",
+      "description": "Description"
+    },
+    "clientView": "Client View",
+    "freelancerView": "Freelancer View"
+  },
   "verify_email": {
     "title": "Verify your email",
     "subtitle": "We've sent a verification link to:",

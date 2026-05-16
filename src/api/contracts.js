@@ -14,5 +14,6 @@ export const contractsApi = {
   approveDelivery: (deliveryId) => api.post(`/api/deliveries/${deliveryId}/approve`),
   requestDeliveryRevision: (deliveryId, payload) => api.post(`/api/deliveries/${deliveryId}/revision`, payload),
   disputeDelivery: (deliveryId, payload) => api.post(`/api/deliveries/${deliveryId}/dispute`, payload),
-  fundMilestone: (milestoneId) => api.post(`/api/milestones/${milestoneId}/fund`)
+  fundMilestone: (milestoneId) => api.post(`/api/milestones/${milestoneId}/fund`),
+  getEscrow: (contractId) => api.get(`/api/contracts/${contractId}/escrow`)
 };
