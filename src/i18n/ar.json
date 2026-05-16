@@ -243,7 +243,30 @@
     "submit": "إرسال",
     "submitting": "جاري الإرسال...",
     "successMessage": "تم إرسال تسليمك بنجاح.",
-    "whatHappensNext": "ماذا يحدث بعد ذلك؟ أمام العميل 3 أيام لمراجعة تسليمك. إذا لم يتخذ أي إجراء، سيتم قبول التسليم تلقائياً وسيتم الإفراج عن الأموال."
+    "whatHappensNext": "ماذا يحدث بعد ذلك؟ أمام العميل 3 أيام لمراجعة تسليمك. إذا لم يتخذ أي إجراء، سيتم قبول التسليم تلقائياً وسيتم الإفراج عن الأموال.",
+    "review": {
+      "pageTitle": "مراجعة التسليم",
+      "submissionDate": "تاريخ التسليم:",
+      "escrowAtStake": "سيتم الإفراج عن {{amount}} للمستقل عند الموافقة",
+      "autoApprovesIn": "تتم الموافقة تلقائيًا خلال {{days}} يوم {{hours}} ساعة",
+      "attachments": "المرفقات",
+      "approve": "موافقة",
+      "requestRevision": "طلب مراجعة",
+      "openDispute": "فتح نزاع",
+      "revisionReason": "قدم سببًا لطلب المراجعة:",
+      "disputeReason": "قدم سببًا مفصلاً للنزاع:",
+      "revisionReasonRequired": "يرجى إدخال سبب لطلب المراجعة.",
+      "disputeReasonRequired": "يرجى إدخال سبب للنزاع.",
+      "approveSuccess": "تم الإفراج عن الدفعة للمستقل",
+      "submit": "إرسال",
+      "submitting": "جاري الإرسال..."
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "تمت الموافقة",
+      "disputed": "متنازع عليه",
+      "revisionRequested": "مطلوب مراجعته"
+    }
   },
   "verify_email": {
     "title": "تأكيد بريدك الإلكتروني",

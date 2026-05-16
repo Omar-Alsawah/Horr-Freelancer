@@ -24,6 +24,7 @@ import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
 import PublicProfilePage from '../features/profile/PublicProfilePage';
 import VerificationPage from '../features/verification/VerificationPage';
 import DeliverySubmitPage from '../features/contracts/DeliverySubmitPage';
+import DeliveryReviewPage from '../features/contracts/DeliveryReviewPage';
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
           { path: 'contracts/:contractId/deliver', element: <DeliverySubmitPage /> },
           { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
+          { path: 'contracts/:contractId/deliveries/:deliveryId', element: <DeliveryReviewPage /> },
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },

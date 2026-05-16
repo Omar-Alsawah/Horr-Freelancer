@@ -243,7 +243,30 @@
     "submit": "Submit",
     "submitting": "Submitting...",
     "successMessage": "Your delivery has been successfully submitted.",
-    "whatHappensNext": "What happens next? The client has 3 days to review your delivery. If they don't take action, the delivery will be automatically accepted and funds will be released."
+    "whatHappensNext": "What happens next? The client has 3 days to review your delivery. If they don't take action, the delivery will be automatically accepted and funds will be released.",
+    "review": {
+      "pageTitle": "Review Delivery",
+      "submissionDate": "Submission Date:",
+      "escrowAtStake": "{{amount}} will be released to freelancer upon approval",
+      "autoApprovesIn": "Auto-approves in {{days}} days {{hours}} hours",
+      "attachments": "Attachments",
+      "approve": "Approve",
+      "requestRevision": "Request Revision",
+      "openDispute": "Open Dispute",
+      "revisionReason": "Provide a reason for revision:",
+      "disputeReason": "Provide a detailed reason for the dispute:",
+      "revisionReasonRequired": "Please enter a reason for the revision.",
+      "disputeReasonRequired": "Please enter a reason for the dispute.",
+      "approveSuccess": "Payment released to freelancer",
+      "submit": "Submit",
+      "submitting": "Submitting..."
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "disputed": "Disputed",
+      "revisionRequested": "Revision Requested"
+    }
   },
   "verify_email": {
     "title": "Verify your email",
