@@ -10,14 +10,20 @@ import { Input } from '../../components/ui/input';
 
 const WITHDRAWAL_METHOD_BADGES = {
   0: { key: 'methodInstapay', color: 'bg-blue-100 text-blue-800' },
+  'InstaPay': { key: 'methodInstapay', color: 'bg-blue-100 text-blue-800' },
   1: { key: 'methodBank', color: 'bg-purple-100 text-purple-800' },
+  'BankTransfer': { key: 'methodBank', color: 'bg-purple-100 text-purple-800' },
   2: { key: 'methodEWallet', color: 'bg-orange-100 text-orange-800' },
+  'EWallet': { key: 'methodEWallet', color: 'bg-orange-100 text-orange-800' },
 };
 
 const WITHDRAWAL_STATUS = {
   0: { key: 'statusPending', color: 'bg-yellow-100 text-yellow-800' },
+  'Pending': { key: 'statusPending', color: 'bg-yellow-100 text-yellow-800' },
   1: { key: 'statusApproved', color: 'bg-green-100 text-green-800' },
+  'Approved': { key: 'statusApproved', color: 'bg-green-100 text-green-800' },
   2: { key: 'statusRejected', color: 'bg-red-100 text-red-800' },
+  'Rejected': { key: 'statusRejected', color: 'bg-red-100 text-red-800' },
 };
 
 const formatEGP = (amount, locale) => {
@@ -133,7 +139,7 @@ const WithdrawalsPage = () => {
         bankAccountDetails: payload.bankAccountDetails,
         eWalletNumber: payload.eWalletNumber,
         status: newReq.status ?? 0,
-        submittedDate: newReq.submittedDate || new Date().toISOString(),
+        submittedAt: newReq.submittedAt || new Date().toISOString(),
         adminNote: newReq.adminNote || null,
         ...newReq
       };
@@ -188,12 +194,11 @@ const WithdrawalsPage = () => {
   };
 
   const renderMethodDetail = (dep) => {
-    switch(dep.method) {
-      case 0: return dep.instapayUsername;
-      case 1: return dep.bankAccountDetails;
-      case 2: return dep.eWalletNumber;
-      default: return '—';
-    }
+    const m = dep.method;
+    if (m === 0 || m === 'InstaPay') return dep.instapayUsername;
+    if (m === 1 || m === 'BankTransfer') return dep.bankAccountDetails;
+    if (m === 2 || m === 'EWallet') return dep.eWalletNumber;
+    return '—';
   };
 
   return (
@@ -431,16 +436,18 @@ const WithdrawalsPage = () => {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-gray-600">
-                            {req.submittedDate
+                            {req.submittedAt
                               ? new Intl.DateTimeFormat(currentLocale === 'ar' ? 'ar-EG' : 'en-US', {
                                   year: 'numeric',
                                   month: 'short',
                                   day: 'numeric',
-                                }).format(new Date(req.submittedDate))
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }).format(new Date(req.submittedAt))
                               : '—'}
                           </td>
                           <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">
-                            {req.status === 2 ? (req.adminNote || '—') : ''}
+                            {req.adminNote || '—'}
                           </td>
                         </tr>
                       );
