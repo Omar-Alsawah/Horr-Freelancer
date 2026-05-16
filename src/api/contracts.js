@@ -8,5 +8,6 @@ export const contractsApi = {
   deliverWork: (id, formData) => api.post(`/api/contracts/${id}/deliver-work`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  submitReview: (id, payload) => api.post(`/api/contracts/${id}/reviews`, payload)
+  submitReview: (id, payload) => api.post(`/api/contracts/${id}/reviews`, payload),
+  submitDelivery: (formData) => api.post('/api/deliveries/submit', formData)
 };

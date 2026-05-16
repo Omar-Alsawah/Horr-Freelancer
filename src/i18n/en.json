@@ -225,6 +225,26 @@
     "note_required": "Please provide a note for this delivery.",
     "work_submitted": "Work submitted successfully!"
   },
+  "delivery": {
+    "pageTitle": "Submit Delivery",
+    "contractLabel": "Contract:",
+    "clientLabel": "Client:",
+    "milestoneLabel": "Milestone:",
+    "amountLabel": "Amount:",
+    "deadlineLabel": "Deadline:",
+    "noEscrowWarning": "This contract has no funded escrow. Your delivery cannot be accepted until the client funds it.",
+    "noteLabel": "Delivery Note",
+    "notePlaceholder": "Describe the work you have completed...",
+    "addAttachment": "Add attachment",
+    "fileType": "File",
+    "linkType": "Link",
+    "remove": "Remove",
+    "emptyError": "Please add at least a note or one attachment",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "successMessage": "Your delivery has been successfully submitted.",
+    "whatHappensNext": "What happens next? The client has 3 days to review your delivery. If they don't take action, the delivery will be automatically accepted and funds will be released."
+  },
   "verify_email": {
     "title": "Verify your email",
     "subtitle": "We've sent a verification link to:",

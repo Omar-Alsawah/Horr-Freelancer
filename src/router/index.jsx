@@ -23,6 +23,7 @@ import ProfileSettingsPage from '../features/profile/ProfileSettingsPage';
 import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
 import PublicProfilePage from '../features/profile/PublicProfilePage';
 import VerificationPage from '../features/verification/VerificationPage';
+import DeliverySubmitPage from '../features/contracts/DeliverySubmitPage';
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,8 @@ export const router = createBrowserRouter([
           { path: 'offers/:proposalId', element: <ViewOfferPage /> },
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
+          { path: 'contracts/:contractId/deliver', element: <DeliverySubmitPage /> },
+          { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
