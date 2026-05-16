@@ -19,20 +19,17 @@ const PublicProfilePage = () => {
       try {
         setLoading(true);
 
-        // Fetch profile
+        // Fetch profile (hydrated with portfolio, languages, etc.)
         const profileRes = await profileApi.getPublicProfile(userIdHash);
         const profileData =
           profileRes.data.data || profileRes.data.value || profileRes.data;
+        
         setProfile(profileData);
-
-        // Fetch portfolio separately
-        try {
-          const portRes = await profileApi.getPublicPortfolio(userIdHash);
-          const portData =
-            portRes.data.data || portRes.data.value || portRes.data;
-          setPortfolio(Array.isArray(portData) ? portData : []);
-        } catch (err) {
-          console.error("Error fetching public portfolio:", err);
+        
+        // Extract portfolio from the hydrated profile
+        if (profileData && profileData.portfolio) {
+          setPortfolio(Array.isArray(profileData.portfolio) ? profileData.portfolio : []);
+        } else {
           setPortfolio([]);
         }
 
