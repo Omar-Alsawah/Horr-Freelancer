@@ -381,5 +381,31 @@
     "success_title": "تم تأكيد البريد الإلكتروني!",
     "success_subtitle": "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن الدخول إلى حسابك.",
     "redirect_msg": "سيتم توجيهك لتسجيل الدخول خلال {{seconds}} ثانية..."
+  },
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "depositRequests": "طلبات الإيداع",
+    "withdrawalRequests": "طلبات السحب",
+    "verificationRequests": "طلبات التوثيق",
+    "logout": "تسجيل الخروج",
+    "clientName": "اسم العميل",
+    "amount": "المبلغ",
+    "receiptNumber": "رقم الإيصال",
+    "submittedDate": "تاريخ التقديم",
+    "actions": "الإجراءات",
+    "viewReceipt": "عرض الإيصال",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "approveDepositTitle": "الموافقة على الإيداع",
+    "approveDepositConfirm": "هل أنت متأكد من رغبتك في الموافقة على طلب الإيداع هذا؟",
+    "rejectDepositTitle": "رفض الإيداع",
+    "rejectDepositNoteLabel": "ملاحظة الإدارة (اختياري)",
+    "rejectDepositNotePlaceholder": "سبب الرفض...",
+    "cancel": "إلغاء",
+    "alreadyReviewed": "تم مراجعة هذا الطلب بالفعل.",
+    "noDepositRequests": "لا توجد طلبات إيداع معلقة.",
+    "approveSuccess": "تم الموافقة على طلب الإيداع بنجاح.",
+    "rejectSuccess": "تم رفض طلب الإيداع بنجاح.",
+    "submit": "إرسال"
   }
 }

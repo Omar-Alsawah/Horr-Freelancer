@@ -381,5 +381,31 @@
     "success_title": "Email Verified!",
     "success_subtitle": "Your email has been successfully verified. You can now access your account.",
     "redirect_msg": "Redirecting to login in {{seconds}} seconds..."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "depositRequests": "Deposit Requests",
+    "withdrawalRequests": "Withdrawal Requests",
+    "verificationRequests": "Verification Requests",
+    "logout": "Log Out",
+    "clientName": "Client Name",
+    "amount": "Amount",
+    "receiptNumber": "Receipt Number",
+    "submittedDate": "Submitted Date",
+    "actions": "Actions",
+    "viewReceipt": "View Receipt",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveDepositTitle": "Approve Deposit",
+    "approveDepositConfirm": "Are you sure you want to approve this deposit request?",
+    "rejectDepositTitle": "Reject Deposit",
+    "rejectDepositNoteLabel": "Admin Note (Optional)",
+    "rejectDepositNotePlaceholder": "Reason for rejection...",
+    "cancel": "Cancel",
+    "alreadyReviewed": "This request has already been reviewed.",
+    "noDepositRequests": "No pending deposit requests.",
+    "approveSuccess": "Deposit request approved successfully.",
+    "rejectSuccess": "Deposit request rejected successfully.",
+    "submit": "Submit"
   }
 }
