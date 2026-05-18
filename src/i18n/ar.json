@@ -417,6 +417,17 @@
     "withdrawRejectSuccess": "تم رفض طلب السحب بنجاح.",
     "instapay": "إنستا باي",
     "bankTransfer": "تحويل بنكي",
-    "ewallet": "محفظة إلكترونية"
+    "ewallet": "محفظة إلكترونية",
+    "noVerificationRequests": "لا توجد طلبات توثيق معلقة.",
+    "rejectionReason": "سبب الرفض",
+    "rejectionReasonPlaceholder": "صف سبب رفض هذا الطلب...",
+    "frontId": "الهوية من الأمام",
+    "backId": "الهوية من الخلف",
+    "selfie": "سيلفي",
+    "verifyApproveSuccess": "تم الموافقة على طلب التوثيق بنجاح.",
+    "verifyRejectSuccess": "تم رفض طلب التوثيق بنجاح.",
+    "approveVerificationTitle": "الموافقة على التوثيق",
+    "approveVerificationConfirm": "هل أنت متأكد من رغبتك في الموافقة على طلب التوثيق هذا؟",
+    "rejectVerificationTitle": "رفض التوثيق"
   }
 }

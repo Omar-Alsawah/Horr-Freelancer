@@ -417,6 +417,17 @@
     "withdrawRejectSuccess": "Withdrawal request rejected successfully.",
     "instapay": "InstaPay",
     "bankTransfer": "Bank Transfer",
-    "ewallet": "E-Wallet"
+    "ewallet": "E-Wallet",
+    "noVerificationRequests": "No pending verification requests.",
+    "rejectionReason": "Rejection Reason",
+    "rejectionReasonPlaceholder": "Describe why this request was rejected...",
+    "frontId": "Front ID",
+    "backId": "Back ID",
+    "selfie": "Selfie",
+    "verifyApproveSuccess": "Verification request approved successfully.",
+    "verifyRejectSuccess": "Verification request rejected successfully.",
+    "approveVerificationTitle": "Approve Verification",
+    "approveVerificationConfirm": "Are you sure you want to approve this verification request?",
+    "rejectVerificationTitle": "Reject Verification"
   }
 }
