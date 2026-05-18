@@ -406,6 +406,17 @@
     "noDepositRequests": "No pending deposit requests.",
     "approveSuccess": "Deposit request approved successfully.",
     "rejectSuccess": "Deposit request rejected successfully.",
-    "submit": "Submit"
+    "submit": "Submit",
+    "freelancerName": "Freelancer Name",
+    "method": "Method",
+    "methodDetail": "Method Detail",
+    "manualDeductionNotice": "Balance deduction is manual — this only marks the request as approved.",
+    "noWithdrawalRequests": "No pending withdrawal requests.",
+    "noteRequired": "Admin note is required for rejections.",
+    "withdrawApproveSuccess": "Withdrawal request approved successfully.",
+    "withdrawRejectSuccess": "Withdrawal request rejected successfully.",
+    "instapay": "InstaPay",
+    "bankTransfer": "Bank Transfer",
+    "ewallet": "E-Wallet"
   }
 }

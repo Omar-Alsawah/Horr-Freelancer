@@ -406,6 +406,17 @@
     "noDepositRequests": "لا توجد طلبات إيداع معلقة.",
     "approveSuccess": "تم الموافقة على طلب الإيداع بنجاح.",
     "rejectSuccess": "تم رفض طلب الإيداع بنجاح.",
-    "submit": "إرسال"
+    "submit": "إرسال",
+    "freelancerName": "اسم المستقل",
+    "method": "الطريقة",
+    "methodDetail": "تفاصيل الطريقة",
+    "manualDeductionNotice": "خصم الرصيد يدوي — هذا الإجراء يحدد الطلب كمقبول فقط.",
+    "noWithdrawalRequests": "لا توجد طلبات سحب معلقة.",
+    "noteRequired": "ملاحظة الإدارة مطلوبة للرفض.",
+    "withdrawApproveSuccess": "تم الموافقة على طلب السحب بنجاح.",
+    "withdrawRejectSuccess": "تم رفض طلب السحب بنجاح.",
+    "instapay": "إنستا باي",
+    "bankTransfer": "تحويل بنكي",
+    "ewallet": "محفظة إلكترونية"
   }
 }

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
+import AdminLayout from '../layouts/AdminLayout';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
@@ -29,6 +30,8 @@ import MilestoneFundingPage from '../features/contracts/MilestoneFundingPage';
 import EscrowBreakdownPage from '../features/contracts/EscrowBreakdownPage';
 import DisputeManagementPage from '../features/admin/DisputeManagementPage';
 import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
+import DepositRequestsPage from '../features/admin/DepositRequestsPage';
+import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +63,19 @@ export const router = createBrowserRouter([
           { path: 'settings/password', element: <PasswordSecurityPage /> },
           { path: 'settings/verification', element: <VerificationPage /> },
           { path: 'settings/billing', element: <div className="p-8 font-bold text-2xl">Get Paid Placeholder</div> }
+        ]
+      }
+    ]
+  },
+  {
+    path: '/admin',
+    element: <ProtectedRoute requiredRoles={['Admin']} />,
+    children: [
+      {
+        element: <AdminLayout />,
+        children: [
+          { path: 'deposits', element: <DepositRequestsPage /> },
+          { path: 'withdrawals', element: <WithdrawalRequestsPage /> }
         ]
       }
     ]
