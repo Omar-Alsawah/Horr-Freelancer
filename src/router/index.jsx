@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
+import AdminLayout from '../layouts/AdminLayout';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
@@ -25,6 +26,15 @@ import BillingPage from '../features/billing/BillingPage';
 import WithdrawalsPage from '../features/billing/WithdrawalsPage';
 import PublicProfilePage from '../features/profile/PublicProfilePage';
 import VerificationPage from '../features/verification/VerificationPage';
+import DeliverySubmitPage from '../features/contracts/DeliverySubmitPage';
+import DeliveryReviewPage from '../features/contracts/DeliveryReviewPage';
+import MilestoneFundingPage from '../features/contracts/MilestoneFundingPage';
+import EscrowBreakdownPage from '../features/contracts/EscrowBreakdownPage';
+import DisputeManagementPage from '../features/admin/DisputeManagementPage';
+import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
+import DepositRequestsPage from '../features/admin/DepositRequestsPage';
+import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
+import VerificationReviewPage from '../features/admin/VerificationReviewPage';
 
 
 export const router = createBrowserRouter([
@@ -45,6 +55,11 @@ export const router = createBrowserRouter([
           { path: 'offers/:proposalId', element: <ViewOfferPage /> },
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
           { path: 'contracts/:id', element: <ContractDetailsPage /> },
+          { path: 'contracts/:contractId/escrow', element: <EscrowBreakdownPage /> },
+          { path: 'contracts/:contractId/milestones', element: <MilestoneFundingPage /> },
+          { path: 'contracts/:contractId/deliver', element: <DeliverySubmitPage /> },
+          { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
+          { path: 'contracts/:contractId/deliveries/:deliveryId', element: <DeliveryReviewPage /> },
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
@@ -54,6 +69,20 @@ export const router = createBrowserRouter([
           { path: 'settings/billing', element: <BillingPage /> },
           { path: 'billing', element: <BillingPage /> },
           { path: 'billing/withdrawals', element: <WithdrawalsPage /> }
+        ]
+      }
+    ]
+  },
+  {
+    path: '/admin',
+    element: <ProtectedRoute requiredRoles={['Admin']} />,
+    children: [
+      {
+        element: <AdminLayout />,
+        children: [
+          { path: 'deposits', element: <DepositRequestsPage /> },
+          { path: 'withdrawals', element: <WithdrawalRequestsPage /> },
+          { path: 'verification', element: <VerificationReviewPage /> }
         ]
       }
     ]
