@@ -9,13 +9,7 @@ import { Input } from '@/components/ui/input';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-function parseJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-  } catch (e) { return {}; }
-}
+
 
 // Detect "email not confirmed" errors from backend
 function isEmailNotConfirmedError(err) {
@@ -69,16 +63,8 @@ export default function Login() {
     try {
       const res = await api.post('/api/auth/login', { email, password });
       const token = res.data;
-      const payload = parseJwt(token);
-      
-      const userObj = {
-        userId: payload.userId || payload.sub || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-        email: payload.email || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-        role: payload.role || payload['http://schemas.microsoft.com/w2008/06/identity/claims/role'],
-        name: payload.name || payload.unique_name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
-      };
 
-      loginAction(token, userObj);
+      loginAction(token);
       navigate('/');
     } catch (err) {
       if (isEmailNotConfirmedError(err)) {
