@@ -370,7 +370,7 @@
     "instructions": "يرجى التحقق من صندوق الوارد الخاص بك والنقر على الرابط لتأكيد حسابك. إذا لم تستلم البريد الإلكتروني، يمكنك طلب بريد جديد أدناه.",
     "resend_btn": "إعادة إرسال بريد التأكيد",
     "back_to_login": "العودة لتسجيل الدخول",
-    "resend_success": "تم إرسال بريد التأكيد بنجاح!",
+    "resend_success": "تم أرسال بريد التأكيد بنجاح!",
     "no_email_error": "لم يتم العثور على عنوان بريد إلكتروني لإعادة الإرسال."
   },
   "email_confirmed": {
@@ -417,7 +417,7 @@
     "withdrawRejectSuccess": "تم رفض طلب السحب بنجاح.",
     "instapay": "إنستا باي",
     "bankTransfer": "تحويل بنكي",
-    "ewallet": "محفظة إلكترونية",
+    "ewallet": "محلية إلكترونية",
     "noVerificationRequests": "لا توجد طلبات توثيق معلقة.",
     "rejectionReason": "سبب الرفض",
     "rejectionReasonPlaceholder": "صف سبب رفض هذا الطلب...",
@@ -429,6 +429,7 @@
     "approveVerificationTitle": "الموافقة على التوثيق",
     "approveVerificationConfirm": "هل أنت متأكد من رغبتك في الموافقة على طلب التوثيق هذا؟",
     "rejectVerificationTitle": "رفض التوثيق"
+  },
   "billing": {
     "pageTitle": "الفوترة والمدفوعات",
     "outstandingBalance": "الرصيد المتاح",
@@ -466,7 +467,6 @@
     "emptyTitle": "لا توجد طلبات إيداع بعد",
     "emptySubtitle": "قم بتقديم طلب إيداع وسيظهر هنا.",
     "submitting": "جاري التقديم...",
-
     "withdrawalsTitle": "السحوبات",
     "availableBalance": "الرصيد المتاح",
     "withdrawalSchedule": "جدول السحب",
@@ -493,5 +493,10 @@
     "methodInstapay": "إنستاباي",
     "methodBank": "تحويل بنكي",
     "methodEWallet": "إلكترونية"
+  },
+  "messages": {
+    "title": "الرسائل",
+    "search_placeholder": "بحث...",
+    "send_placeholder": "أرسل رسالة..."
   }
 }

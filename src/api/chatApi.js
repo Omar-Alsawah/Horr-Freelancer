@@ -1,0 +1,38 @@
+import apiClient from './axios';
+import uploadClient from './uploadClient';
+
+// ─── Get all chats for the authenticated user ───────────────────────────────
+export async function getChats() {
+  const response = await apiClient.get('/api/chat');
+  return response.data;
+}
+
+// ─── Get paginated messages for a chat ──────────────────────────────────────
+export async function getMessages(chatId, page = 1, pageSize = 30) {
+  const response = await apiClient.get(`/api/chat/${chatId}/messages`, {
+    params: { page, pageSize },
+  });
+  return response.data;
+}
+
+// ─── Send a text message ────────────────────────────────────────────────────
+export async function sendTextMessage(chatId, text) {
+  const response = await apiClient.post(
+    `/api/chat/${chatId}/messages/text`,
+    { Text: text } // Using "Text" (PascalCase) to match the SendTextMessageRequest DTO from the API contract
+  );
+  return response.data;
+}
+
+// ─── Upload a file message ──────────────────────────────────────────────────
+// ⚠️ Uses uploadClient — NOT apiClient
+// ⚠️ Do NOT set Content-Type — browser sets multipart boundary automatically
+export async function uploadFile(chatId, file) {
+  const formData = new FormData();
+  formData.append('file', file); // "file" must match exact field name from API contracts doc
+  const response = await uploadClient.post(
+    `/api/chat/${chatId}/messages/file`,
+    formData
+  );
+  return response.data;
+}
