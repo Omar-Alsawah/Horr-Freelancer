@@ -429,6 +429,7 @@
     "approveVerificationTitle": "Approve Verification",
     "approveVerificationConfirm": "Are you sure you want to approve this verification request?",
     "rejectVerificationTitle": "Reject Verification"
+  },
   "billing": {
     "pageTitle": "Billing & payments",
     "outstandingBalance": "Outstanding balance",
@@ -466,7 +467,6 @@
     "emptyTitle": "No deposit requests yet",
     "emptySubtitle": "Submit a deposit request and it will appear here.",
     "submitting": "Submitting...",
-
     "withdrawalsTitle": "Withdrawals",
     "availableBalance": "Available Balance",
     "withdrawalSchedule": "Withdrawal Schedule",

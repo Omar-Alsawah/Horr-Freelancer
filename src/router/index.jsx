@@ -20,6 +20,7 @@ import MyContractsPage from '../features/contracts/MyContractsPage';
 import ContractDetailsPage from '../features/contracts/ContractDetailsPage';
 import MyProfilePage from '../features/profile/MyProfilePage';
 import SettingsPage from '../features/profile/SettingsPage';
+import MessagesPage from '../pages/MessagesPage';
 
 import PasswordSecurityPage from '../features/profile/PasswordSecurityPage';
 import BillingPage from '../features/billing/BillingPage';
@@ -63,6 +64,8 @@ export const router = createBrowserRouter([
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
+          { path: 'messages', element: <MessagesPage /> },
+          { path: 'messages/:chatId', element: <MessagesPage /> },
 
           { path: 'settings/password', element: <PasswordSecurityPage /> },
           { path: 'settings/verification', element: <VerificationPage /> },
