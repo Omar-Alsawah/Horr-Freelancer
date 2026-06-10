@@ -6,60 +6,38 @@ import { getChats } from '../../api/chatApi';
 
 export default function ChatSidebar() {
   const [chats, setChats] = useState([]);
+  const [filteredChats, setFilteredChats] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { chatId } = useParams();
 
-  // Mock conversations used when API fails
-  const mockChats = [
-    {
-      Id: 'mock-1',
-      OtherPartyName: 'Mercedes Hodkiewicz',
-      OtherPartyAvatarUrl: 'https://ui-avatars.com/api/?name=Mercedes+Hodkiewicz&background=random',
-      LastMessageAt: new Date().toISOString(),
-      LastMessagePreview: 'Hey, are you available for a quick call?',
-      UnreadCount: 2,
-    },
-    {
-      Id: 'mock-2',
-      OtherPartyName: 'Mira Rhiel Madsen',
-      OtherPartyAvatarUrl: 'https://ui-avatars.com/api/?name=Mira+Rhiel+Madsen&background=random',
-      LastMessageAt: new Date(Date.now() - 3600 * 1000).toISOString(),
-      LastMessagePreview: 'I have sent the contract for review.',
-      UnreadCount: 0,
-    },
-  ];
-
-  // ─── Load mock chats on mount (no backend) ───────────────────────────────────────
+  // ─── Load chats from API on mount ─────────────────────────────────────────
   useEffect(() => {
-    setChats([
-      {
-        Id: '1',
-        OtherPartyName: 'Mercedes Hodkiewicz',
-        OtherPartyAvatarUrl: '',
-        LastMessagePreview: 'Hey! I have added some of my feedback to this doc.',
-        LastMessageAt: new Date().toISOString(),
-        UnreadCount: 2,
-      },
-      {
-        Id: '2',
-        OtherPartyName: 'Mira Rhiel Madsen',
-        OtherPartyAvatarUrl: '',
-        LastMessagePreview: "Let's set up some time to meet.",
-        LastMessageAt: new Date().toISOString(),
-        UnreadCount: 0,
-      },
-      {
-        Id: '3',
-        OtherPartyName: 'Erin Ekstrom Bothman',
-        OtherPartyAvatarUrl: '',
-        LastMessagePreview: 'Yes, I am available for the afternoon.',
-        LastMessageAt: new Date().toISOString(),
-        UnreadCount: 1,
-      },
-    ]);
-    setLoading(false);
+    getChats()
+      .then((data) => {
+        setChats(data);
+        setFilteredChats(data);
+      })
+      .catch(() => toast.error('Could not load conversations.'))
+      .finally(() => setLoading(false));
   }, []);
+
+  // ─── Filter chats when search query changes ────────────────────────────────
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredChats(chats);
+    } else {
+      const lower = searchQuery.toLowerCase();
+      setFilteredChats(
+        chats.filter(
+          (chat) =>
+            chat.OtherPartyName?.toLowerCase().includes(lower) ||
+            chat.LastMessagePreview?.toLowerCase().includes(lower)
+        )
+      );
+    }
+  }, [searchQuery, chats]);
 
   // ─── Shared Header ─────────────────────────────────────────────────────────
   const renderSidebarHeader = () => (
@@ -70,7 +48,12 @@ export default function ChatSidebar() {
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" placeholder="Search" />
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
     </div>
   );
@@ -102,7 +85,7 @@ export default function ChatSidebar() {
         {renderSidebarHeader()}
         <div className="conversation-list">
           <div className="flex items-center justify-center h-full text-gray-400 text-sm p-4 text-center">
-            Could not load conversations.
+            No conversations yet.
           </div>
         </div>
       </aside>
@@ -114,7 +97,15 @@ export default function ChatSidebar() {
     <aside className="chat-sidebar">
       {renderSidebarHeader()}
       <div className="conversation-list">
-        {chats.map((chat) => (
+
+        {/* No search results */}
+        {filteredChats.length === 0 && (
+          <div className="flex items-center justify-center py-8 text-gray-400 text-sm">
+            No conversations match your search.
+          </div>
+        )}
+
+        {filteredChats.map((chat) => (
           <div
             key={chat.Id || chat.ChatId}
             onClick={() => navigate(`/messages/${chat.Id || chat.ChatId}`)}
@@ -125,25 +116,31 @@ export default function ChatSidebar() {
             {/* Avatar */}
             <div className="user-status-avatar">
               <img
-                src={chat.OtherPartyAvatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(chat.OtherPartyName || 'User') + '&background=random'}
+                src={
+                  chat.OtherPartyAvatarUrl ||
+                  'https://ui-avatars.com/api/?name=' +
+                  encodeURIComponent(chat.OtherPartyName || 'User') +
+                  '&background=random'
+                }
                 alt={chat.OtherPartyName}
               />
-              {/* Optional: we don't have online status in ChatSummaryDto, leaving indicator out or hidden */}
             </div>
 
             {/* Info */}
             <div className="conv-info">
               <div className="conv-top">
-                <span className="conv-name truncate">
-                  {chat.OtherPartyName}
-                </span>
+                <span className="conv-name truncate">{chat.OtherPartyName}</span>
                 <span className="conv-time flex-shrink-0">
-                  {chat.LastMessageAt ? formatDistanceToNow(new Date(chat.LastMessageAt), { addSuffix: true }) : ''}
+                  {chat.LastMessageAt
+                    ? formatDistanceToNow(new Date(chat.LastMessageAt), { addSuffix: true })
+                    : ''}
                 </span>
               </div>
-              <div className={`conv-preview truncate ${chat.UnreadCount > 0 ? 'unread' : ''} flex justify-between items-center gap-2`}>
+              <div
+                className={`conv-preview truncate ${chat.UnreadCount > 0 ? 'unread' : ''
+                  } flex justify-between items-center gap-2`}
+              >
                 <span className="truncate">{chat.LastMessagePreview}</span>
-                {/* Unread badge (tailoring a standard tailwind badge since messages.html didn't have one explicitly styled as a badge) */}
                 {chat.UnreadCount > 0 && (
                   <span className="bg-[#eab308] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
                     {chat.UnreadCount}
