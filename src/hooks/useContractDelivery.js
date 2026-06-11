@@ -27,7 +27,7 @@ export function useContractQuery(id) {
     setError(null);
     try {
       const res = await contractsApi.getContract(id);
-      setData(res.data);
+      setData(res.data?.data || res.data);
     } catch (err) {
       setError(err);
       toast.error(err.title || 'Failed to load contract details.');

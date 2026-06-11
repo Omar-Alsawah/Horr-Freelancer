@@ -144,9 +144,13 @@ export default function DeliveryUploader({
     const select = async () => {
       await Promise.resolve();
       if (active && milestones && milestones.length > 0 && !selectedMilestoneId) {
-        const activeMilestone = milestones.find(m => m.status === 'Funded') || milestones[0];
+        const activeMilestone = milestones.find(m => {
+          const status = String(m.status || m.Status || '').toLowerCase();
+          return status === 'funded';
+        }) || milestones[0];
         if (activeMilestone) {
-          setSelectedMilestoneId(activeMilestone.id.toString());
+          const mId = activeMilestone.id || activeMilestone.Id;
+          setSelectedMilestoneId(mId.toString());
         }
       }
     };
@@ -172,15 +176,23 @@ export default function DeliveryUploader({
             className="block w-full rounded-xl border-gray-300 shadow-sm p-3 text-sm focus:border-amber-500 focus:ring-amber-500 border bg-white outline-none disabled:opacity-60"
           >
             <option value="">{t('delivery.uploader.noMilestone', 'Select milestone (Optional)')}</option>
-            {milestones.map((m) => (
-              <option 
-                key={m.id} 
-                value={m.id} 
-                disabled={m.status === 'Released'}
-              >
-                {m.title} ({i18n.language === 'ar' ? `${m.amount} ج.م` : `EGP ${m.amount}`}) {m.status === 'Released' ? `(${t('milestone.status.released', 'Released')})` : ''}
-              </option>
-            ))}
+            {milestones.map((m) => {
+              const mId = m.id || m.Id;
+              const mTitle = m.title || m.Title;
+              const mAmount = m.amount || m.Amount;
+              const mStatus = String(m.status || m.Status || '').toLowerCase();
+              const isReleased = mStatus === 'released';
+
+              return (
+                <option 
+                  key={mId} 
+                  value={mId} 
+                  disabled={isReleased}
+                >
+                  {mTitle} ({i18n.language === 'ar' ? `${mAmount} ج.م` : `EGP ${mAmount}`}) {isReleased ? `(${t('milestone.status.released', 'Released')})` : ''}
+                </option>
+              );
+            })}
           </select>
         </div>
       )}

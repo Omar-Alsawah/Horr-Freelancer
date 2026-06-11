@@ -15,13 +15,35 @@ const getMessageId = (msg) => {
   return msg.Id || msg.MessageId || msg.id || msg.messageId;
 };
 
+// Helper to get case-insensitive properties
+const getProp = (obj, propName) => {
+  if (!obj) return null;
+  const lower = propName.toLowerCase();
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === lower) {
+      return obj[key];
+    }
+  }
+  return null;
+};
+
 export default function ChatWindow({ chatId }) {
   const isValidChat = chatId && chatId !== 'demo-chat-id' && chatId !== 'undefined';
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(isValidChat);
   const [activeChat, setActiveChat] = useState(null);
-  const bottomRef = useRef(null);
   const navigate = useNavigate();
+
+  // ─── Pagination & Scrolling States ──────────────────────────────────────────
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const containerRef = useRef(null);
+  const prevScrollHeightRef = useRef(0);
+  const prevScrollTopRef = useRef(0);
+  const isPrependingRef = useRef(false);
+  const isInitialLoadRef = useRef(true);
   
   // We use the named import for useAuthStore based on src/store/authStore.js
   const { user } = useAuthStore();
@@ -42,27 +64,19 @@ export default function ChatWindow({ chatId }) {
   // ─── SignalR connection ────────────────────────────────────────────────────
   const { connectionState } = useChatConnection(chatId, handleNewMessage);
 
-  // ─── Load messages and chat details from API ──────────────────────────────
+  // ─── Load initial page of messages and chat details ────────────────────────
   useEffect(() => {
     if (!isValidChat) return;
     let active = true;
-
-    // Helper to get case-insensitive properties
-    const getProp = (obj, propName) => {
-      if (!obj) return null;
-      const lower = propName.toLowerCase();
-      for (const key of Object.keys(obj)) {
-        if (key.toLowerCase() === lower) {
-          return obj[key];
-        }
-      }
-      return null;
-    };
 
     const loadData = async () => {
       await Promise.resolve();
       if (!active) return;
       setLoading(true);
+      setCurrentPage(1);
+      setHasMore(true);
+      setIsFetchingMore(false);
+      isInitialLoadRef.current = true;
 
       try {
         // Load active chat info
@@ -77,11 +91,15 @@ export default function ChatWindow({ chatId }) {
           }
         }
 
-        // Load messages
-        const data = await getMessages(chatId);
+        // Load messages (page 1)
+        const data = await getMessages(chatId, 1);
         if (active) {
           const items = getProp(data, 'items') || [];
-          setMessages(items);
+          const reversed = [...items].reverse();
+          setMessages(reversed);
+          if (items.length < 30) {
+            setHasMore(false);
+          }
         }
       } catch {
         toast.error('Could not load messages from server.');
@@ -97,12 +115,61 @@ export default function ChatWindow({ chatId }) {
     return () => {
       active = false;
     };
-  }, [chatId]);
+  }, [chatId, isValidChat]);
 
-  // ─── Auto-scroll to bottom on new messages ────────────────────────────────
+  // ─── Handle Scroll Up Lazy Loading ─────────────────────────────────────────
+  const handleScroll = async (e) => {
+    const container = e.currentTarget;
+    if (container.scrollTop < 50 && hasMore && !isFetchingMore && isValidChat && !loading) {
+      setIsFetchingMore(true);
+      const nextPage = currentPage + 1;
+
+      try {
+        // Store current scroll measurements for restoration
+        prevScrollHeightRef.current = container.scrollHeight;
+        prevScrollTopRef.current = container.scrollTop;
+
+        const data = await getMessages(chatId, nextPage);
+        const items = getProp(data, 'items') || [];
+
+        if (items.length < 30) {
+          setHasMore(false);
+        }
+
+        if (items.length > 0) {
+          const reversedNewItems = [...items].reverse();
+          isPrependingRef.current = true;
+          setMessages((prev) => [...reversedNewItems, ...prev]);
+          setCurrentPage(nextPage);
+        } else {
+          setHasMore(false);
+        }
+      } catch (err) {
+        console.error('Error fetching older messages:', err);
+        toast.error('Could not load older messages.');
+      } finally {
+        setIsFetchingMore(false);
+      }
+    }
+  };
+
+  // ─── Scroll Restoration and Alignment ─────────────────────────────────────
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (isInitialLoadRef.current && messages.length > 0) {
+      container.scrollTop = container.scrollHeight;
+      isInitialLoadRef.current = false;
+    } else if (isPrependingRef.current) {
+      const diff = container.scrollHeight - prevScrollHeightRef.current;
+      container.scrollTop = prevScrollTopRef.current + diff;
+      isPrependingRef.current = false;
+    } else {
+      // Smooth scroll for new message
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, loading]);
 
   // ─── Placeholder state if no active chat is selected ─────────────────────
   if (!chatId || chatId === 'demo-chat-id' || chatId === 'undefined') {
@@ -190,7 +257,13 @@ export default function ChatWindow({ chatId }) {
       </header>
 
       {/* ── Messages list ──────────────────────────────────────────────────── */}
-      <div className="chat-messages">
+      <div className="chat-messages" ref={containerRef} onScroll={handleScroll}>
+
+        {isFetchingMore && (
+          <div className="flex justify-center py-2 flex-shrink-0">
+            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
 
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400 text-sm">
@@ -209,9 +282,6 @@ export default function ChatWindow({ chatId }) {
             );
           })
         )}
-
-        {/* Scroll anchor */}
-        <div ref={bottomRef} />
       </div>
 
       {/* ── Input bar ──────────────────────────────────────────────────────── */}

@@ -203,6 +203,8 @@
     "empty_closed_title": "لا توجد عقود منتهية بعد",
     "empty_closed_subtitle": "العقود المكتملة والمنتهية ستظهر هنا.",
     "back_to_contracts": "العودة إلى العقود",
+    "back_to_contract_details": "العودة إلى تفاصيل العقد",
+    "terms_title": "شروط العقد",
     "request_specialist": "طلب مراجعة من متخصص",
     "deliver_work": "تسليم العمل",
     "price": "السعر",

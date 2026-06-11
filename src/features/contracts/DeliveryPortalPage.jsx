@@ -143,20 +143,33 @@ export default function DeliveryPortalPage() {
   if (!contract) return null;
 
   // State calculations
-  const hasPendingDelivery = deliveries.some((d) => d.status === 'Pending');
-  const isActive = contract.status === 'Active';
-  const isCompleted = contract.status === 'Completed';
+  const hasPendingDelivery = deliveries.some((d) => {
+    const status = String(d.status || d.Status || '').toLowerCase();
+    return status === 'pending' || status === '0';
+  });
+  const statusVal = contract.status !== undefined ? contract.status : contract.Status;
+  const statusStr = String(statusVal != null ? statusVal : '').toLowerCase();
+  const isActive = statusStr === 'active' || statusStr === '1';
+  const isCompleted = statusStr === 'completed' || statusStr === 'closed' || statusStr === '2' || statusStr === '5';
+
+  const cId = contract.id || contract.Id;
+  const title = contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract';
+  const clientName = contract.client_Name || contract.clientName || contract.Client_Name || 'Client';
+  const rate = contract.agreedRate || contract.AgreedRate;
+  const started = contract.startedAt || contract.startDate || contract.StartedAt;
+  const formattedStartDate = started ? new Date(started).toLocaleDateString() : 'N/A';
+  const milestones = contract.milestones || contract.Milestones || [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Top Breadcrumb Navigation */}
       <div className="flex items-center">
         <Link 
-          to={`/contracts/${contract.id}`} 
+          to={`/contracts/${cId}`} 
           className="inline-flex items-center text-sm font-semibold text-slate-650 hover:text-amber-500 transition-colors gap-1.5"
         >
           {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-          {t('contracts.back_to_contracts', 'Back to Contract Details')}
+          {t('contracts.back_to_contract_details', 'Back to Contract Details')}
         </Link>
       </div>
 
@@ -178,16 +191,16 @@ export default function DeliveryPortalPage() {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {contract.jobTitle}
+            {title}
           </h1>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-350">
             <div>
               <span className="font-medium text-slate-400">{t('contracts.client', 'Client')}: </span>
-              <span className="text-white">{contract.clientName}</span>
+              <span className="text-white">{clientName}</span>
             </div>
             <div>
               <span className="font-medium text-slate-400">{t('contracts.start_date', 'Started')}: </span>
-              <span className="text-white">{contract.startDate}</span>
+              <span className="text-white">{formattedStartDate}</span>
             </div>
           </div>
         </div>
@@ -196,7 +209,7 @@ export default function DeliveryPortalPage() {
             {t('contracts.price', 'Contract Budget')}
           </span>
           <span className="text-2xl sm:text-3xl font-black text-amber-400">
-            {formatCurrency(contract.agreedRate)}
+            {formatCurrency(rate)}
           </span>
         </div>
       </div>
@@ -240,7 +253,7 @@ export default function DeliveryPortalPage() {
                   </div>
 
                   <DeliveryUploader
-                    milestones={contract.milestones}
+                    milestones={milestones}
                     onSubmit={handleFreelancerSubmit}
                     isSubmitting={isSubmitting}
                     uploadProgress={uploadProgress}
@@ -300,26 +313,35 @@ export default function DeliveryPortalPage() {
                 </h3>
               </div>
               <div className="space-y-3">
-                {contract.milestones && contract.milestones.map((m) => (
-                  <div key={m.id} className="p-3 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between text-sm">
-                    <div>
-                      <h4 className="font-semibold text-gray-850">{m.title}</h4>
-                      <span className="text-xs text-gray-500">{m.deadline}</span>
+                {milestones.map((m) => {
+                  const mId = m.id || m.Id;
+                  const mTitle = m.title || m.Title;
+                  const mDeadline = m.dueDate || m.DueDate || m.deadline;
+                  const formattedDeadline = mDeadline ? new Date(mDeadline).toLocaleDateString() : 'N/A';
+                  const mAmount = m.amount || m.Amount;
+                  const mStatus = m.status || m.Status || '';
+
+                  return (
+                    <div key={mId} className="p-3 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between text-sm">
+                      <div>
+                        <h4 className="font-semibold text-gray-850">{mTitle}</h4>
+                        <span className="text-xs text-gray-500">{formattedDeadline}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-gray-900">{formatCurrency(mAmount)}</div>
+                        <span className={`text-xs font-semibold uppercase ${
+                          mStatus === 'Released' 
+                            ? 'text-green-600' 
+                            : mStatus === 'Funded' 
+                              ? 'text-blue-600' 
+                              : 'text-amber-600'
+                        }`}>
+                          {mStatus}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-gray-900">{formatCurrency(m.amount)}</div>
-                      <span className={`text-xs font-semibold uppercase ${
-                        m.status === 'Released' 
-                          ? 'text-green-600' 
-                          : m.status === 'Funded' 
-                            ? 'text-blue-600' 
-                            : 'text-amber-600'
-                      }`}>
-                        {m.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

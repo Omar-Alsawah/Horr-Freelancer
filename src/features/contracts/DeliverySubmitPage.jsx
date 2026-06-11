@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
@@ -32,16 +32,17 @@ export default function DeliverySubmitPage() {
   const [deliveryNote, setDeliveryNote] = useState('');
   const [attachments, setAttachments] = useState([]); // { id: string, type: 'FILE' | 'LINK', file: File | null, link: string }
 
-  const loadContract = async () => {
+  const loadContract = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
       const res = await contractsApi.getContract(contractId);
-      const data = res.data;
+      const data = res.data?.data || res.data;
       setContract(data);
       
-      if (milestoneId && data.milestones) {
-        const m = data.milestones.find(m => m.id.toString() === milestoneId);
+      const milestonesList = data.milestones || data.Milestones || [];
+      if (milestoneId && milestonesList.length > 0) {
+        const m = milestonesList.find(m => (m.id || m.Id || '').toString() === milestoneId);
         if (m) setMilestone(m);
       }
     } catch (err) {
@@ -50,13 +51,21 @@ export default function DeliverySubmitPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [contractId, milestoneId, t]);
 
   useEffect(() => {
-    if (role === 'Freelancer') {
-      loadContract();
-    }
-  }, [contractId, milestoneId, t, role]);
+    let active = true;
+    const load = async () => {
+      await Promise.resolve();
+      if (active && role === 'Freelancer') {
+        loadContract();
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [role, loadContract]);
 
   if (role !== 'Freelancer') {
     return <Navigate to="/unauthorized" replace />;
@@ -162,11 +171,11 @@ export default function DeliverySubmitPage() {
         <div className="flex flex-col md:flex-row md:justify-between mb-2">
           <div>
             <span className="font-semibold text-gray-700">{t('delivery.contractLabel')} </span>
-            <span className="text-gray-900">{contract.title || contract.jobTitle}</span>
+            <span className="text-gray-900">{contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract'}</span>
           </div>
           <div>
             <span className="font-semibold text-gray-700">{t('delivery.clientLabel')} </span>
-            <span className="text-gray-900">{contract.clientName}</span>
+            <span className="text-gray-900">{contract.client_Name || contract.clientName || contract.Client_Name || 'Client'}</span>
           </div>
         </div>
         

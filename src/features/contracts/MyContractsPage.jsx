@@ -57,8 +57,12 @@ export default function MyContractsPage() {
     setLoading(true);
     try {
       const res = await contractsApi.getMyContracts({ page, limit });
-      setContracts(res.data.data || []);
-      setTotalPages(res.data.totalPages || 1);
+      const dataPayload = res.data?.data || res.data;
+      const items = dataPayload?.items || dataPayload?.Items || (Array.isArray(dataPayload) ? dataPayload : []);
+      const totalCount = dataPayload?.totalCount || dataPayload?.TotalCount || 0;
+      const pages = Math.ceil(totalCount / limit) || 1;
+      setContracts(items);
+      setTotalPages(pages);
     } catch (err) {
       toast.error(err.title || t('common.error'));
       setContracts([]);
@@ -67,42 +71,74 @@ export default function MyContractsPage() {
     }
   }, [page, limit, t]);
 
-  useEffect(() => { fetchContracts(); }, [fetchContracts]);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      await Promise.resolve();
+      if (active) {
+        fetchContracts();
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [fetchContracts]);
 
-  const activeContracts = contracts.filter(c => c.status === 'Active');
-  const closedContracts = contracts.filter(c => c.status === 'Closed');
+  const activeContracts = contracts.filter(c => {
+    const statusVal = c.status !== undefined ? c.status : c.Status;
+    const status = String(statusVal != null ? statusVal : '').toLowerCase();
+    return status === 'active' || status === '1';
+  });
+  const closedContracts = contracts.filter(c => {
+    const statusVal = c.status !== undefined ? c.status : c.Status;
+    const status = String(statusVal != null ? statusVal : '').toLowerCase();
+    return status === 'closed' || status === 'completed' || status === '2' || status === '5';
+  });
   const displayedContracts = activeTab === 'active' ? activeContracts : closedContracts;
 
-  const renderContract = (contract) => (
-    <div
-      key={contract.id}
-      className="contract-item"
-      onClick={() => contract.status === 'Active' ? navigate(`/contracts/${contract.id}`) : null}
-      style={{ cursor: contract.status === 'Active' ? 'pointer' : 'default' }}
-    >
-      <div className="contract-info">
-        <h3>{contract.jobTitle}</h3>
-        <div className="client-info">{t('contracts.client')}: {contract.clientName}</div>
-        <div className="date-range">
-          {t('contracts.started')}: {contract.startDate}
+  const renderContract = (contract) => {
+    const cId = contract.id || contract.Id;
+    const statusVal = contract.status !== undefined ? contract.status : contract.Status;
+    const statusStr = String(statusVal != null ? statusVal : '').toLowerCase();
+    const isActive = statusStr === 'active' || statusStr === '1';
+    const title = contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract';
+    const clientName = contract.client_Name || contract.clientName || contract.Client_Name || 'Client';
+    const rate = contract.agreedRate || contract.AgreedRate;
+    const started = contract.startedAt || contract.startDate || contract.StartedAt;
+    const formattedStartDate = started ? new Date(started).toLocaleDateString() : 'N/A';
+
+    return (
+      <div
+        key={cId}
+        className="contract-item"
+        onClick={() => isActive ? navigate(`/contracts/${cId}`) : null}
+        style={{ cursor: isActive ? 'pointer' : 'default' }}
+      >
+        <div className="contract-info">
+          <h3>{title}</h3>
+          <div className="client-info">{t('contracts.client')}: {clientName}</div>
+          <div className="date-range">
+            {t('contracts.started')}: {formattedStartDate}
+          </div>
+        </div>
+        <div className="contract-meta">
+          <div className="contract-rate">{formatEgp(rate, lang)}</div>
+          <span className={`contract-status ${isActive ? 'status-active' : 'status-closed'}`}>
+            {isActive ? t('contracts.status_active') : t('contracts.status_closed')}
+          </span>
+          {isActive && (
+            <button
+              className="view-details-btn"
+              onClick={(e) => { e.stopPropagation(); navigate(`/contracts/${cId}`); }}
+            >
+              {t('contracts.view_details')}
+            </button>
+          )}
         </div>
       </div>
-      <div className="contract-meta">
-        <div className="contract-rate">{formatEgp(contract.agreedRate, lang)}</div>
-        <span className={`contract-status ${contract.status === 'Active' ? 'status-active' : 'status-closed'}`}>
-          {contract.status === 'Active' ? t('contracts.status_active') : t('contracts.status_closed')}
-        </span>
-        {contract.status === 'Active' && (
-          <button
-            className="view-details-btn"
-            onClick={(e) => { e.stopPropagation(); navigate(`/contracts/${contract.id}`); }}
-          >
-            {t('contracts.view_details')}
-          </button>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="main-container">

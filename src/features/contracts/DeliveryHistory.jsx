@@ -50,9 +50,11 @@ export default function DeliveryHistory({
   }
 
   // Sort deliveries by date descending (newest first)
-  const sortedDeliveries = [...deliveries].sort(
-    (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
-  );
+  const sortedDeliveries = [...deliveries].sort((a, b) => {
+    const dateB = b.submittedAt || b.SubmittedAt || b.submissionDate || b.date;
+    const dateA = a.submittedAt || a.SubmittedAt || a.submissionDate || a.date;
+    return new Date(dateB).getTime() - new Date(dateA).getTime();
+  });
 
   return (
     <div className="space-y-5">

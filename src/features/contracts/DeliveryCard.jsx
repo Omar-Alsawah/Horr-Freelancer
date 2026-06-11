@@ -19,7 +19,8 @@ export default function DeliveryCard({
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isPending = delivery.status === 'Pending';
+  const statusStr = String(delivery.status !== undefined ? delivery.status : (delivery.Status !== undefined ? delivery.Status : '')).toLowerCase();
+  const isPending = statusStr === 'pending' || statusStr === '0';
   const isClient = role === 'Client';
 
   const resetForm = () => {
@@ -73,7 +74,8 @@ export default function DeliveryCard({
     }
   };
 
-  const formattedDate = new Date(delivery.submissionDate).toLocaleString(
+  const dateVal = delivery.submittedAt || delivery.SubmittedAt || delivery.submissionDate || delivery.date;
+  const formattedDate = new Date(dateVal).toLocaleString(
     i18n.language === 'ar' ? 'ar-EG' : 'en-US',
     { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
   );
@@ -86,7 +88,7 @@ export default function DeliveryCard({
           <Calendar className="h-4 w-4 text-gray-400" />
           <span>{formattedDate}</span>
         </div>
-        <DeliveryStatusBadge status={delivery.status} />
+        <DeliveryStatusBadge status={delivery.status !== undefined ? delivery.status : delivery.Status} />
       </div>
 
       {/* Card Body */}
