@@ -1,70 +1,127 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
 import { useChatConnection } from '../../hooks/useChatConnection';
-import { getMessages } from '../../api/chatApi';
+import { getMessages, getChats } from '../../api/chatApi';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 
 // ─── Import your layout stylesheet ─────────────────────────────────────────
 import '../../chat-styles.css';
 
+const getMessageId = (msg) => {
+  if (!msg) return null;
+  return msg.Id || msg.MessageId || msg.id || msg.messageId;
+};
+
 export default function ChatWindow({ chatId }) {
+  const isValidChat = chatId && chatId !== 'demo-chat-id' && chatId !== 'undefined';
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isValidChat);
+  const [activeChat, setActiveChat] = useState(null);
   const bottomRef = useRef(null);
   const navigate = useNavigate();
+  
   // We use the named import for useAuthStore based on src/store/authStore.js
   const { user } = useAuthStore();
   const userId = user?.userId;
 
   // ─── Append incoming SignalR message ──────────────────────────────────────
   const handleNewMessage = (message) => {
-    setMessages((prev) => [...prev, message]);
+    const newId = getMessageId(message);
+    if (!newId) return;
+    setMessages((prev) => {
+      if (prev.some((m) => getMessageId(m) === newId)) {
+        return prev;
+      }
+      return [...prev, message];
+    });
   };
 
   // ─── SignalR connection ────────────────────────────────────────────────────
   const { connectionState } = useChatConnection(chatId, handleNewMessage);
 
-  // ─── Load mock messages on mount / chatId change (no backend) ──────────────
+  // ─── Load messages and chat details from API ──────────────────────────────
   useEffect(() => {
-    if (!chatId) return;
-    setLoading(true);
-    setMessages([
-      {
-        Id: '1',
-        Type: 0,
-        TextContent: 'Hey! I have added some of my feedback to this doc. Let me know if you have any questions!',
-        SenderId: 'other',
-        SenderAvatarUrl: '',
-        SentAt: new Date().toISOString(),
-      },
-      {
-        Id: '2',
-        Type: 0,
-        TextContent: 'Awesome, thank you so much! I will take a look soon.',
-        SenderId: 'me',
-        SenderAvatarUrl: '',
-        SentAt: new Date().toISOString(),
-      },
-      {
-        Id: '3',
-        Type: 3,
-        FileName: 'Design Feedback.pdf',
-        FileUrl: '',
-        SenderId: 'other',
-        SenderAvatarUrl: '',
-        SentAt: new Date().toISOString(),
-      },
-    ]);
-    setLoading(false);
+    if (!isValidChat) return;
+    let active = true;
+
+    // Helper to get case-insensitive properties
+    const getProp = (obj, propName) => {
+      if (!obj) return null;
+      const lower = propName.toLowerCase();
+      for (const key of Object.keys(obj)) {
+        if (key.toLowerCase() === lower) {
+          return obj[key];
+        }
+      }
+      return null;
+    };
+
+    const loadData = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      setLoading(true);
+
+      try {
+        // Load active chat info
+        const chatsList = await getChats();
+        if (active && chatsList && Array.isArray(chatsList)) {
+          const found = chatsList.find(c => {
+            const cId = getProp(c, 'id') || getProp(c, 'chatId');
+            return String(cId) === String(chatId);
+          });
+          if (found) {
+            setActiveChat(found);
+          }
+        }
+
+        // Load messages
+        const data = await getMessages(chatId);
+        if (active) {
+          const items = getProp(data, 'items') || [];
+          setMessages(items);
+        }
+      } catch {
+        toast.error('Could not load messages from server.');
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
   }, [chatId]);
 
   // ─── Auto-scroll to bottom on new messages ────────────────────────────────
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // ─── Placeholder state if no active chat is selected ─────────────────────
+  if (!chatId || chatId === 'demo-chat-id' || chatId === 'undefined') {
+    return (
+      <main className="chat-main items-center justify-center text-center p-8 bg-gray-50 dark:bg-zinc-950">
+        <div className="flex flex-col items-center max-w-sm">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4 shadow-sm">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No conversation selected</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            Select a contact from the sidebar to start chatting, view project details, and access the delivery portal.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   // ─── Loading state ────────────────────────────────────────────────────────
   if (loading) {
@@ -75,6 +132,22 @@ export default function ChatWindow({ chatId }) {
     );
   }
 
+  // Helper to resolve property names case-insensitively
+  const getActiveChatProp = (propName) => {
+    if (!activeChat) return null;
+    const lower = propName.toLowerCase();
+    for (const key of Object.keys(activeChat)) {
+      if (key.toLowerCase() === lower) {
+        return activeChat[key];
+      }
+    }
+    return null;
+  };
+
+  const otherPartyName = getActiveChatProp('otherPartyName') || 'Chat';
+  const otherPartyAvatarUrl = getActiveChatProp('otherPartyAvatarUrl');
+  const contractId = getActiveChatProp('contractId');
+
   // ─── Main render ──────────────────────────────────────────────────────────
   return (
     <main className="chat-main">
@@ -84,28 +157,35 @@ export default function ChatWindow({ chatId }) {
 
         <div className="flex items-center gap-4">
           <div className="user-status-avatar">
-            <img src={'https://ui-avatars.com/api/?name=Chat&background=random'} alt="User" />
+            <img 
+              src={
+                otherPartyAvatarUrl || 
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(otherPartyName)}&background=random`
+              } 
+              alt={otherPartyName} 
+            />
             <div
               className={`status-indicator ${connectionState === 'Connected' ? 'online' : ''}`}
               style={{ display: 'block', background: connectionState === 'Reconnecting' ? '#eab308' : '' }}
             ></div>
           </div>
           <div className="chat-header-info">
-            <h3>Chat</h3>
+            <h3>{otherPartyName}</h3>
             <p className="text-xs text-gray-500">{connectionState}</p>
           </div>
         </div>
 
         {/* Delivery Portal button */}
-        <button
-          onClick={() => {
-            // TODO: wire contractId from chat data
-            navigate(`/contracts/undefined/deliver`);
-          }}
-          className="bg-[#eab308] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-opacity"
-        >
-          Delivery Portal
-        </button>
+        {contractId && (
+          <button
+            onClick={() => {
+              navigate(`/contracts/${contractId}/deliveries`);
+            }}
+            className="bg-[#eab308] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-opacity"
+          >
+            Delivery Portal
+          </button>
+        )}
 
       </header>
 
@@ -117,13 +197,17 @@ export default function ChatWindow({ chatId }) {
             No messages yet. Say hello!
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.Id || message.MessageId || Math.random().toString()}
-              message={message}
-              isOwnMessage={message.SenderId === userId}
-            />
-          ))
+          messages.map((message, idx) => {
+            const mId = message.Id || message.MessageId || message.id || message.messageId || `msg-${idx}`;
+            const mSenderId = message.SenderId || message.senderId;
+            return (
+              <MessageBubble
+                key={mId}
+                message={message}
+                isOwnMessage={String(mSenderId) === String(userId)}
+              />
+            );
+          })
         )}
 
         {/* Scroll anchor */}
@@ -133,9 +217,16 @@ export default function ChatWindow({ chatId }) {
       {/* ── Input bar ──────────────────────────────────────────────────────── */}
       <MessageInput
         chatId={chatId}
-        onMessageSent={(newMessage) =>
-          setMessages((prev) => [...prev, newMessage])
-        }
+        onMessageSent={(newMessage) => {
+          const newId = getMessageId(newMessage);
+          if (!newId) return;
+          setMessages((prev) => {
+            if (prev.some((m) => getMessageId(m) === newId)) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
+        }}
       />
 
     </main>

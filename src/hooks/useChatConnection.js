@@ -5,9 +5,15 @@ import toast from 'react-hot-toast';
 export function useChatConnection(chatId, onMessageReceived) {
   const connectionRef = useRef(null);
   const [connectionState, setConnectionState] = useState('Disconnected');
+  const onMessageReceivedRef = useRef(onMessageReceived);
+
+  // Keep the handler ref updated
+  useEffect(() => {
+    onMessageReceivedRef.current = onMessageReceived;
+  }, [onMessageReceived]);
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || chatId === 'demo-chat-id' || chatId === 'undefined') return;
 
     let isMounted = true;
 
@@ -21,7 +27,9 @@ export function useChatConnection(chatId, onMessageReceived) {
       .build();
 
     // 2. Register the incoming message handler
-    connection.on('ReceiveMessage', onMessageReceived);
+    connection.on('ReceiveMessage', (message) => {
+      onMessageReceivedRef.current(message);
+    });
 
     // 3. Track connection state changes
     connection.onreconnecting(() => {

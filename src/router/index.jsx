@@ -36,6 +36,7 @@ import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
 import DepositRequestsPage from '../features/admin/DepositRequestsPage';
 import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
+import DeliveryPortalPage from '../features/contracts/DeliveryPortalPage';
 
 
 export const router = createBrowserRouter([
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
           { path: 'contracts/:contractId/milestones', element: <MilestoneFundingPage /> },
           { path: 'contracts/:contractId/deliver', element: <DeliverySubmitPage /> },
           { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
+          { path: 'contracts/:contractId/deliveries', element: <DeliveryPortalPage /> },
           { path: 'contracts/:contractId/deliveries/:deliveryId', element: <DeliveryReviewPage /> },
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
