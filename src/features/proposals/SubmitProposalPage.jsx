@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
@@ -6,7 +6,7 @@ import { jobsApi } from '../../api/jobs';
 import { proposalsApi } from '../../api/proposals';
 
 const SubmitProposalPage = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const jobId = searchParams.get('jobId');
@@ -20,7 +20,6 @@ const SubmitProposalPage = () => {
   const [submitAsType, setSubmitAsType] = useState('Freelancer');
   const [bidRate, setBidRate] = useState(0);
   const [coverLetter, setCoverLetter] = useState('');
-  const [terms, setTerms] = useState([{ milestoneTitle: '', amount: 0, dueDate: '' }]);
 
   // Validation State
   const [errors, setErrors] = useState({});
@@ -52,21 +51,6 @@ const SubmitProposalPage = () => {
     setBidRate(value);
   };
 
-  const handleAddMilestone = () => {
-    setTerms([...terms, { milestoneTitle: '', amount: 0, dueDate: '' }]);
-  };
-
-  const handleRemoveMilestone = (index) => {
-    const newTerms = terms.filter((_, i) => i !== index);
-    setTerms(newTerms);
-  };
-
-  const handleMilestoneChange = (index, field, value) => {
-    const newTerms = [...terms];
-    newTerms[index][field] = field === 'amount' ? parseFloat(value) || 0 : value;
-    setTerms(newTerms);
-  };
-
   const validate = () => {
     const newErrors = {};
     if (bidRate <= 0) {
@@ -78,21 +62,10 @@ const SubmitProposalPage = () => {
     } else if (coverLetter.length > 2000) {
       newErrors.coverLetter = t('proposals.validation.cover_letter_max');
     } else {
-      const regex = /^[\u0600-\u06FFa-zA-Z0-9\s\.,!?]+$/;
+      const regex = /^[\u0600-\u06FFa-zA-Z0-9\s.,!?]+$/;
       if (!regex.test(coverLetter)) {
         newErrors.coverLetter = t('proposals.validation.cover_letter_invalid');
       }
-    }
-
-    const milestoneErrors = terms.map((milestone) => {
-      const e = {};
-      if (!milestone.milestoneTitle) e.milestoneTitle = t('proposals.validation.milestone_title_required');
-      if (milestone.amount <= 0) e.amount = t('proposals.validation.milestone_amount_required');
-      return e;
-    });
-
-    if (milestoneErrors.some((e) => Object.keys(e).length > 0)) {
-      newErrors.milestones = milestoneErrors;
     }
 
     setErrors(newErrors);
@@ -111,8 +84,7 @@ const SubmitProposalPage = () => {
         jobPostId: jobId,
         submitAsType,
         bidRate,
-        coverLetter,
-        terms
+        coverLetter
       };
 
       await proposalsApi.submitProposal(proposalData);
@@ -134,7 +106,6 @@ const SubmitProposalPage = () => {
   const horrFee = bidRate * 0.10;
   const receiveAmount = bidRate - horrFee;
 
-  const isRtl = i18n.language === 'ar';
 
   return (
     <div className="container container-single-col" style={{ maxWidth: '900px' }}>
@@ -234,67 +205,7 @@ const SubmitProposalPage = () => {
           </div>
         </div>
 
-        {/* Milestones */}
-        <div className="proposal-section">
-          <div className="proposal-section-title">
-            {t('proposals.milestones_title')}
-            <button 
-              type="button" 
-              onClick={handleAddMilestone}
-              className="text-[#C5A47E] text-sm font-semibold hover:underline"
-            >
-              + {t('proposals.add_milestone')}
-            </button>
-          </div>
 
-          <div className="space-y-4">
-            {terms.map((milestone, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg relative">
-                <div>
-                  <label className="block text-sm font-medium mb-1">{t('proposals.milestone_title_label')}</label>
-                  <input 
-                    type="text" 
-                    value={milestone.milestoneTitle}
-                    onChange={(e) => handleMilestoneChange(index, 'milestoneTitle', e.target.value)}
-                    className={`w-full p-2 border rounded ${errors.milestones?.[index]?.milestoneTitle ? 'border-red-500' : ''}`}
-                  />
-                  {errors.milestones?.[index]?.milestoneTitle && <div className="error-message">{errors.milestones[index].milestoneTitle}</div>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">{t('proposals.milestone_amount_label')}</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={milestone.amount}
-                    onChange={(e) => handleMilestoneChange(index, 'amount', e.target.value)}
-                    className={`w-full p-2 border rounded ${errors.milestones?.[index]?.amount ? 'border-red-500' : ''}`}
-                  />
-                  {errors.milestones?.[index]?.amount && <div className="error-message">{errors.milestones[index].amount}</div>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">{t('proposals.milestone_date_label')}</label>
-                  <input 
-                    type="date" 
-                    value={milestone.dueDate}
-                    onChange={(e) => handleMilestoneChange(index, 'dueDate', e.target.value)}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-                {terms.length > 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveMilestone(index)}
-                    className="absolute -top-2 -right-2 bg-white border rounded-full p-1 text-red-500 hover:bg-red-50"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Cover Letter */}
         <div className={`proposal-section ${errors.coverLetter ? 'border-[#d32f2f]' : ''}`}>
