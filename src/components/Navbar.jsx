@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, ChevronDown, Bell, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function Navbar() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -119,14 +119,14 @@ export default function Navbar() {
                 {deliverWorkDropdownOpen && (
                   <div className="origin-top-left absolute left-0 mt-4 w-60 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),_0_8px_10px_-6px_rgba(0,0,0,0.1)] py-3 bg-white border border-gray-100 z-50">
                     <Link
-                      to="/"
+                      to="/contracts/my-contracts"
                       onClick={() => setDeliverWorkDropdownOpen(false)}
                       className="block px-5 py-2.5 text-[15px] text-gray-800 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                     >
                       Your active contracts
                     </Link>
                     <Link
-                      to="/"
+                      to="/contracts/my-contracts"
                       onClick={() => setDeliverWorkDropdownOpen(false)}
                       className="block px-5 py-2.5 text-[15px] text-gray-800 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                     >
@@ -226,8 +226,8 @@ export default function Navbar() {
             <div className="px-3 py-2">
               <div className="text-base font-medium text-gray-900 mb-2">Deliver work</div>
               <div className="pl-4 space-y-1 border-l-2 border-gray-100 ml-1">
-                <Link to="/" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">Your active contracts</Link>
-                <Link to="/" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">Contract history</Link>
+                <Link to="/contracts/my-contracts" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">Your active contracts</Link>
+                <Link to="/contracts/my-contracts" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">Contract history</Link>
               </div>
             </div>
             <Link to="/messages" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Messages</Link>
