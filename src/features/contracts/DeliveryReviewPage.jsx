@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, FileText, Link as LinkIcon, CheckCircle2, AlertCircle, Clock, XCircle, Search, RefreshCw } from 'lucide-react';
+import { Loader2, FileText, Link as LinkIcon, CheckCircle2, AlertCircle, AlertTriangle, Clock, Search, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { useAuthStore } from '../../store/authStore';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -63,25 +63,33 @@ export default function DeliveryReviewPage() {
   const [reasonError, setReasonError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadDelivery = async () => {
+  const loadDelivery = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
       const res = await contractsApi.getDelivery(contractId, deliveryId);
-      setDelivery(res.data);
+      setDelivery(res.data?.data || res.data);
     } catch (err) {
       toast.error(err.title || t('common.error'));
       setError(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, [contractId, deliveryId, t]);
 
   useEffect(() => {
-    if (role === 'Client') {
-      loadDelivery();
-    }
-  }, [contractId, deliveryId, t, role]);
+    let active = true;
+    const load = async () => {
+      await Promise.resolve();
+      if (active && role === 'Client') {
+        loadDelivery();
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [role, loadDelivery]);
 
   if (role !== 'Client') {
     return <Navigate to="/unauthorized" replace />;
@@ -174,7 +182,8 @@ export default function DeliveryReviewPage() {
 
   if (!delivery) return null;
 
-  const isPending = delivery.status === 'Pending';
+  const statusStr = String(delivery.status !== undefined ? delivery.status : (delivery.Status !== undefined ? delivery.Status : '')).toLowerCase();
+  const isPending = statusStr === 'pending' || statusStr === '0';
 
   return (
     <div className="max-w-3xl mx-auto my-8 p-6 space-y-6">
@@ -185,7 +194,7 @@ export default function DeliveryReviewPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('delivery.review.pageTitle')}</h1>
             <div className="text-sm text-gray-500">
-              {t('delivery.review.submissionDate')} {new Date(delivery.submissionDate).toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
+              {t('delivery.review.submissionDate')} {new Date(delivery.submittedAt || delivery.SubmittedAt || delivery.submissionDate || delivery.date).toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
             </div>
             {isPending && delivery.reviewDeadline && (
               <CountdownTimer deadline={delivery.reviewDeadline} autoApprovesText={t('delivery.review.autoApprovesIn')} />

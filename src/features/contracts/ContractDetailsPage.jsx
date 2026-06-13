@@ -19,6 +19,7 @@ export default function ContractDetailsPage() {
   const lang = i18n.language;
 
   const [contract, setContract] = useState(null);
+  const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Delivery Modal
@@ -37,7 +38,14 @@ export default function ContractDetailsPage() {
     try {
       setLoading(true);
       const res = await contractsApi.getContract(id);
-      setContract(res.data);
+      const contractData = res.data?.data || res.data;
+      setContract(contractData);
+      try {
+        const resDeliveries = await contractsApi.getDeliveries(id);
+        setDeliveries(resDeliveries.data || []);
+      } catch (err) {
+        console.error('Failed to load deliveries:', err);
+      }
     } catch (err) {
       toast.error(err.title || t('common.error'));
       navigate('/contracts/my-contracts');
@@ -46,7 +54,19 @@ export default function ContractDetailsPage() {
     }
   }, [id, navigate, t]);
 
-  useEffect(() => { fetchContract(); }, [fetchContract]);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      await Promise.resolve();
+      if (active) {
+        fetchContract();
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [fetchContract]);
 
   const handleFileChange = (e) => {
     if (e.target.files) {
@@ -79,16 +99,16 @@ export default function ContractDetailsPage() {
       setFiles([]);
       
       // Append delivery to list directly
-      setContract(prev => ({
-        ...prev,
-        deliveries: [...(prev.deliveries || []), {
+      setDeliveries(prev => [
+        {
           id: res.data?.id || Date.now(),
-          note: deliveryNote,
-          date: new Date().toISOString(),
+          deliveryNote: deliveryNote,
+          submittedAt: new Date().toISOString(),
           status: 'Pending',
-          files: files.map(f => ({ name: f.name }))
-        }]
-      }));
+          attachments: files.map(f => ({ name: f.name, type: 'FILE' }))
+        },
+        ...prev
+      ]);
     } catch (err) {
       toast.error(err.title || t('common.error'));
     } finally {
@@ -133,6 +153,17 @@ export default function ContractDetailsPage() {
 
   if (!contract) return null;
 
+  const statusVal = contract.status !== undefined ? contract.status : contract.Status;
+  const statusStr = String(statusVal != null ? statusVal : '').toLowerCase();
+  const isActive = statusStr === 'active' || statusStr === '1';
+  const isClosed = statusStr === 'closed' || statusStr === 'completed' || statusStr === '2' || statusStr === '5';
+  const title = contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract';
+  const clientName = contract.client_Name || contract.clientName || contract.Client_Name || 'Client';
+  const rate = contract.agreedRate || contract.AgreedRate;
+  const started = contract.startedAt || contract.startDate || contract.StartedAt;
+  const formattedStartDate = started ? new Date(started).toLocaleDateString() : 'N/A';
+  const description = contract.description || contract.Description || 'This contract involves the full scope of work as discussed in the proposal. The goal is to deliver high-quality results within the agreed timeline.';
+
   return (
     <div className="main-container">
       <Link to="/contracts/my-contracts" style={{ display: 'inline-block', marginBottom: 16, color: 'var(--color-primary-green)', textDecoration: 'none' }}>
@@ -143,12 +174,12 @@ export default function ContractDetailsPage() {
         {/* Header */}
         <div className="contract-header">
           <div className="header-left">
-            <h1 id="contract-title">{contract.jobTitle}</h1>
-            <div className="client-subtitle">{contract.clientName}</div>
+            <h1 id="contract-title">{title}</h1>
+            <div className="client-subtitle">{clientName}</div>
           </div>
           <div className="header-right header-buttons">
             <button className="btn-specialist">{t('contracts.request_specialist')}</button>
-            {contract.status === 'Active' && (
+            {isActive && (
               <button className="btn-deliver" onClick={() => setIsDeliveryOpen(true)}>{t('contracts.deliver_work')}</button>
             )}
             <button className="btn-message" onClick={() => navigate('/messages')} title="Message Client">
@@ -162,54 +193,64 @@ export default function ContractDetailsPage() {
         <div className="terms-grid">
           <div className="term-item">
             <label>{t('contracts.price')}</label>
-            <span>{formatEgp(contract.agreedRate, lang)}</span>
+            <span>{formatEgp(rate, lang)}</span>
           </div>
           <div className="term-item">
             <label>{t('contracts.start_date')}</label>
-            <span>{contract.startDate || 'N/A'}</span>
+            <span>{formattedStartDate}</span>
           </div>
           <div className="term-item">
             <label>{t('contracts.status')}</label>
-            <span className={`contract-status ${contract.status === 'Active' ? 'status-active' : 'status-closed'}`}>
-              {contract.status === 'Active' ? t('contracts.status_active') : t('contracts.status_closed')}
+            <span className={`contract-status ${isActive ? 'status-active' : 'status-closed'}`}>
+              {isActive ? t('contracts.status_active') : t('contracts.status_closed')}
             </span>
           </div>
         </div>
 
         <div className="section-title">{t('contracts.description')}</div>
         <div className="description-box mb-8 whitespace-pre-wrap">
-          {contract.description || 'This contract involves the full scope of work as discussed in the proposal. The goal is to deliver high-quality results within the agreed timeline.'}
+          {description}
         </div>
 
         {/* Delivery History */}
         <div className="border-t border-[#e2e2e2] pt-6 mb-8">
             <div className="section-title">{t('contracts.delivery_history')}</div>
-            {(!contract.deliveries || contract.deliveries.length === 0) ? (
+            {(!deliveries || deliveries.length === 0) ? (
                <p className="text-[#5e6d55] text-sm">{t('contracts.no_deliveries')}</p>
             ) : (
                 <div className="space-y-4">
-                   {contract.deliveries.map((delivery, idx) => (
-                      <div key={idx} className="p-4 border border-[#e2e2e2] rounded-lg bg-gray-50">
-                          <div className="flex justify-between items-start mb-2">
-                             <div className="font-medium text-[#001e00]">{new Date(delivery.date).toLocaleDateString()}</div>
-                             <span className="text-xs bg-gray-200 px-2 py-1 rounded inline-flex items-center">{delivery.status || 'Delivered'}</span>
-                          </div>
-                          <p className="text-sm text-[#5e6d55] mb-3 whitespace-pre-wrap">{delivery.note}</p>
-                          {delivery.files?.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                               {delivery.files.map((f, i) => (
-                                 <span key={i} className="text-xs bg-white border border-[#e2e2e2] px-2 py-1 rounded-full flex items-center gap-1 shadow-sm"><Paperclip size={12}/>{f.name}</span>
-                               ))}
+                   {deliveries.map((delivery, idx) => {
+                      const dStatus = delivery.status || 'Delivered';
+                      const dNote = delivery.deliveryNote || delivery.note || '';
+                      const dDate = delivery.submittedAt || delivery.date || new Date().toISOString();
+                      const dAttachments = delivery.attachments || delivery.files || [];
+
+                      return (
+                        <div key={delivery.id || idx} className="p-4 border border-[#e2e2e2] rounded-lg bg-gray-50">
+                            <div className="flex justify-between items-start mb-2">
+                               <div className="font-medium text-[#001e00]">{new Date(dDate).toLocaleDateString()}</div>
+                               <span className="text-xs bg-gray-200 px-2 py-1 rounded inline-flex items-center">{dStatus}</span>
                             </div>
-                          )}
-                      </div>
-                   ))}
+                            {dNote && <p className="text-sm text-[#5e6d55] mb-3 whitespace-pre-wrap">{dNote}</p>}
+                            {dAttachments.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                 {dAttachments.map((f, i) => {
+                                   const fName = f.name || f.fileName || f.originalFileName || 'Attachment';
+                                   return (
+                                     <span key={f.id || i} className="text-xs bg-white border border-[#e2e2e2] px-2 py-1 rounded-full flex items-center gap-1 shadow-sm"><Paperclip size={12}/>{fName}</span>
+                                   );
+                                 })}
+                              </div>
+                            )}
+                        </div>
+                      );
+                   })}
                 </div>
             )}
         </div>
 
         {/* Contract Closed Notice OR Review Section */}
-        {contract.status === 'Closed' && (
+        {isClosed && (
             <div className="feedback-section border-t border-[#e2e2e2] pt-6">
                 {!contract.review ? (
                     <>
@@ -255,7 +296,7 @@ export default function ContractDetailsPage() {
       </div>
 
       {/* Delivery Modal */}
-      {isDeliveryOpen && contract.status === 'Active' && (
+      {isDeliveryOpen && isActive && (
         <div className="modal-overlay" style={{ display: 'flex' }} onClick={(e) => {
             if (e.target.className === 'modal-overlay') setIsDeliveryOpen(false);
           }}>

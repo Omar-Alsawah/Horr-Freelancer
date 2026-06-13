@@ -1,40 +1,64 @@
-import React from 'react';
 import { format } from 'date-fns';
 
 const BASE_URL = 'https://localhost:5200';
 
 export default function MessageBubble({ message, isOwnMessage }) {
+  const getProp = (obj, propName) => {
+    if (!obj) return null;
+    const lower = propName.toLowerCase();
+    for (const key of Object.keys(obj)) {
+      if (key.toLowerCase() === lower) {
+        return obj[key];
+      }
+    }
+    return null;
+  };
+
+  const type = getProp(message, 'type');
+  const body = getProp(message, 'body');
+  const textContent = getProp(message, 'textContent');
+  const fileUrl = getProp(message, 'fileUrl');
+  const fileName = getProp(message, 'fileName');
+  const senderAvatarUrl = getProp(message, 'senderAvatarUrl');
+  const senderName = getProp(message, 'senderName') || 'User';
+  const sentAt = getProp(message, 'sentAt') || new Date().toISOString();
+
   const renderContent = () => {
-    switch (message.Type) {
-      case 0: // Text
+    const normalizedType = typeof type === 'string' ? type.toLowerCase() : type;
+    switch (normalizedType) {
+      case 0:
+      case 'text': // Text
         return (
-          <p>{message.TextContent}</p>
+          <p>{textContent || body}</p>
         );
-      case 1: // Image
+      case 1:
+      case 'image': // Image
         return (
           <img
-            src={`${BASE_URL}${message.FileUrl}`}
+            src={`${BASE_URL}${fileUrl}`}
             alt="image"
             style={{ maxWidth: '100%', borderRadius: '8px' }}
           />
         );
-      case 2: // Video
+      case 2:
+      case 'video': // Video
         return (
           <video
             controls
-            src={`${BASE_URL}${message.FileUrl}`}
+            src={`${BASE_URL}${fileUrl}`}
             style={{ maxWidth: '100%', borderRadius: '8px' }}
           />
         );
-      case 3: // PDF
+      case 3:
+      case 'pdf': // PDF
         return (
           <a
-            href={`${BASE_URL}${message.FileUrl}`}
+            href={`${BASE_URL}${fileUrl}`}
             download
             className="flex items-center gap-2"
             style={{ textDecoration: 'underline' }}
           >
-            📄 {message.FileName}
+            📄 {fileName}
           </a>
         );
       default:
@@ -47,8 +71,11 @@ export default function MessageBubble({ message, isOwnMessage }) {
       {/* Avatar */}
       <div className="message-avatar">
         <img
-          src={message.SenderAvatarUrl || 'https://ui-avatars.com/api/?name=U&background=random'}
-          alt="avatar"
+          src={
+            senderAvatarUrl ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(senderName)}&background=random`
+          }
+          alt={senderName}
         />
       </div>
 
@@ -58,7 +85,7 @@ export default function MessageBubble({ message, isOwnMessage }) {
           {renderContent()}
         </div>
         <p className="message-time">
-          {format(new Date(message.SentAt), 'hh:mm a')}
+          {format(new Date(sentAt), 'hh:mm a')}
         </p>
       </div>
     </div>

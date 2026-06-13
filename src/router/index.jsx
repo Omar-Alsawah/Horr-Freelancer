@@ -1,9 +1,8 @@
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import AdminLayout from '../layouts/AdminLayout';
-// ProtectedRoute is commented out since we are bypassing authentication entirely
-// import ProtectedRoute from '../components/layout/ProtectedRoute'; 
+import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
 import Dashboard from '../pages/Dashboard';
@@ -37,12 +36,13 @@ import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
 import DepositRequestsPage from '../features/admin/DepositRequestsPage';
 import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
+import DeliveryPortalPage from '../features/contracts/DeliveryPortalPage';
+
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    // AUTH BYPASSED: Replaced ProtectedRoute with <Outlet /> so children render unconditionally
-    element: <Outlet />,
+    element: <ProtectedRoute requiredRoles={null} />,
     children: [
       {
         element: <MainLayout />,
@@ -61,6 +61,7 @@ export const router = createBrowserRouter([
           { path: 'contracts/:contractId/milestones', element: <MilestoneFundingPage /> },
           { path: 'contracts/:contractId/deliver', element: <DeliverySubmitPage /> },
           { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
+          { path: 'contracts/:contractId/deliveries', element: <DeliveryPortalPage /> },
           { path: 'contracts/:contractId/deliveries/:deliveryId', element: <DeliveryReviewPage /> },
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
@@ -79,8 +80,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    // AUTH BYPASSED: Replaced Admin ProtectedRoute with <Outlet /> to let anyone access admin panels
-    element: <Outlet />,
+    element: <ProtectedRoute requiredRoles={['Admin']} />,
     children: [
       {
         element: <AdminLayout />,

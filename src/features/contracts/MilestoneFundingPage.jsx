@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { Loader2, PlusCircle, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, PlusCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { walletApi } from '../../api/wallet';
 import { useAuthStore } from '../../store/authStore';
@@ -30,7 +30,7 @@ export default function MilestoneFundingPage() {
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
@@ -39,8 +39,9 @@ export default function MilestoneFundingPage() {
         walletApi.getWalletBalance()
       ]);
       
-      setContract(contractRes.data);
-      setMilestones(contractRes.data.milestones || []);
+      const contractData = contractRes.data?.data || contractRes.data;
+      setContract(contractData);
+      setMilestones(contractData.milestones || contractData.Milestones || []);
       setWalletBalance(walletRes.data?.balance ?? 0);
     } catch (err) {
       toast.error(err.title || t('common.error'));
@@ -48,13 +49,21 @@ export default function MilestoneFundingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [contractId, t]);
 
   useEffect(() => {
-    if (role === 'Client') {
-      loadData();
-    }
-  }, [contractId, t, role]);
+    let active = true;
+    const load = async () => {
+      await Promise.resolve();
+      if (active && role === 'Client') {
+        loadData();
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [role, loadData]);
 
   if (role !== 'Client') {
     return <Navigate to="/unauthorized" replace />;
@@ -140,10 +149,10 @@ export default function MilestoneFundingPage() {
       {/* Page Header */}
       <div className="bg-white rounded-lg shadow border border-gray-200 p-6 flex flex-col md:flex-row md:items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{contract.title || contract.jobTitle}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract'}</h1>
           <div className="text-gray-500 font-medium">
             <span className="mr-8">{t('milestone.totalFunded')}: <span className="text-gray-900 font-bold">{formatCurrency(totalFunded, i18n.language)}</span></span>
-            <span>{t('milestone.totalValue')}: <span className="text-gray-900 font-bold">{formatCurrency(contract.totalValue, i18n.language)}</span></span>
+            <span>{t('milestone.totalValue')}: <span className="text-gray-900 font-bold">{formatCurrency(contract.totalValue || contract.TotalValue || contract.agreedRate || contract.AgreedRate || 0, i18n.language)}</span></span>
           </div>
         </div>
         <div className="mt-4 md:mt-0 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -158,7 +167,7 @@ export default function MilestoneFundingPage() {
         {/* Simple timeline line running down the left */}
         <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200 z-0 hidden md:block"></div>
         
-        {milestones.map((milestone, idx) => (
+        {milestones.map((milestone) => (
           <div key={milestone.id} className="relative z-10 flex items-start gap-6">
             
             {/* Timeline Dot */}
