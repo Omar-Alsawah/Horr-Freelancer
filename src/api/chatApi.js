@@ -36,3 +36,9 @@ export async function uploadFile(chatId, file) {
   );
   return response.data;
 }
+
+// ─── Get or create chat by contract ID ──────────────────────────────────────
+export async function getChatByContract(contractId) {
+  const response = await apiClient.get(`/api/chat/by-contract/${contractId}`);
+  return response.data;
+}

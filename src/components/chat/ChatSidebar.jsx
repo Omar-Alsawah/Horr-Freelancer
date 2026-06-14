@@ -4,22 +4,27 @@ import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getChats } from '../../api/chatApi';
 
-export default function ChatSidebar() {
-  const [chats, setChats] = useState([]);
+export default function ChatSidebar({ chats: propChats, setChats: propSetChats, loading: propLoading }) {
+  const [internalChats, setInternalChats] = useState([]);
+  const [internalLoading, setInternalLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { chatId } = useParams();
 
+  const chats = propChats !== undefined ? propChats : internalChats;
+  const setChats = propSetChats !== undefined ? propSetChats : setInternalChats;
+  const loading = propLoading !== undefined ? propLoading : internalLoading;
+
   // ─── Load chats from API on mount ─────────────────────────────────────────
   useEffect(() => {
+    if (propChats !== undefined) return;
     getChats()
       .then((data) => {
-        setChats(data);
+        setChats(data || []);
       })
       .catch(() => toast.error('Could not load conversations.'))
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => setInternalLoading(false));
+  }, [propChats, setChats]);
 
   // ─── Auto-redirect if no valid chatId is present ───────────────────────────
   useEffect(() => {

@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { X, Paperclip, MessageSquare, Briefcase, Play, Link as LinkIcon, File } from 'lucide-react';
+import { Paperclip, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { contractsApi } from '../../api/contracts';
+import { getChatByContract } from '../../api/chatApi';
 
 function formatEgp(amount, lang) {
   if (amount == null) return '';
@@ -22,12 +23,6 @@ export default function ContractDetailsPage() {
   const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Delivery Modal
-  const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
-  const [deliveryNote, setDeliveryNote] = useState('');
-  const [files, setFiles] = useState([]);
-  const [deliverySubmitting, setDeliverySubmitting] = useState(false);
-  const fileInputRef = useRef(null);
 
   // Review
   const [rating, setRating] = useState(0);
@@ -68,53 +63,6 @@ export default function ContractDetailsPage() {
     };
   }, [fetchContract]);
 
-  const handleFileChange = (e) => {
-    if (e.target.files) {
-      setFiles(prev => [...prev, ...Array.from(e.target.files)]);
-    }
-  };
-
-  const removeFile = (indexToRemove) => {
-    setFiles(files.filter((_, i) => i !== indexToRemove));
-  };
-
-  const handleDeliver = async () => {
-    if (!deliveryNote.trim()) {
-      toast.error(t('contracts.note_required'));
-      return;
-    }
-
-    setDeliverySubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append('note', deliveryNote);
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-
-      const res = await contractsApi.deliverWork(id, formData);
-      toast.success(t('contracts.work_submitted'));
-      setIsDeliveryOpen(false);
-      setDeliveryNote('');
-      setFiles([]);
-      
-      // Append delivery to list directly
-      setDeliveries(prev => [
-        {
-          id: res.data?.id || Date.now(),
-          deliveryNote: deliveryNote,
-          submittedAt: new Date().toISOString(),
-          status: 'Pending',
-          attachments: files.map(f => ({ name: f.name, type: 'FILE' }))
-        },
-        ...prev
-      ]);
-    } catch (err) {
-      toast.error(err.title || t('common.error'));
-    } finally {
-      setDeliverySubmitting(false);
-    }
-  };
 
   const submitReview = async () => {
     if (rating === 0) {
@@ -140,6 +88,24 @@ export default function ContractDetailsPage() {
       }
     } finally {
       setReviewSubmitting(false);
+    }
+  };
+
+  const handleMessageClient = async () => {
+    try {
+      setLoading(true);
+      const chatObj = await getChatByContract(id);
+      const targetChatId = chatObj?.chatId ?? chatObj?.ChatId ?? chatObj?.id ?? chatObj?.Id;
+      if (targetChatId) {
+        navigate(`/messages/${targetChatId}`);
+      } else {
+        toast.error('Could not resolve chat ID');
+      }
+    } catch (err) {
+      console.error('Failed to open chat:', err);
+      toast.error(err.title || t('common.error'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,9 +146,11 @@ export default function ContractDetailsPage() {
           <div className="header-right header-buttons">
             <button className="btn-specialist">{t('contracts.request_specialist')}</button>
             {isActive && (
-              <button className="btn-deliver" onClick={() => setIsDeliveryOpen(true)}>{t('contracts.deliver_work')}</button>
+              <button className="btn-deliver" onClick={() => navigate(`/contracts/${id}/deliveries`)}>
+                {t('contracts.view_delivery_portal') || 'View Delivery Portal'}
+              </button>
             )}
-            <button className="btn-message" onClick={() => navigate('/messages')} title="Message Client">
+            <button className="btn-message" onClick={handleMessageClient} title="Message Client">
               <MessageSquare size={20} />
             </button>
           </div>
@@ -292,87 +260,7 @@ export default function ContractDetailsPage() {
                 )}
             </div>
         )}
-
       </div>
-
-      {/* Delivery Modal */}
-      {isDeliveryOpen && isActive && (
-        <div className="modal-overlay" style={{ display: 'flex' }} onClick={(e) => {
-            if (e.target.className === 'modal-overlay') setIsDeliveryOpen(false);
-          }}>
-          <div className="modal-container m-4">
-            <div className="modal-header">
-              <h2 className="text-xl font-semibold text-[#001e00]">{t('contracts.manage_delivery')}</h2>
-              <button className="close-modal" onClick={() => setIsDeliveryOpen(false)}><X/></button>
-            </div>
-
-            <div className="modal-body space-y-5">
-                <div className="input-group">
-                    <label className="block mb-2 font-medium text-[#001e00]">{t('contracts.attachments')}</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                        <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()}>
-                            <Briefcase size={24} className="mb-2 text-[#5e6d55]" />
-                            <span className="text-sm">Photo</span>
-                        </button>
-                        <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()}>
-                            <Play size={24} className="mb-2 text-[#5e6d55]" />
-                            <span className="text-sm">Video</span>
-                        </button>
-                        <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()}>
-                            <LinkIcon size={24} className="mb-2 text-[#5e6d55]" />
-                            <span className="text-sm">Link</span>
-                        </button>
-                        <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()}>
-                            <File size={24} className="mb-2 text-[#5e6d55]" />
-                            <span className="text-sm">File</span>
-                        </button>
-                        <input 
-                            type="file" 
-                            multiple 
-                            className="hidden" 
-                            ref={fileInputRef} 
-                            onChange={handleFileChange} 
-                        />
-                    </div>
-                    {/* Selected Files Chips */}
-                    {files.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-2">
-                           {files.map((file, i) => (
-                             <div key={i} className="flex items-center gap-1 bg-[#f0f2f5] text-[#333] px-3 py-1.5 rounded-full text-sm">
-                                <span className="truncate max-w-[150px]">{file.name}</span>
-                                <button type="button" onClick={() => removeFile(i)} className="text-[#999] hover:text-red-500 rounded-full p-0.5"><X size={14}/></button>
-                             </div>
-                           ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="input-group">
-                    <label className="block mb-2 font-medium text-[#001e00]">{t('contracts.message_description')}</label>
-                    <textarea 
-                      className="w-full h-32 p-3 border border-[#ccc] rounded-lg resize-y font-['Inter']"
-                      placeholder={t('contracts.delivery_placeholder')}
-                      value={deliveryNote}
-                      onChange={e => setDeliveryNote(e.target.value)}
-                    ></textarea>
-                </div>
-            </div>
-
-            <div className="bg-[#f9f9f9] px-6 py-4 flex justify-end gap-3 border-t border-[#e2e2e2]">
-                <button className="px-5 py-2.5 rounded-full font-semibold border border-[#ccc] bg-white text-[#333]" onClick={() => setIsDeliveryOpen(false)}>
-                  {t('common.cancel')}
-                </button>
-                <button 
-                  className="btn-deliver disabled:opacity-50"
-                  onClick={handleDeliver}
-                  disabled={deliverySubmitting}
-                >
-                  {deliverySubmitting ? t('common.loading') : t('contracts.deliver_btn')}
-                </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

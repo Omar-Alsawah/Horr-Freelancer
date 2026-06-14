@@ -27,11 +27,11 @@ const getProp = (obj, propName) => {
   return null;
 };
 
-export default function ChatWindow({ chatId }) {
+export default function ChatWindow({ chatId, initialActiveChat }) {
   const isValidChat = chatId && chatId !== 'demo-chat-id' && chatId !== 'undefined';
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(isValidChat);
-  const [activeChat, setActiveChat] = useState(null);
+  const [activeChat, setActiveChat] = useState(initialActiveChat || null);
   const navigate = useNavigate();
 
   // ─── Pagination & Scrolling States ──────────────────────────────────────────
@@ -48,6 +48,13 @@ export default function ChatWindow({ chatId }) {
   // We use the named import for useAuthStore based on src/store/authStore.js
   const { user } = useAuthStore();
   const userId = user?.userId;
+
+  // Sync activeChat when prop changes
+  useEffect(() => {
+    if (initialActiveChat) {
+      setActiveChat(initialActiveChat);
+    }
+  }, [initialActiveChat]);
 
   // ─── Append incoming SignalR message ──────────────────────────────────────
   const handleNewMessage = (message) => {
@@ -80,14 +87,16 @@ export default function ChatWindow({ chatId }) {
 
       try {
         // Load active chat info
-        const chatsList = await getChats();
-        if (active && chatsList && Array.isArray(chatsList)) {
-          const found = chatsList.find(c => {
-            const cId = getProp(c, 'id') || getProp(c, 'chatId');
-            return String(cId) === String(chatId);
-          });
-          if (found) {
-            setActiveChat(found);
+        if (!initialActiveChat) {
+          const chatsList = await getChats();
+          if (active && chatsList && Array.isArray(chatsList)) {
+            const found = chatsList.find(c => {
+              const cId = getProp(c, 'id') || getProp(c, 'chatId');
+              return String(cId) === String(chatId);
+            });
+            if (found) {
+              setActiveChat(found);
+            }
           }
         }
 
@@ -115,7 +124,7 @@ export default function ChatWindow({ chatId }) {
     return () => {
       active = false;
     };
-  }, [chatId, isValidChat]);
+  }, [chatId, isValidChat, initialActiveChat]);
 
   // ─── Handle Scroll Up Lazy Loading ─────────────────────────────────────────
   const handleScroll = async (e) => {

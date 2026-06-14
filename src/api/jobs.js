@@ -5,4 +5,5 @@ export const jobsApi = {
   getJob: (id) => api.get(`/api/jobs/jobs/${id}`),
   saveJob: (id) => api.post(`/api/jobs/${id}/save-job`),
   unsaveJob: (id) => api.delete(`/api/jobs/${id}/unsave-job`),
+  getRecommendedJobs: () => api.get('/api/Recommendations/jobs'),
 };

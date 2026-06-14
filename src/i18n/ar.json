@@ -185,7 +185,10 @@
     "accept_offer_success": "تم قبول العرض بنجاح!",
     "decline_offer_success": "تم رفض العرض بنجاح",
     "decline_reason_prompt": "يرجى إدخال سبب رفض هذا العرض:",
-    "offer_not_found": "العرض غير موجود"
+    "offer_not_found": "العرض غير موجود",
+    "empty_saved_subtitle": "ليس لديك أي عروض في هذا القسم.",
+    "back_to_list": "العودة إلى العروض",
+    "no_description": "لا يوجد وصف متاح."
   },
   "contracts": {
     "my_contracts": "عقودي",
@@ -223,7 +226,9 @@
     "delivery_placeholder": "صف العمل الذي تقوم بتسليمه...",
     "deliver_btn": "تسليم",
     "note_required": "يرجى تقديم ملاحظة لهذا التسليم.",
-    "work_submitted": "تم تسليم العمل بنجاح!"
+    "work_submitted": "تم تسليم العمل بنجاح!",
+    "view_delivery_portal": "عرض بوابة التسليم",
+    "terms_title": "شروط العقد"
   },
   "delivery": {
     "pageTitle": "تسليم العمل",
@@ -498,5 +503,15 @@
     "title": "الرسائل",
     "search_placeholder": "بحث...",
     "send_placeholder": "أرسل رسالة..."
+  },
+  "dashboard": {
+    "welcome_recommended": "مرحبًا، {{name}}! إليك بعض الوظائف المقترحة لتبدأ بها",
+    "no_recommendations_title": "لا توجد اقتراحات بعد",
+    "no_recommendations_subtitle": "أكمل ملفك الشخصي للحصول على وظائف مطابقة لمهاراتك.",
+    "personalized_matches": "اقتراحات مخصصة",
+    "welcome_back": "مرحبًا بعودتك، {{name}}!",
+    "banner_subtitle": "لقد قمنا بتحليل ملفك الشخصي ومطابقته مع فرص عمل عالية الجودة تناسب مهاراتك.",
+    "browse_all": "تصفح جميع الوظائف",
+    "recommended_jobs_header": "وظائف قد تعجبك"
   }
 }

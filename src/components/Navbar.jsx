@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, ChevronDown, Bell, Menu, X } from 'lucide-react';
@@ -11,7 +11,22 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [findWorkDropdownOpen, setFindWorkDropdownOpen] = useState(false);
-  const [deliverWorkDropdownOpen, setDeliverWorkDropdownOpen] = useState(false);
+
+  const findWorkRef = useRef(null);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (findWorkRef.current && !findWorkRef.current.contains(e.target)) {
+        setFindWorkDropdownOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleLang = () => {
     const nextLang = i18n.language === 'en' ? 'ar' : 'en';
@@ -47,7 +62,7 @@ export default function Navbar() {
             <div className="hidden md:ml-6 md:flex md:space-x-8 md:items-center">
 
               {/* Find Work Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={findWorkRef}>
                 <button
                   onClick={() => setFindWorkDropdownOpen(!findWorkDropdownOpen)}
                   className="text-gray-900 hover:text-gray-500 px-3 py-2 text-sm font-medium flex items-center gap-1 focus:outline-none"
@@ -105,36 +120,9 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Deliver Work Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setDeliverWorkDropdownOpen(!deliverWorkDropdownOpen)}
-                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 focus:outline-none transition-colors ${
-                    deliverWorkDropdownOpen ? 'text-[#B68C48]' : 'text-gray-900 hover:text-gray-500'
-                  }`}
-                >
-                  Deliver work <ChevronDown className="w-4 h-4" />
-                </button>
-
-                {deliverWorkDropdownOpen && (
-                  <div className="origin-top-left absolute left-0 mt-4 w-60 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),_0_8px_10px_-6px_rgba(0,0,0,0.1)] py-3 bg-white border border-gray-100 z-50">
-                    <Link
-                      to="/contracts/my-contracts"
-                      onClick={() => setDeliverWorkDropdownOpen(false)}
-                      className="block px-5 py-2.5 text-[15px] text-gray-800 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                    >
-                      Your active contracts
-                    </Link>
-                    <Link
-                      to="/contracts/my-contracts"
-                      onClick={() => setDeliverWorkDropdownOpen(false)}
-                      className="block px-5 py-2.5 text-[15px] text-gray-800 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                    >
-                      Contract history
-                    </Link>
-                  </div>
-                )}
-              </div>
+              <Link to="/contracts/my-contracts" className="text-gray-900 hover:text-gray-500 px-3 py-2 text-sm font-medium">
+                Contracts
+              </Link>
               <Link to="/messages" className="text-gray-900 hover:text-gray-500 px-3 py-2 text-sm font-medium">
                 Messages
               </Link>
@@ -175,7 +163,7 @@ export default function Navbar() {
             </button>
 
             {/* User Avatar with Dropdown */}
-            <div className="relative ml-1">
+            <div className="relative ml-1" ref={profileRef}>
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center justify-center h-9 w-9 rounded-full bg-[#1e293b] text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#eab308]"
@@ -222,14 +210,7 @@ export default function Navbar() {
             <Link to="/services/my-services" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Your Services</Link>
             {/* TODO: page not implemented */}
             <Link to="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Direct Contracts</Link>
-            {/* Deliver work mobile items */}
-            <div className="px-3 py-2">
-              <div className="text-base font-medium text-gray-900 mb-2">Deliver work</div>
-              <div className="pl-4 space-y-1 border-l-2 border-gray-100 ml-1">
-                <Link to="/contracts/my-contracts" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">Your active contracts</Link>
-                <Link to="/contracts/my-contracts" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">Contract history</Link>
-              </div>
-            </div>
+            <Link to="/contracts/my-contracts" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Contracts</Link>
             <Link to="/messages" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Messages</Link>
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200 bg-gray-50">

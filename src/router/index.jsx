@@ -9,6 +9,7 @@ import Unauthorized from '../pages/Unauthorized';
 import VerifyEmail from '../pages/VerifyEmail';
 import EmailConfirmed from '../pages/EmailConfirmed';
 import FindWorkPage from '../features/jobs/FindWorkPage';
+import DashboardPage from '../pages/DashboardPage';
 import SavedJobsPage from '../features/jobs/SavedJobsPage';
 import JobDetailsPage from '../features/jobs/JobDetailsPage';
 import SubmitProposalPage from '../features/proposals/SubmitProposalPage';
@@ -44,7 +45,7 @@ export const router = createBrowserRouter([
       {
         element: <MainLayout />,
         children: [
-          { index: true, element: <FindWorkPage /> },
+          { index: true, element: <DashboardPage /> },
           { path: 'find-work', element: <FindWorkPage /> },
           { path: 'saved-jobs', element: <SavedJobsPage /> },
           { path: 'jobs/:id', element: <JobDetailsPage /> },

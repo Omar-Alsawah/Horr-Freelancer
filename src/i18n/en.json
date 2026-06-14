@@ -185,7 +185,10 @@
     "accept_offer_success": "Offer accepted successfully!",
     "decline_offer_success": "Offer declined successfully",
     "decline_reason_prompt": "Please enter a reason for declining this offer:",
-    "offer_not_found": "Offer not found"
+    "offer_not_found": "Offer not found",
+    "empty_saved_subtitle": "You have no proposals in this section.",
+    "back_to_list": "Back to Proposals",
+    "no_description": "No description available."
   },
   "contracts": {
     "my_contracts": "My Contracts",
@@ -223,7 +226,9 @@
     "delivery_placeholder": "Describe the work you are submitting...",
     "deliver_btn": "Deliver",
     "note_required": "Please provide a note for this delivery.",
-    "work_submitted": "Work submitted successfully!"
+    "work_submitted": "Work submitted successfully!",
+    "view_delivery_portal": "View Delivery Portal",
+    "terms_title": "Contract Terms"
   },
   "delivery": {
     "pageTitle": "Submit Delivery",
@@ -543,5 +548,15 @@
     "continue": "Continue",
     "securePayment": "Secure payment via Horr Escrow",
     "contactSeller": "Contact Seller"
+  },
+  "dashboard": {
+    "welcome_recommended": "Welcome, {{name}}! Here are some recommended jobs to get you started",
+    "no_recommendations_title": "No recommendations yet",
+    "no_recommendations_subtitle": "Complete your profile to get personalized job matches.",
+    "personalized_matches": "Personalized Matches",
+    "welcome_back": "Welcome back, {{name}}!",
+    "banner_subtitle": "We have analyzed your profile and matched you with high-quality opportunities that fit your skillset.",
+    "browse_all": "Browse All Jobs",
+    "recommended_jobs_header": "Jobs you might like"
   }
 }
