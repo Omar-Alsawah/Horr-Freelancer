@@ -5,11 +5,11 @@ import AdminLayout from '../layouts/AdminLayout';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
-import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
 import VerifyEmail from '../pages/VerifyEmail';
 import EmailConfirmed from '../pages/EmailConfirmed';
 import FindWorkPage from '../features/jobs/FindWorkPage';
+import DashboardPage from '../pages/DashboardPage';
 import SavedJobsPage from '../features/jobs/SavedJobsPage';
 import JobDetailsPage from '../features/jobs/JobDetailsPage';
 import SubmitProposalPage from '../features/proposals/SubmitProposalPage';
@@ -31,8 +31,6 @@ import DeliverySubmitPage from '../features/contracts/DeliverySubmitPage';
 import DeliveryReviewPage from '../features/contracts/DeliveryReviewPage';
 import MilestoneFundingPage from '../features/contracts/MilestoneFundingPage';
 import EscrowBreakdownPage from '../features/contracts/EscrowBreakdownPage';
-import DisputeManagementPage from '../features/admin/DisputeManagementPage';
-import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
 import DepositRequestsPage from '../features/admin/DepositRequestsPage';
 import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
@@ -47,7 +45,7 @@ export const router = createBrowserRouter([
       {
         element: <MainLayout />,
         children: [
-          { index: true, element: <FindWorkPage /> },
+          { index: true, element: <DashboardPage /> },
           { path: 'find-work', element: <FindWorkPage /> },
           { path: 'saved-jobs', element: <SavedJobsPage /> },
           { path: 'jobs/:id', element: <JobDetailsPage /> },

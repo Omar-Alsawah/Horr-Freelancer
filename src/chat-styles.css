@@ -1,11 +1,6 @@
 
     /* Chat Layout */
-    body {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow: hidden;
-    }
+    /* Chat Layout body styles removed to fix global scrolling */
 
     #global-header {
         flex-shrink: 0;

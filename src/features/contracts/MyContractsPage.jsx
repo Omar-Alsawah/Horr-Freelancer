@@ -93,7 +93,7 @@ export default function MyContractsPage() {
   const closedContracts = contracts.filter(c => {
     const statusVal = c.status !== undefined ? c.status : c.Status;
     const status = String(statusVal != null ? statusVal : '').toLowerCase();
-    return status === 'closed' || status === 'completed' || status === '2' || status === '5';
+    return status !== 'active' && status !== '1';
   });
   const displayedContracts = activeTab === 'active' ? activeContracts : closedContracts;
 

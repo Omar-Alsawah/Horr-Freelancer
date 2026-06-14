@@ -13,9 +13,9 @@ export default function MainLayout() {
   }, [i18n.language]);
 
   return (
-    <div className={`min-h-screen bg-background antialiased text-foreground flex flex-col ${i18n.language === 'ar' ? 'font-cairo' : 'font-sans'}`}>
+    <div className={`min-h-screen bg-transparent antialiased text-foreground flex flex-col ${i18n.language === 'ar' ? 'font-cairo' : 'font-sans'}`}>
       <Navbar />
-      <main className="flex-1 bg-gray-50">
+      <main className="flex-1 bg-transparent">
         <Outlet />
       </main>
       <Toaster position="bottom-right" />

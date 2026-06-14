@@ -185,7 +185,10 @@
     "accept_offer_success": "Offer accepted successfully!",
     "decline_offer_success": "Offer declined successfully",
     "decline_reason_prompt": "Please enter a reason for declining this offer:",
-    "offer_not_found": "Offer not found"
+    "offer_not_found": "Offer not found",
+    "empty_saved_subtitle": "You have no proposals in this section.",
+    "back_to_list": "Back to Proposals",
+    "no_description": "No description available."
   },
   "contracts": {
     "my_contracts": "My Contracts",
@@ -203,8 +206,6 @@
     "empty_closed_title": "No closed contracts yet",
     "empty_closed_subtitle": "Completed and ended contracts will appear here.",
     "back_to_contracts": "Back to Contracts",
-    "back_to_contract_details": "Back to Contract Details",
-    "terms_title": "Contract Terms",
     "request_specialist": "Request Specialist Review",
     "deliver_work": "Deliver Work",
     "price": "Price",
@@ -225,7 +226,9 @@
     "delivery_placeholder": "Describe the work you are submitting...",
     "deliver_btn": "Deliver",
     "note_required": "Please provide a note for this delivery.",
-    "work_submitted": "Work submitted successfully!"
+    "work_submitted": "Work submitted successfully!",
+    "view_delivery_portal": "View Delivery Portal",
+    "terms_title": "Contract Terms"
   },
   "delivery": {
     "pageTitle": "Submit Delivery",
@@ -495,5 +498,65 @@
     "methodInstapay": "InstaPay",
     "methodBank": "Bank Transfer",
     "methodEWallet": "E-Wallet"
+  },
+  "services": {
+    "myServices": "My Services",
+    "manageDesc": "Manage your project catalog and attract more clients.",
+    "createNew": "Create Service",
+    "searchPlaceholder": "Search your services...",
+    "filterAll": "All Statuses",
+    "filterActive": "Active",
+    "filterDraft": "Draft",
+    "noServicesFound": "No services found",
+    "tryAdjustingFilters": "Try adjusting your search or create a new service.",
+    "noImage": "No Image",
+    "days": "Days",
+    "startingAt": "Starting at",
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "paused": "Paused"
+    },
+    "createTitle": "Create a Service",
+    "createDesc": "Provide detailed information to attract the right clients.",
+    "stepOverview": "Overview",
+    "stepPricing": "Pricing & Scope",
+    "stepGallery": "Gallery",
+    "stepPublish": "Publish",
+    "serviceTitle": "Service Title",
+    "titlePlaceholder": "I will...",
+    "titleHint": "Keep it short, clear, and action-oriented.",
+    "category": "Category",
+    "selectCategory": "Select a Category",
+    "description": "Description",
+    "descPlaceholder": "Describe what you are offering...",
+    "price": "Price ($)",
+    "deliveryTime": "Delivery Time (Days)",
+    "revisions": "Number of Revisions",
+    "unlimited": "Unlimited",
+    "uploadImages": "Upload Images",
+    "uploadAFile": "Upload a file",
+    "dragAndDrop": "or drag and drop",
+    "fileConstraints": "PNG, JPG, GIF up to 10MB",
+    "almostDone": "Almost Done!",
+    "publishReviewText": "Review your service details before publishing. Once published, clients will be able to view and purchase your service.",
+    "publish": "Publish Service",
+    "aboutThisService": "About This Service",
+    "standardPackage": "Standard Package",
+    "daysDelivery": "Days Delivery",
+    "revisionsCount": "Revisions",
+    "continue": "Continue",
+    "securePayment": "Secure payment via Horr Escrow",
+    "contactSeller": "Contact Seller"
+  },
+  "dashboard": {
+    "welcome_recommended": "Welcome, {{name}}! Here are some recommended jobs to get you started",
+    "no_recommendations_title": "No recommendations yet",
+    "no_recommendations_subtitle": "Complete your profile to get personalized job matches.",
+    "personalized_matches": "Personalized Matches",
+    "welcome_back": "Welcome back, {{name}}!",
+    "banner_subtitle": "We have analyzed your profile and matched you with high-quality opportunities that fit your skillset.",
+    "browse_all": "Browse All Jobs",
+    "recommended_jobs_header": "Jobs you might like"
   }
 }

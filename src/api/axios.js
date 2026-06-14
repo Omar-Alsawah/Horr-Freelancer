@@ -6,6 +6,24 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
+const originalGet = api.get;
+const pendingGetRequests = new Map();
+
+api.get = function (url, config) {
+  const key = JSON.stringify({ url, params: config?.params });
+  if (pendingGetRequests.has(key)) {
+    return pendingGetRequests.get(key);
+  }
+
+  const promise = originalGet.call(this, url, config)
+    .finally(() => {
+      pendingGetRequests.delete(key);
+    });
+
+  pendingGetRequests.set(key, promise);
+  return promise;
+};
+
 export const getImageUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
