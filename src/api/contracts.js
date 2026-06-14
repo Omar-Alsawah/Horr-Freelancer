@@ -5,8 +5,9 @@ export const contractsApi = {
   getContract: (id) => api.get(`/api/contracts/${id}`),
   acceptOffer: (proposalId) => api.post(`/api/contracts/${proposalId}/accept-offer`),
   declineOffer: (proposalId) => api.post(`/api/contracts/${proposalId}/decline-offer`),
-  deliverWork: (id, formData) => api.post(`/api/contracts/${id}/deliver-work`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+  deliverWork: (id, formData, config = {}) => api.post(`/api/contracts/${id}/deliver-work`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    ...config
   }),
   submitReview: (id, payload) => api.post(`/api/contracts/${id}/reviews`, payload),
   submitDelivery: (formData) => api.post('/api/deliveries/submit', formData),
@@ -15,5 +16,14 @@ export const contractsApi = {
   requestDeliveryRevision: (deliveryId, payload) => api.post(`/api/deliveries/${deliveryId}/revision`, payload),
   disputeDelivery: (deliveryId, payload) => api.post(`/api/deliveries/${deliveryId}/dispute`, payload),
   fundMilestone: (milestoneId) => api.post(`/api/milestones/${milestoneId}/fund`),
-  getEscrow: (contractId) => api.get(`/api/contracts/${contractId}/escrow`)
+  getEscrow: (contractId) => api.get(`/api/contracts/${contractId}/escrow`),
+  
+  // Contract Delivery Portal Endpoints
+  getDeliveries: (contractId) => api.get(`/api/contracts/${contractId}/deliveries`),
+  downloadAttachment: (contractId, deliveryId, attachmentId) => api.get(
+    `/api/contracts/${contractId}/deliveries/${deliveryId}/attachments/${attachmentId}/download`,
+    { responseType: 'blob' }
+  ),
+  completeContract: (contractId) => api.post(`/api/contracts/${contractId}/complete`)
 };
+

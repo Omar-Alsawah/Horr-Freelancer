@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -6,7 +6,6 @@ import { getChats } from '../../api/chatApi';
 
 export default function ChatSidebar() {
   const [chats, setChats] = useState([]);
-  const [filteredChats, setFilteredChats] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -17,27 +16,36 @@ export default function ChatSidebar() {
     getChats()
       .then((data) => {
         setChats(data);
-        setFilteredChats(data);
       })
       .catch(() => toast.error('Could not load conversations.'))
       .finally(() => setLoading(false));
   }, []);
 
-  // ─── Filter chats when search query changes ────────────────────────────────
+  // ─── Auto-redirect if no valid chatId is present ───────────────────────────
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredChats(chats);
-    } else {
-      const lower = searchQuery.toLowerCase();
-      setFilteredChats(
-        chats.filter(
-          (chat) =>
-            chat.OtherPartyName?.toLowerCase().includes(lower) ||
-            chat.LastMessagePreview?.toLowerCase().includes(lower)
-        )
-      );
+    if (!loading && chats.length > 0) {
+      const hasNoValidChatId = !chatId || chatId === 'demo-chat-id' || chatId === 'undefined';
+      if (hasNoValidChatId) {
+        const firstChat = chats[0];
+        const firstId = firstChat.id || firstChat.chatId || firstChat.Id || firstChat.ChatId;
+        if (firstId) {
+          navigate(`/messages/${firstId}`, { replace: true });
+        }
+      }
     }
-  }, [searchQuery, chats]);
+  }, [chatId, chats, loading, navigate]);
+
+  // ─── Filter chats computed during render ─────────────────────────────────
+  const filteredChats = searchQuery.trim()
+    ? chats.filter((chat) => {
+        const name = chat.otherPartyName || chat.OtherPartyName || '';
+        const preview = chat.lastMessagePreview || chat.LastMessagePreview || '';
+        return (
+          name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          preview.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      })
+    : chats;
 
   // ─── Shared Header ─────────────────────────────────────────────────────────
   const renderSidebarHeader = () => (
@@ -105,51 +113,60 @@ export default function ChatSidebar() {
           </div>
         )}
 
-        {filteredChats.map((chat) => (
-          <div
-            key={chat.Id || chat.ChatId}
-            onClick={() => navigate(`/messages/${chat.Id || chat.ChatId}`)}
-            className={`conversation-item ${String(chat.Id || chat.ChatId) === chatId ? 'active' : ''}`}
-            role="button"
-            tabIndex={0}
-          >
-            {/* Avatar */}
-            <div className="user-status-avatar">
-              <img
-                src={
-                  chat.OtherPartyAvatarUrl ||
-                  'https://ui-avatars.com/api/?name=' +
-                  encodeURIComponent(chat.OtherPartyName || 'User') +
-                  '&background=random'
-                }
-                alt={chat.OtherPartyName}
-              />
-            </div>
+        {filteredChats.map((chat) => {
+          const cId = chat.id || chat.chatId || chat.Id || chat.ChatId;
+          const name = chat.otherPartyName || chat.OtherPartyName || 'User';
+          const avatarUrl = chat.otherPartyAvatarUrl || chat.OtherPartyAvatarUrl;
+          const time = chat.lastMessageAt || chat.LastMessageAt;
+          const preview = chat.lastMessagePreview || chat.LastMessagePreview || '';
+          const unread = chat.unreadCount || chat.UnreadCount || 0;
 
-            {/* Info */}
-            <div className="conv-info">
-              <div className="conv-top">
-                <span className="conv-name truncate">{chat.OtherPartyName}</span>
-                <span className="conv-time flex-shrink-0">
-                  {chat.LastMessageAt
-                    ? formatDistanceToNow(new Date(chat.LastMessageAt), { addSuffix: true })
-                    : ''}
-                </span>
+          return (
+            <div
+              key={cId}
+              onClick={() => navigate(`/messages/${cId}`)}
+              className={`conversation-item ${String(cId) === String(chatId) ? 'active' : ''}`}
+              role="button"
+              tabIndex={0}
+            >
+              {/* Avatar */}
+              <div className="user-status-avatar">
+                <img
+                  src={
+                    avatarUrl ||
+                    'https://ui-avatars.com/api/?name=' +
+                    encodeURIComponent(name) +
+                    '&background=random'
+                  }
+                  alt={name}
+                />
               </div>
-              <div
-                className={`conv-preview truncate ${chat.UnreadCount > 0 ? 'unread' : ''
-                  } flex justify-between items-center gap-2`}
-              >
-                <span className="truncate">{chat.LastMessagePreview}</span>
-                {chat.UnreadCount > 0 && (
-                  <span className="bg-[#eab308] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
-                    {chat.UnreadCount}
+
+              {/* Info */}
+              <div className="conv-info">
+                <div className="conv-top">
+                  <span className="conv-name truncate">{name}</span>
+                  <span className="conv-time flex-shrink-0">
+                    {time
+                      ? formatDistanceToNow(new Date(time), { addSuffix: true })
+                      : ''}
                   </span>
-                )}
+                </div>
+                <div
+                  className={`conv-preview truncate ${unread > 0 ? 'unread' : ''
+                    } flex justify-between items-center gap-2`}
+                >
+                  <span className="truncate">{preview}</span>
+                  {unread > 0 && (
+                    <span className="bg-[#eab308] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                      {unread}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );

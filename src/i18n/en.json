@@ -203,6 +203,8 @@
     "empty_closed_title": "No closed contracts yet",
     "empty_closed_subtitle": "Completed and ended contracts will appear here.",
     "back_to_contracts": "Back to Contracts",
+    "back_to_contract_details": "Back to Contract Details",
+    "terms_title": "Contract Terms",
     "request_specialist": "Request Specialist Review",
     "deliver_work": "Deliver Work",
     "price": "Price",
