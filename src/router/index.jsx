@@ -35,12 +35,16 @@ import DepositRequestsPage from '../features/admin/DepositRequestsPage';
 import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
 import DeliveryPortalPage from '../features/contracts/DeliveryPortalPage';
+import MyServicesPage from '../features/services/MyServicesPage';
+import CreateServicePage from '../features/services/CreateServicePage';
+import ServiceDetailsPage from '../features/services/ServiceDetailsPage';
+import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
 
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <ProtectedRoute requiredRoles={null} />,
+    // element: <ProtectedRoute requiredRoles={null} />,
     children: [
       {
         element: <MainLayout />,
@@ -61,6 +65,10 @@ export const router = createBrowserRouter([
           { path: 'contracts/:contractId/milestones/:milestoneId/deliver', element: <DeliverySubmitPage /> },
           { path: 'contracts/:contractId/deliveries', element: <DeliveryPortalPage /> },
           { path: 'contracts/:contractId/deliveries/:deliveryId', element: <DeliveryReviewPage /> },
+          { path: 'services/my-services', element: <MyServicesPage /> },
+          { path: 'services/create', element: <CreateServicePage /> },
+          { path: 'services/:id', element: <ServiceDetailsPage /> },
+          { path: 'specialist/revisions', element: <RevisionQueuePage /> },
           { path: 'profile', element: <MyProfilePage /> },
           { path: 'profile/:userIdHash/public', element: <PublicProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
