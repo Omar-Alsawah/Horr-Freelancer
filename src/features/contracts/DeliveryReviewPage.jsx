@@ -127,7 +127,7 @@ export default function DeliveryReviewPage() {
     setReasonError('');
     setIsSubmitting(true);
     try {
-      await contractsApi.requestDeliveryRevision(deliveryId, { Reason: reason.trim() });
+      await contractsApi.requestDeliveryRevision(deliveryId, { reason: reason.trim() });
       setDelivery(prev => ({ ...prev, status: 'RevisionRequested' }));
       setActiveAction(null);
     } catch (err) {
@@ -145,7 +145,7 @@ export default function DeliveryReviewPage() {
     setReasonError('');
     setIsSubmitting(true);
     try {
-      await contractsApi.disputeDelivery(deliveryId, { ContractId: contractId, DeliveryId: deliveryId, Reason: reason.trim() });
+      await contractsApi.disputeDelivery(deliveryId, { contractId: Number(contractId), reason: reason.trim() });
       setDelivery(prev => ({ ...prev, status: 'Disputed' }));
       setActiveAction(null);
     } catch (err) {

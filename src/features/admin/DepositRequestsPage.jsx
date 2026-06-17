@@ -23,7 +23,8 @@ export default function DepositRequestsPage() {
     setLoading(true);
     try {
       const response = await api.get('/api/admin/billing/deposit-requests/pending');
-      setRequests(response.data || []);
+      const payload = response.data?.data || response.data;
+      setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
       toast.error(err.title || t('common.error'));
     } finally {
@@ -80,7 +81,7 @@ export default function DepositRequestsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-sm">
-                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.clientName')}</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.clientId')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.amount')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.receiptNumber')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.submittedDate')}</th>
@@ -107,18 +108,18 @@ export default function DepositRequestsPage() {
               ) : (
                 requests.map((request, idx) => (
                   <tr key={request.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{request.clientName}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900 font-mono text-xs">{request.clientId || '—'}</td>
                     <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                       {new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP' }).format(request.amount || 0)}
                     </td>
                     <td className="px-6 py-4 text-gray-500 font-mono text-xs">{request.receiptNumber || '—'}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {request.submittedDate ? new Date(request.submittedDate).toLocaleDateString() : '—'}
+                      {request.submittedAt ? new Date(request.submittedAt).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setReceiptImage(request.receiptUrl)}
+                          onClick={() => setReceiptImage(request.receiptPhotoUrl)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md transition-colors"
                         >
                           <Eye className="w-4 h-4" />

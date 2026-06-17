@@ -35,6 +35,7 @@ import DepositRequestsPage from '../features/admin/DepositRequestsPage';
 import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
 import DeliveryPortalPage from '../features/contracts/DeliveryPortalPage';
+import AdminDashboardPage from '../features/admin/AdminDashboardPage';
 
 
 export const router = createBrowserRouter([
@@ -83,6 +84,8 @@ export const router = createBrowserRouter([
       {
         element: <AdminLayout />,
         children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: 'dashboard', element: <AdminDashboardPage /> },
           { path: 'deposits', element: <DepositRequestsPage /> },
           { path: 'withdrawals', element: <WithdrawalRequestsPage /> },
           { path: 'verification', element: <VerificationReviewPage /> }

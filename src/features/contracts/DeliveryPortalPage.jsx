@@ -39,6 +39,7 @@ export default function DeliveryPortalPage() {
   const { 
     mutate: submitWork, 
     isLoading: isSubmitting, 
+    error: submitError,
     uploadProgress 
   } = useDeliverWorkMutation();
 
@@ -72,9 +73,10 @@ export default function DeliveryPortalPage() {
 
   const handleDownloadAttachment = async (attachmentId, filename) => {
     // Determine the delivery containing this attachment to pass its ID
-    const delivery = deliveries.find(d => 
-      d.attachments && d.attachments.some(a => a.id === attachmentId)
-    );
+    const delivery = deliveries.find(d => {
+      const atts = d.attachments || d.files || [];
+      return atts.some(a => a.id === attachmentId);
+    });
     
     if (!delivery) {
       toast.error('Attachment metadata not found.');
@@ -88,17 +90,37 @@ export default function DeliveryPortalPage() {
     }
   };
 
-  // Client Actions Stub (Client completes review in separate pages)
-  const handleApprove = () => {
-    toast.error('Approve action is client-only and must be performed via Client portal.');
+  const handleApprove = async (deliveryId) => {
+    try {
+      await contractsApi.approveDelivery(deliveryId);
+      toast.success(t('delivery.review.approveSuccess', 'Delivery approved successfully!'));
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    }
   };
 
-  const handleRevision = () => {
-    toast.error('Revision action is client-only.');
+  const handleRevision = async (deliveryId, reason) => {
+    try {
+      await contractsApi.requestDeliveryRevision(deliveryId, { reason });
+      toast.success(t('delivery.review.revisionSuccess', 'Revision requested successfully!'));
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    }
   };
 
-  const handleDispute = () => {
-    toast.error('Dispute action is client-only.');
+  const handleDispute = async (deliveryId, reason) => {
+    try {
+      await contractsApi.disputeDelivery(deliveryId, { contractId: Number(contractId), reason });
+      toast.success(t('delivery.review.disputeSuccess', 'Dispute opened successfully!'));
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    }
   };
 
   if (contractError || deliveriesError) {
@@ -251,6 +273,16 @@ export default function DeliveryPortalPage() {
                       {t('delivery.history.freelancerDesc', 'Submit completed files and description to request milestone release.')}
                     </p>
                   </div>
+
+                  {submitError && (
+                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
+                      <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block">Submission Blocked</span>
+                        <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                      </div>
+                    </div>
+                  )}
 
                   <DeliveryUploader
                     milestones={milestones}

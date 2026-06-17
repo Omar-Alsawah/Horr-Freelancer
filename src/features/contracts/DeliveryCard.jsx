@@ -100,7 +100,7 @@ export default function DeliveryCard({
         )}
 
         <DeliveryFilesList 
-          attachments={delivery.attachments} 
+          attachments={delivery.attachments || delivery.files || []} 
           onDownload={onDownloadAttachment} 
         />
       </div>

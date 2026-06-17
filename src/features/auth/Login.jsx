@@ -65,7 +65,13 @@ export default function Login() {
       const token = res.data;
 
       loginAction(token);
-      navigate('/');
+      
+      const userRole = useAuthStore.getState().role;
+      if (userRole === 'Admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       if (isEmailNotConfirmedError(err)) {
         setUnverifiedEmail(email);

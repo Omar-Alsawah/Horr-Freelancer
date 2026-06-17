@@ -10,7 +10,8 @@ export const contractsApi = {
     ...config
   }),
   submitReview: (id, payload) => api.post(`/api/contracts/${id}/reviews`, payload),
-  submitDelivery: (formData) => api.post('/api/deliveries/submit', formData),
+  submitDelivery: (payload) => api.post('/api/deliveries/submit', payload),
+  uploadFiles: (formData, config = {}) => api.post('/api/deliveries/upload', formData, config),
   getDelivery: (contractId, deliveryId) => api.get(`/api/contracts/${contractId}/deliveries/${deliveryId}`),
   approveDelivery: (deliveryId) => api.post(`/api/deliveries/${deliveryId}/approve`),
   requestDeliveryRevision: (deliveryId, payload) => api.post(`/api/deliveries/${deliveryId}/revision`, payload),
@@ -19,9 +20,9 @@ export const contractsApi = {
   getEscrow: (contractId) => api.get(`/api/contracts/${contractId}/escrow`),
   
   // Contract Delivery Portal Endpoints
-  getDeliveries: (contractId) => api.get(`/api/contracts/${contractId}/deliveries`),
-  downloadAttachment: (contractId, deliveryId, attachmentId) => api.get(
-    `/api/contracts/${contractId}/deliveries/${deliveryId}/attachments/${attachmentId}/download`,
+  getDeliveries: (contractId) => api.get('/api/deliveries', { params: { contractId } }),
+  downloadAttachment: (attachmentId) => api.get(
+    `/api/deliveries/attachments/${attachmentId}/download`,
     { responseType: 'blob' }
   ),
   completeContract: (contractId) => api.post(`/api/contracts/${contractId}/complete`)

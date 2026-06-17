@@ -39,7 +39,8 @@ export default function WithdrawalRequestsPage() {
     setLoading(true);
     try {
       const response = await api.get('/api/admin/billing/withdrawal-requests/pending');
-      setRequests(response.data || []);
+      const payload = response.data?.data || response.data;
+      setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
       toast.error(err.title || t('common.error'));
     } finally {
@@ -93,7 +94,7 @@ export default function WithdrawalRequestsPage() {
   };
 
   const getMethodDetail = (request) => {
-    const field = METHOD_DETAILS_MAP[request.withdrawalMethod];
+    const field = METHOD_DETAILS_MAP[request.method];
     return request[field] || '—';
   };
 
@@ -107,7 +108,7 @@ export default function WithdrawalRequestsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-sm">
-                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.freelancerName')}</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.freelancerId')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.amount')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.method')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.methodDetail')}</th>
@@ -136,18 +137,18 @@ export default function WithdrawalRequestsPage() {
               ) : (
                 requests.map((request, idx) => (
                   <tr key={request.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{request.freelancerName}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900 font-mono text-xs">{request.freelancerId || '—'}</td>
                     <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                       {new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP' }).format(request.amount || 0)}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${METHOD_BADGE_STYLES[request.withdrawalMethod] || 'bg-gray-100 text-gray-700'}`}>
-                        {t(METHOD_LABEL_MAP[request.withdrawalMethod])}
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${METHOD_BADGE_STYLES[request.method] || 'bg-gray-100 text-gray-700'}`}>
+                        {t(METHOD_LABEL_MAP[request.method])}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-500 font-mono text-xs">{getMethodDetail(request)}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {request.submittedDate ? new Date(request.submittedDate).toLocaleDateString() : '—'}
+                      {request.submittedAt ? new Date(request.submittedAt).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

@@ -37,7 +37,7 @@ export default function ContractDetailsPage() {
       setContract(contractData);
       try {
         const resDeliveries = await contractsApi.getDeliveries(id);
-        setDeliveries(resDeliveries.data || []);
+        setDeliveries(resDeliveries.data?.data || resDeliveries.data || []);
       } catch (err) {
         console.error('Failed to load deliveries:', err);
       }
