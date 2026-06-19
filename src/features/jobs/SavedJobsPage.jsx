@@ -21,7 +21,7 @@ export default function SavedJobsPage() {
   const fetchSavedJobs = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await jobsApi.getJobs({ page, pageSize, saved: true });
+      const res = await jobsApi.getSavedJobs({ page, pageSize });
       setJobs(res.data.items || []);
       setTotalPages(Math.ceil((res.data.totalCount || 0) / pageSize));
     } catch (err) {

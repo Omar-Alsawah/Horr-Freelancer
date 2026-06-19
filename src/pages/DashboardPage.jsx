@@ -9,7 +9,7 @@ import JobCardSkeleton from '../features/jobs/JobCardSkeleton';
 import EmptyState from '../features/jobs/EmptyState';
 
 const CACHE_KEY = 'horr_recommended_jobs';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
@@ -147,6 +147,8 @@ export default function DashboardPage() {
     }
   };
 
+  const isFallback = jobs.some(job => job.isFallback);
+
   if (user?.role && user.role !== 'Freelancer') {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -176,7 +178,9 @@ export default function DashboardPage() {
         
         <div className="relative z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#eab308]/10 text-[#856404] mb-3">
-            ✨ {t('dashboard.personalized_matches') || 'Personalized Matches'}
+            {isFallback 
+              ? `⏱️ ${t('dashboard.recent_jobs_badge', 'Recent Jobs')}` 
+              : `✨ ${t('dashboard.personalized_matches', 'Personalized Matches')}`}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 mb-2 font-cairo">
             {i18n.exists('dashboard.welcome_back') 
@@ -184,7 +188,9 @@ export default function DashboardPage() {
               : `Welcome back, ${user?.name || 'Freelancer'}!`}
           </h1>
           <p className="text-gray-500 text-sm md:text-base max-w-xl">
-            {t('dashboard.banner_subtitle') || 'We have analyzed your profile and matched you with high-quality opportunities that fit your skillset.'}
+            {isFallback
+              ? (t('dashboard.recent_jobs_fallback_subtitle', 'There were no recommended jobs, and here are some recent jobs for you'))
+              : (t('dashboard.banner_subtitle', 'We have analyzed your profile and matched you with high-quality opportunities that fit your skillset.'))}
           </p>
         </div>
         
@@ -205,7 +211,9 @@ export default function DashboardPage() {
       {/* Recommended Section Title */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-900 font-cairo" style={{ margin: 0 }}>
-          {t('dashboard.recommended_jobs_header') || 'Jobs you might like'}
+          {isFallback 
+            ? t('dashboard.recent_jobs_header', 'Recent Jobs') 
+            : t('dashboard.recommended_jobs_header', 'Jobs you might like')}
         </h2>
       </div>
 
@@ -214,8 +222,8 @@ export default function DashboardPage() {
           [1, 2, 3].map(i => <JobCardSkeleton key={i} />)
         ) : jobs.length === 0 ? (
           <EmptyState
-            title={t('dashboard.no_recommendations_title') || 'No recommendations yet'}
-            subtitle={t('dashboard.no_recommendations_subtitle') || 'Complete your profile to get personalized job matches.'}
+            title={t('dashboard.no_recommendations_title', 'No recommendations yet')}
+            subtitle={t('dashboard.no_recommendations_subtitle', 'Complete your profile to get personalized job matches.')}
           />
         ) : (
           jobs.map(job => (

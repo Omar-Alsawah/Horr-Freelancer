@@ -209,7 +209,7 @@ export default function DeliveryPortalPage() {
             </span>
             <span className="text-xs font-bold uppercase bg-slate-800 text-slate-350 px-3 py-1 rounded-full tracking-wider flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              {t('escrow.clientView', 'Escrow Protected')}
+              {isFreelancer ? t('escrow.freelancerView', 'Freelancer View') : t('escrow.clientView', 'Client View')}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">

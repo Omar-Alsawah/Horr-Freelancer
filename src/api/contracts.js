@@ -3,8 +3,8 @@ import api from './axios';
 export const contractsApi = {
   getMyContracts: (params = {}) => api.get('/api/contracts/my-contracts', { params }),
   getContract: (id) => api.get(`/api/contracts/${id}`),
-  acceptOffer: (proposalId) => api.post(`/api/contracts/${proposalId}/accept-offer`),
-  declineOffer: (proposalId) => api.post(`/api/contracts/${proposalId}/decline-offer`),
+  acceptOffer: (contractId) => api.post(`/api/contracts/${contractId}/accept-offer`),
+  declineOffer: (contractId) => api.post(`/api/contracts/${contractId}/decline-offer`),
   deliverWork: (id, formData, config = {}) => api.post(`/api/contracts/${id}/deliver-work`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     ...config

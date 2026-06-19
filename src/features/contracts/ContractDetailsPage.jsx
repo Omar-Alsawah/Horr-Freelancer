@@ -144,7 +144,6 @@ export default function ContractDetailsPage() {
             <div className="client-subtitle">{clientName}</div>
           </div>
           <div className="header-right header-buttons">
-            <button className="btn-specialist">{t('contracts.request_specialist')}</button>
             {isActive && (
               <button className="btn-deliver" onClick={() => navigate(`/contracts/${id}/deliveries`)}>
                 {t('contracts.view_delivery_portal') || 'View Delivery Portal'}

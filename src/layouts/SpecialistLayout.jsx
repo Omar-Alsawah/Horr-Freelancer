@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
-import { LayoutDashboard, Wallet, ArrowDownFromLine, ShieldCheck, LogOut } from 'lucide-react';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
-export default function AdminLayout() {
+export default function SpecialistLayout() {
   const { t, i18n } = useTranslation();
   const { logout } = useAuthStore();
   const navigate = useNavigate();
@@ -22,10 +22,7 @@ export default function AdminLayout() {
   };
 
   const navItems = [
-    { name: t('admin.dashboard'), path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: t('admin.depositRequests'), path: '/admin/deposits', icon: Wallet },
-    { name: t('admin.withdrawalRequests'), path: '/admin/withdrawals', icon: ArrowDownFromLine },
-    { name: t('admin.verificationRequests'), path: '/admin/verification', icon: ShieldCheck },
+    { name: t('specialist.navigation.queue', 'Review Queue'), path: '/specialist/queue', icon: LayoutDashboard },
   ];
 
   return (
@@ -43,7 +40,7 @@ export default function AdminLayout() {
               <polygon points="12 2 22 20 2 20" />
             </svg>
             <span className="font-bold text-2xl text-gray-900 tracking-tight">HORR</span>
-            <span className="text-[10px] font-bold bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded uppercase leading-none">Admin</span>
+            <span className="text-[10px] font-bold bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded uppercase leading-none">Specialist</span>
           </div>
         </div>
 
@@ -77,10 +74,10 @@ export default function AdminLayout() {
         <div className="p-4 border-t border-gray-200">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium text-red-650 hover:bg-red-50 transition-colors"
           >
             <LogOut className="w-5 h-5 text-red-500" />
-            {t('admin.logout')}
+            {t('specialist.navigation.logout', 'Logout')}
           </button>
         </div>
       </aside>

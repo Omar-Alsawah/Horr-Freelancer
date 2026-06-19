@@ -1,6 +1,7 @@
 import axios from 'axios';
+import i18n from '../i18n';
 
-export const BASE_URL = 'https://localhost:7070';
+export const BASE_URL = 'http://localhost:5200';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -59,23 +60,34 @@ api.interceptors.response.use(
 
     let title = error.message || 'Network error';
     let errors = null;
+    let errorCode = null;
 
     if (error.response?.data) {
       const data = error.response.data;
       if (typeof data === 'string') {
         title = data;
-      } else if (data.title) {
-        title = data.title;
-        errors = data.errors || null;
-      } else if (data.message) {
-        title = data.message;
+      } else {
+        errorCode = data.code || data.errorCode || null;
+        if (data.title) {
+          title = data.title;
+          errors = data.errors || null;
+        } else if (data.message) {
+          title = data.message;
+        }
       }
+    }
+
+    if (errorCode && i18n.exists(`errors.${errorCode}`)) {
+      title = i18n.t(`errors.${errorCode}`);
+    } else if (i18n.exists(`errors.${title}`)) {
+      title = i18n.t(`errors.${title}`);
     }
 
     return Promise.reject({
       title,
       status,
-      errors
+      errors,
+      errorCode
     });
   }
 );

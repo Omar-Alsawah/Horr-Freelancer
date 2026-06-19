@@ -42,3 +42,10 @@ export async function getChatByContract(contractId) {
   const response = await apiClient.get(`/api/chat/by-contract/${contractId}`);
   return response.data;
 }
+
+// ─── Initiate a chat for a contract ─────────────────────────────────────────
+// POST /api/chat/initiate with { contractId } in the request body
+export async function initiateChat(contractId) {
+  const response = await apiClient.post('/api/chat/initiate', { contractId });
+  return response.data;
+}
