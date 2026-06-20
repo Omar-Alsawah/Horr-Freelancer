@@ -38,6 +38,7 @@ import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
 import DeliveryPortalPage from '../features/contracts/DeliveryPortalPage';
 import AdminDashboardPage from '../features/admin/AdminDashboardPage';
+import DisputeManagementPage from '../features/admin/DisputeManagementPage';
 import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
 import SpecialistReviewSubmitPage from '../features/specialist/SpecialistReviewSubmitPage';
 
@@ -92,7 +93,8 @@ export const router = createBrowserRouter([
           { path: 'dashboard', element: <AdminDashboardPage /> },
           { path: 'deposits', element: <DepositRequestsPage /> },
           { path: 'withdrawals', element: <WithdrawalRequestsPage /> },
-          { path: 'verification', element: <VerificationReviewPage /> }
+          { path: 'verification', element: <VerificationReviewPage /> },
+          { path: 'disputes', element: <DisputeManagementPage /> }
         ]
       }
     ]

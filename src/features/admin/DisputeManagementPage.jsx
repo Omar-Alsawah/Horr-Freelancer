@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Loader2, AlertCircle, Clock, ChevronDown, ChevronUp, FileText, Link as LinkIcon, DollarSign, User, RefreshCw } from 'lucide-react';
 import { disputesApi } from '../../api/disputes';
+import { BASE_URL } from '../../api/axios';
 import { useAuthStore } from '../../store/authStore';
 import StatusBadge from '../../components/ui/StatusBadge';
 
@@ -33,7 +34,24 @@ export default function DisputeManagementPage() {
     setError(false);
     try {
       const response = await disputesApi.getAdminDisputes();
-      setDisputes(response.data || []);
+      const rawItems = response.data?.data?.items || response.data?.items || response.data || [];
+      const mapped = rawItems.map(d => ({
+        id: d.id,
+        contractTitle: `Contract #${d.contractId}`,
+        reason: d.reason,
+        dateOpened: d.openedAt,
+        status: d.status,
+        amountAtStake: d.agreedRate,
+        clientName: d.clientFullName,
+        freelancerName: d.freelancerFullName,
+        openedByName: d.openedByUserFullName,
+        attachments: (d.attachments || []).map(a => ({
+          type: 'file',
+          name: a.originalFileName,
+          url: `${BASE_URL}/api/deliveries/attachments/${a.id}/download`
+        }))
+      }));
+      setDisputes(mapped);
     } catch (err) {
       toast.error(err.title || t('common.error'));
       setError(true);
@@ -244,6 +262,7 @@ export default function DisputeManagementPage() {
                                           <a 
                                             key={idx}
                                             href={att.url}
+                                            download
                                             target="_blank"
                                             rel="noreferrer"
                                             className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 bg-white text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"

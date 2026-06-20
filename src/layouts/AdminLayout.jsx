@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
-import { LayoutDashboard, Wallet, ArrowDownFromLine, ShieldCheck, LogOut } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowDownFromLine, ShieldCheck, LogOut, Gavel } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 export default function AdminLayout() {
@@ -26,6 +26,7 @@ export default function AdminLayout() {
     { name: t('admin.depositRequests'), path: '/admin/deposits', icon: Wallet },
     { name: t('admin.withdrawalRequests'), path: '/admin/withdrawals', icon: ArrowDownFromLine },
     { name: t('admin.verificationRequests'), path: '/admin/verification', icon: ShieldCheck },
+    { name: t('admin.disputes'), path: '/admin/disputes', icon: Gavel },
   ];
 
   return (

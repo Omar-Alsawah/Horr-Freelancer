@@ -414,6 +414,7 @@
     "depositRequests": "Deposit Requests",
     "withdrawalRequests": "Withdrawal Requests",
     "verificationRequests": "Verification Requests",
+    "disputes": "Dispute Management",
     "logout": "Log Out",
     "clientId": "Client ID",
     "clientName": "Client Name",

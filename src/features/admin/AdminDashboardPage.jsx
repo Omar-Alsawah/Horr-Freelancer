@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Wallet, ArrowDownFromLine, ShieldCheck } from 'lucide-react';
+import { Wallet, ArrowDownFromLine, ShieldCheck, Gavel } from 'lucide-react';
 import api from '../../api/axios';
 
 export default function AdminDashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [counts, setCounts] = useState({ deposits: null, withdrawals: null, verifications: null });
+  const [counts, setCounts] = useState({ deposits: null, withdrawals: null, verifications: null, disputes: null });
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const [depositsRes, withdrawalsRes, verificationsRes] = await Promise.allSettled([
+      const [depositsRes, withdrawalsRes, verificationsRes, disputesRes] = await Promise.allSettled([
         api.get('/api/admin/billing/deposit-requests/pending'),
         api.get('/api/admin/billing/withdrawal-requests/pending'),
         api.get('/api/Verification/pending'),
+        api.get('/api/disputes'),
       ]);
 
       const resolve = (res) => {
@@ -23,10 +24,17 @@ export default function AdminDashboardPage() {
         return Array.isArray(payload) ? payload.length : '—';
       };
 
+      const resolveDisputes = (res) => {
+        if (res.status !== 'fulfilled') return '—';
+        const payload = res.value.data?.data || res.value.data;
+        return typeof payload?.totalCount === 'number' ? payload.totalCount : '—';
+      };
+
       setCounts({
         deposits: resolve(depositsRes),
         withdrawals: resolve(withdrawalsRes),
         verifications: resolve(verificationsRes),
+        disputes: resolveDisputes(disputesRes),
       });
     };
 
@@ -61,6 +69,15 @@ export default function AdminDashboardPage() {
       route: '/admin/verification',
       urgentColor: 'text-green-600',
     },
+    {
+      label: t('admin.disputes'),
+      count: counts.disputes,
+      icon: Gavel,
+      iconColor: 'text-red-500',
+      iconBg: 'bg-red-50',
+      route: '/admin/disputes',
+      urgentColor: 'text-red-600',
+    },
   ];
 
   return (
@@ -70,7 +87,7 @@ export default function AdminDashboardPage() {
         <p className="text-sm text-gray-500 mt-1">{t('admin.dashboardSubtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card) => {
           const Icon = card.icon;
           const isLoading = card.count === null;

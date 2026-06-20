@@ -119,6 +119,74 @@ export default function DeliveryCard({
           attachments={delivery.attachments || delivery.files || []} 
           onDownload={onDownloadAttachment} 
         />
+
+        {/* Revision & Additional Requests Log */}
+        {((delivery.revisionRequests && delivery.revisionRequests.length > 0) || delivery.revisionRequest || (delivery.additionalRevisionRequests && delivery.additionalRevisionRequests.length > 0)) && (
+          <div className="mt-5 pt-4 border-t border-gray-150 space-y-3">
+            <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+              {t('delivery.history.revisions_log', 'Revision & Additional Requests Log')}
+            </span>
+            <div className="space-y-3">
+              {/* Revision Requests */}
+              {Array.isArray(delivery.revisionRequests) ? (
+                delivery.revisionRequests.map((rev, index) => (
+                  <div key={rev.id || index} className="p-3 bg-amber-50/40 border border-amber-100 rounded-xl text-xs space-y-1.5 text-left">
+                    <div className="flex justify-between items-center text-amber-800 font-semibold">
+                      <span>{t('delivery.history.revision_num', 'Revision')} #{index + 1}</span>
+                      <span className="text-[10px] bg-amber-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {rev.status || 'Pending'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">{rev.reason}</p>
+                    {rev.requestedAt && (
+                      <span className="block text-[10px] text-gray-405">
+                        {t('delivery.history.requested_at', 'Requested')}: {new Date(rev.requestedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                ))
+              ) : (
+                delivery.revisionRequest && (
+                  <div className="p-3 bg-amber-50/40 border border-amber-100 rounded-xl text-xs space-y-1.5 text-left">
+                    <div className="flex justify-between items-center text-amber-800 font-semibold">
+                      <span>{t('delivery.history.revision_request', 'Revision Request')}</span>
+                      <span className="text-[10px] bg-amber-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {delivery.revisionRequest.status || 'Pending'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">{delivery.revisionRequest.reason}</p>
+                    {delivery.revisionRequest.requestedAt && (
+                      <span className="block text-[10px] text-gray-405">
+                        {t('delivery.history.requested_at', 'Requested')}: {new Date(delivery.revisionRequest.requestedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                )
+              )}
+
+              {/* Additional Revision Requests */}
+              {Array.isArray(delivery.additionalRevisionRequests) && delivery.additionalRevisionRequests.map((req, idx) => (
+                <div key={req.id || idx} className="p-3 bg-indigo-50/40 border border-indigo-100 rounded-xl text-xs space-y-1.5 text-left">
+                  <div className="flex justify-between items-center text-indigo-800 font-semibold">
+                    <span>{t('delivery.history.additional_revisions_req', 'Requested Additional Revisions')} (+{req.requestedCount})</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      req.status === 'Approved' || req.status === 'Accepted' ? 'bg-emerald-100 text-emerald-800' :
+                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'
+                    }`}>
+                      {req.status || 'Pending'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed font-medium">{req.reason}</p>
+                  {req.requestedAt && (
+                    <span className="block text-[10px] text-gray-450">
+                      {t('delivery.history.requested_at', 'Requested')}: {new Date(req.requestedAt).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action Area for Client (Pending items only) */}

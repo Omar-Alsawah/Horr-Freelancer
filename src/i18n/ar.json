@@ -414,6 +414,7 @@
     "depositRequests": "طلبات الإيداع",
     "withdrawalRequests": "طلبات السحب",
     "verificationRequests": "طلبات التوثيق",
+    "disputes": "إدارة النزاعات",
     "logout": "تسجيل الخروج",
     "clientId": "معرف العميل",
     "clientName": "اسم العميل",

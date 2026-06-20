@@ -11,7 +11,6 @@ import {
   useContractQuery, 
   useContractDeliveriesQuery, 
   useDeliverWorkMutation,
-  useUpdateDeliverWorkMutation,
   useDownloadAttachmentMutation 
 } from '../../hooks/useContractDelivery';
 import { revisionsApi } from '../../api/revisions';
@@ -50,12 +49,7 @@ export default function DeliveryPortalPage() {
     uploadProgress 
   } = useDeliverWorkMutation();
 
-  const {
-    mutate: updateWork,
-    isLoading: isUpdating,
-    error: updateError,
-    uploadProgress: updateUploadProgress
-  } = useUpdateDeliverWorkMutation();
+
 
   const {
     mutate: downloadAttachment
@@ -93,16 +87,6 @@ export default function DeliveryPortalPage() {
       // Invalidate queries / Refresh state
       refetchContract();
       refetchDeliveries();
-    } catch {
-      // toast error handled in hook
-    }
-  };
-
-  const handleFreelancerUpdateDelivery = async (deliveryId, payload) => {
-    try {
-      await updateWork(deliveryId, payload);
-      refetchContract();
-      refetchDeliveries();
       if (isFreelancer) {
         revisionsApi.getPendingAdditionalRevisions()
           .then(res => {
@@ -110,7 +94,7 @@ export default function DeliveryPortalPage() {
           });
       }
     } catch {
-      // handled in hook
+      // toast error handled in hook
     }
   };
 
@@ -235,6 +219,8 @@ export default function DeliveryPortalPage() {
   const statusStr = String(statusVal != null ? statusVal : '').toLowerCase();
   const isActive = statusStr === 'active' || statusStr === '1';
   const isCompleted = statusStr === 'completed' || statusStr === 'closed' || statusStr === '2' || statusStr === '5';
+  const activeRevisionDelivery = deliveries.find(d => String(d.status || d.Status || '').toLowerCase() === 'revisionrequested');
+  const pendingAdditionalRequest = pendingAdditionalRequests.find(req => deliveries?.some(d => d.id === req.deliveryId));
 
   const cId = contract.id || contract.Id;
   const title = contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract';
@@ -321,8 +307,78 @@ export default function DeliveryPortalPage() {
           {isFreelancer && (
             <div className="space-y-6">
               
+              {/* Additional Revisions Request Card (Step 6) */}
+              {pendingAdditionalRequest && (
+                <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 space-y-4">
+                  <h4 className="font-bold text-indigo-950 text-sm flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-indigo-600" />
+                    Request for Additional Revisions
+                  </h4>
+                  <p className="text-xs text-indigo-800 leading-relaxed">
+                    Client is requesting <strong>{pendingAdditionalRequest.requestedCount}</strong> more revisions for: 
+                    <em className="block mt-1 bg-white p-2 rounded border border-indigo-100 font-medium text-left">{pendingAdditionalRequest.reason}</em>
+                  </p>
+                  <div className="flex gap-2 text-xs">
+                    <button 
+                      onClick={() => handleAdditionalRevisionResponse(pendingAdditionalRequest.id, true)} 
+                      className="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition"
+                    >
+                      Accept
+                    </button>
+                    <button 
+                      onClick={() => handleAdditionalRevisionResponse(pendingAdditionalRequest.id, false)} 
+                      className="flex-1 bg-white text-indigo-900 border border-indigo-300 font-bold py-2 rounded-lg hover:bg-indigo-50 transition"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Active & Revision Requested -> Show Revision Instructions + Re-upload Area */}
+              {isActive && activeRevisionDelivery && (
+                <div className="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 sm:p-6 space-y-5 text-left">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-amber-600">
+                      <Sparkles className="h-5 w-5" />
+                      <h3 className="text-lg font-bold text-gray-850">
+                        Submit Revision
+                      </h3>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Upload your updated work and notes in response to the client's revision request.
+                    </p>
+                  </div>
+
+                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
+                    <span className="font-bold block">⚠️ Revision Feedback:</span>
+                    <p className="leading-relaxed bg-white p-2.5 rounded border border-amber-100/60 font-medium">
+                      {activeRevisionDelivery.revisionRequest?.reason || (Array.isArray(activeRevisionDelivery.revisionRequests) && activeRevisionDelivery.revisionRequests[activeRevisionDelivery.revisionRequests.length - 1]?.reason) || 'Please review the requested changes in the history log.'}
+                    </p>
+                  </div>
+
+                  {submitError && (
+                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
+                      <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block">Submission Blocked</span>
+                        <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <DeliveryUploader
+                    milestones={milestones}
+                    onSubmit={handleFreelancerSubmit}
+                    isSubmitting={isSubmitting}
+                    uploadProgress={uploadProgress}
+                    buttonLabel={t('delivery.submit_revision', 'Submit Revision')}
+                  />
+                </div>
+              )}
+              
               {/* Active & No Pending Delivery -> Show Submit Work Area */}
-              {isActive && !hasPendingDelivery && (
+              {isActive && !hasPendingDelivery && !activeRevisionDelivery && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
