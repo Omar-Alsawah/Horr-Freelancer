@@ -13,6 +13,7 @@ export const profileApi = {
   updatePrivacy: (data) => api.patch('/api/UserProfile/privacy', data),
   addPaymentMethod: (data) => api.post('/api/UserProfile/payment-method', data),
   getPublicProfile: (userIdHash) => api.get(`/api/UserProfile/public/${userIdHash}`),
-  updateFreelancerDetails: (data) => api.patch('/api/UserProfile/freelancer-details', data)
+  updateFreelancerDetails: (data) => api.patch('/api/UserProfile/freelancer-details', data),
+  updatePreferredCurrency: (currency) => api.patch('/api/UserProfile/preferred-currency', JSON.stringify(currency))
 };
 

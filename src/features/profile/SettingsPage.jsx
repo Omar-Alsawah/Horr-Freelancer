@@ -57,7 +57,8 @@ const SettingsPage = () => {
           languages: Array.isArray(data.languages) ? data.languages : [],
           education: Array.isArray(data.education) ? data.education : [],
           experienceDetails: Array.isArray(data.experienceDetails) ? data.experienceDetails : [],
-          employmentHistory: Array.isArray(data.employmentHistory) ? data.employmentHistory : []
+          employmentHistory: Array.isArray(data.employmentHistory) ? data.employmentHistory : [],
+          preferredCurrency: data.preferredCurrency || 'USD'
         });
       }
     } catch (error) {
@@ -168,6 +169,11 @@ const SettingsPage = () => {
       };
 
       await profileApi.updateFreelancerDetails(updateDto);
+      
+      if (profile.preferredCurrency) {
+        await profileApi.updatePreferredCurrency(profile.preferredCurrency);
+      }
+
       toast.success('Profile updated successfully');
       await fetchProfile();
     } catch (error) {
@@ -253,6 +259,24 @@ const SettingsPage = () => {
                   </div>
                   <p className="text-[10px] text-gray-400">Email updates are handled via security tab</p>
                 </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Preferred Currency</label>
+                  <div className="relative">
+                    <select 
+                      className="w-full h-12 p-3 border border-gray-200 rounded-xl appearance-none focus:ring-2 focus:ring-[#d4af37]/20 outline-none bg-white"
+                      value={profile.preferredCurrency || 'USD'}
+                      onChange={(e) => handleFieldChange('preferredCurrency', e.target.value)}
+                    >
+                      <option value="USD">USD - US Dollar</option>
+                      <option value="EGP">EGP - Egyptian Pound</option>
+                      <option value="EUR">EUR - Euro</option>
+                      <option value="GBP">GBP - British Pound</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                </div>
+
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Professional Title</label>
                   <Input 

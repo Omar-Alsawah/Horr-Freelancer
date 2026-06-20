@@ -8,8 +8,12 @@ export default function ProtectedRoute({ requiredRoles }) {
     return <Navigate to="/login" replace />;
   }
   
-  if (requiredRoles && !requiredRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
+  if (requiredRoles) {
+    const userRoles = Array.isArray(role) ? role : [role];
+    const hasRole = userRoles.some(r => requiredRoles.includes(r));
+    if (!hasRole) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
   
   return <Outlet />;

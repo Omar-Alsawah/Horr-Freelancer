@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { jobsApi } from '../../api/jobs';
 import { proposalsApi } from '../../api/proposals';
+import { currencyApi } from '../../api/currency';
 
 const SubmitProposalPage = () => {
   const { t } = useTranslation();
@@ -21,6 +22,9 @@ const SubmitProposalPage = () => {
   const [bidRate, setBidRate] = useState(0);
   const [coverLetter, setCoverLetter] = useState('');
   const [durationDays, setDurationDays] = useState('');
+  const [bidCurrency, setBidCurrency] = useState('EGP');
+  const [convertedClientAmount, setConvertedClientAmount] = useState(0);
+  const [convertedJobBudget, setConvertedJobBudget] = useState(0);
 
   // Validation State
   const [errors, setErrors] = useState({});
@@ -46,6 +50,38 @@ const SubmitProposalPage = () => {
 
     fetchJob();
   }, [jobId, navigate, t]);
+
+  useEffect(() => {
+    if (job && job.budgetCurrency && job.budget > 0) {
+      if (job.budgetCurrency !== bidCurrency) {
+        currencyApi.convertCurrency(job.budget, job.budgetCurrency, bidCurrency)
+          .then(res => setConvertedJobBudget(res.data.amount))
+          .catch(err => console.error("Currency conversion error", err));
+      } else {
+        setConvertedJobBudget(job.budget);
+      }
+    }
+  }, [job, bidCurrency]);
+
+  useEffect(() => {
+    if (bidRate > 0 && job && job.budgetCurrency) {
+      if (job.budgetCurrency !== bidCurrency) {
+        currencyApi.convertCurrency(bidRate, bidCurrency, job.budgetCurrency)
+          .then(res => setConvertedClientAmount(res.data.amount))
+          .catch(err => console.error("Currency conversion error", err));
+      } else {
+        setConvertedClientAmount(bidRate);
+      }
+    } else {
+      setConvertedClientAmount(0);
+    }
+  }, [bidRate, bidCurrency, job]);
+
+  useEffect(() => {
+    if (convertedJobBudget > 0 && bidRate === 0) {
+       setBidRate(convertedJobBudget);
+    }
+  }, [convertedJobBudget]);
 
   const handleBidRateChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
@@ -89,6 +125,7 @@ const SubmitProposalPage = () => {
         jobPostId: jobId,
         submitAsType,
         bidRate,
+        bidCurrency,
         coverLetter,
         durationDays
       };
@@ -159,7 +196,12 @@ const SubmitProposalPage = () => {
             {t('proposals.terms_title')}
             {job && (
               <div className="client-budget-tag">
-                {t('proposals.client_budget')} {job.budgetType === 'Fixed' ? `EGP ${job.budget}` : `EGP ${job.minBudget} - ${job.maxBudget}`}
+                {t('proposals.client_budget')} {job.budgetType === 'Fixed' ? `${job.budgetCurrency || 'USD'} ${job.budget}` : `${job.budgetCurrency || 'USD'} ${job.minBudget} - ${job.maxBudget}`}
+                {job.budgetCurrency !== bidCurrency && convertedJobBudget > 0 && (
+                  <span className="ml-2 text-xs font-normal">
+                    (Approx. {bidCurrency} {convertedJobBudget.toFixed(2)})
+                  </span>
+                )}
                 <span className="inline-block w-[14px] h-[14px] bg-[#666] rounded-full text-center leading-[14px] text-[10px] text-white ml-1">?</span>
               </div>
             )}
@@ -172,15 +214,34 @@ const SubmitProposalPage = () => {
               <strong>{t('proposals.price_label')}</strong>
               <div className="text-sm text-gray-500">{t('proposals.price_hint')}</div>
             </div>
-            <div className="rate-input-group">
-              <span>$</span>
-              <input 
-                type="number" 
-                step="0.01"
-                value={bidRate} 
-                onChange={handleBidRateChange}
-                className={errors.bidRate ? 'border-red-500' : ''}
-              />
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <select 
+                  value={bidCurrency}
+                  onChange={(e) => setBidCurrency(e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1"
+                >
+                  <option value="USD">USD</option>
+                  <option value="EGP">EGP</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+                <div className="rate-input-group flex-1">
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    min="0"
+                    value={bidRate || ''} 
+                    onChange={handleBidRateChange}
+                    className={errors.bidRate ? 'border-red-500 w-full' : 'w-full'}
+                  />
+                </div>
+              </div>
+              {convertedClientAmount > 0 && job?.budgetCurrency !== bidCurrency && (
+                <div className="text-xs text-gray-500 text-right pr-2">
+                  Client will see: ~{convertedClientAmount.toFixed(2)} {job.budgetCurrency}
+                </div>
+              )}
             </div>
           </div>
           {errors.bidRate && <div className="error-message mb-4">{errors.bidRate}</div>}
@@ -200,7 +261,7 @@ const SubmitProposalPage = () => {
               <div className="text-sm text-gray-500">{t('proposals.receive_hint')}</div>
             </div>
             <div className="rate-input-group">
-              <span>$</span>
+              <span>{bidCurrency}</span>
               <input 
                 type="number" 
                 value={receiveAmount.toFixed(2)} 

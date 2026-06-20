@@ -44,13 +44,26 @@ import SpecialistReviewSubmitPage from '../features/specialist/SpecialistReviewS
 import MyServicesPage from '../features/services/MyServicesPage';
 import CreateServicePage from '../features/services/CreateServicePage';
 import ServiceDetailsPage from '../features/services/ServiceDetailsPage';
-import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
+
+
+import ClientLayout from '../layouts/ClientLayout';
+import ClientDashboard from '../features/dashboard/pages/ClientDashboard';
+import { PostJobPage } from '../features/jobs';
+import JobProposalsPage from '../features/jobs/pages/JobProposalsPage';
+import ClientSettingsPage from '../features/account/pages/SettingsPage';
+import SearchTalentPage from '../features/talent/SearchTalentPage';
+import SavedTalentPage from '../features/talent/SavedTalentPage';
+import FreelancerDetailsPage from '../features/talent/FreelancerDetailsPage';
+import ClientMyContractsPage from '../features/contracts/pages/MyContractsPage';
+import ClientContractDetailsPage from '../features/contracts/pages/ContractDetailsPage';
+import ClientDeliveryPortalPage from '../features/contracts/pages/ClientDeliveryPortalPage';
+import ManageJobPage from '../features/jobs/pages/ManageJobPage';
 
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    // element: <ProtectedRoute requiredRoles={null} />,
+    element: <ProtectedRoute requiredRoles={['Freelancer']} />,
     children: [
       {
         element: <MainLayout />,
@@ -118,6 +131,31 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="/specialist/queue" replace /> },
           { path: 'queue', element: <RevisionQueuePage /> },
           { path: 'reviews/:contractId/:deliveryId', element: <SpecialistReviewSubmitPage /> }
+        ]
+      }
+    ]
+  },
+  {
+    path: '/client',
+    element: <ProtectedRoute requiredRoles={['Client']} />,
+    children: [
+      {
+        element: <ClientLayout />,
+        children: [
+          { index: true, element: <Navigate to="/client/dashboard" replace /> },
+          { path: 'dashboard', element: <ClientDashboard /> },
+          { path: 'post-job', element: <PostJobPage /> },
+          { path: 'settings', element: <ClientSettingsPage /> },
+          { path: 'search-talent', element: <SearchTalentPage /> },
+          { path: 'saved-talent', element: <SavedTalentPage /> },
+          { path: 'freelancer/:id', element: <FreelancerDetailsPage /> },
+          { path: 'job-proposals', element: <JobProposalsPage /> },
+          { path: 'contracts', element: <ClientMyContractsPage /> },
+          { path: 'contracts/:id', element: <ClientContractDetailsPage /> },
+          { path: 'contracts/:id/deliveries', element: <ClientDeliveryPortalPage /> },
+          { path: 'messages', element: <MessagesPage /> },
+          { path: 'messages/:chatId', element: <MessagesPage /> },
+          { path: 'manage-job/:id', element: <ManageJobPage /> }
         ]
       }
     ]

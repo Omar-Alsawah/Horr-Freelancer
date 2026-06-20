@@ -128,6 +128,8 @@ export default function ContractDetailsPage() {
   const rate = contract.agreedRate || contract.AgreedRate;
   const started = contract.startedAt || contract.startDate || contract.StartedAt;
   const formattedStartDate = started ? new Date(started).toLocaleDateString() : 'N/A';
+  const dueDate = contract.dueDate || contract.DueDate;
+  const formattedDueDate = dueDate ? new Date(dueDate).toLocaleDateString() : 'N/A';
   const description = contract.description || contract.Description || 'This contract involves the full scope of work as discussed in the proposal. The goal is to deliver high-quality results within the agreed timeline.';
 
   return (
@@ -165,6 +167,10 @@ export default function ContractDetailsPage() {
           <div className="term-item">
             <label>{t('contracts.start_date')}</label>
             <span>{formattedStartDate}</span>
+          </div>
+          <div className="term-item">
+            <label>{t('contracts.due_date') || 'Due Date'}</label>
+            <span>{formattedDueDate}</span>
           </div>
           <div className="term-item">
             <label>{t('contracts.status')}</label>

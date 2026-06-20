@@ -67,13 +67,19 @@ export default function Login() {
 
       loginAction(token);
       
-      const userRole = useAuthStore.getState().role;
-      if (userRole === 'Admin') {
+      const rawRole = useAuthStore.getState().role;
+      const userRoles = Array.isArray(rawRole) ? rawRole : [rawRole];
+      
+      const isRole = (r) => userRoles.some(ur => ur && ur.toLowerCase() === r.toLowerCase());
+
+      if (isRole('Admin')) {
         navigate('/admin/dashboard', { replace: true });
-      } else if (userRole === 'Specialist') {
+      } else if (isRole('Specialist')) {
         navigate('/specialist/queue', { replace: true });
+      } else if (isRole('Client')) {
+        navigate('/client/dashboard', { replace: true });
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     } catch (err) {
       if (isEmailNotConfirmedError(err)) {

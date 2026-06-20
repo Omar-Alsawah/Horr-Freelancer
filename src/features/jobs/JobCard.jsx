@@ -1,24 +1,25 @@
 import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 
-function formatBudget(min, max, lang) {
-  const fmt = (n) => {
-    if (lang === 'ar') {
-      return new Intl.NumberFormat('ar-EG').format(n);
-    }
-    return new Intl.NumberFormat('en-EG').format(n);
+function formatBudget(budget, currency, convertedBudget, convertedCurrency, lang) {
+  const fmt = (n, cur) => {
+    return new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-EG', {
+      style: 'currency',
+      currency: cur || 'USD',
+      maximumFractionDigits: 0
+    }).format(n);
   };
 
-  if (lang === 'ar') {
-    if (max && min !== max) return `${fmt(min)} ج.م – ${fmt(max)} ج.م`;
-    return `${fmt(min || max)} ج.م`;
+  const originalStr = fmt(budget || 0, currency);
+  if (convertedBudget != null && convertedCurrency != null && convertedCurrency !== currency) {
+    const convertedStr = fmt(convertedBudget, convertedCurrency);
+    return `${originalStr} (${convertedStr})`;
   }
-  if (max && min !== max) return `EGP ${fmt(min)} – ${fmt(max)}`;
-  return `EGP ${fmt(min || max)}`;
+  return originalStr;
 }
 
 export default function JobCard({ job, isSaved, onToggleSave, onClick }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <div 
@@ -47,7 +48,7 @@ export default function JobCard({ job, isSaved, onToggleSave, onClick }) {
         {' - '}
         {job.experienceLevel || t('jobs.intermediate')}
         {' - '}
-        {t('jobs.est_budget')}: {job.budgetMin && job.budgetMax ? `$${job.budgetMin}-$${job.budgetMax}` : `$${job.budgetMin || job.budgetMax || '0'}`}
+        {t('jobs.est_budget')}: {formatBudget(job.budget, job.budgetCurrency, job.convertedBudget, job.convertedCurrency, i18n.language)}
       </div>
 
       {job.description && (

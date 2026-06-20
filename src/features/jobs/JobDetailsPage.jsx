@@ -5,17 +5,20 @@ import { Heart, Tag, Star, Globe, Calendar, ArrowLeft, Copy, Flag } from 'lucide
 import toast from 'react-hot-toast';
 import { jobsApi } from '../../api/jobs';
 
-function formatBudget(min, max, lang) {
-  const fmt = (n) => {
-    if (lang === 'ar') return new Intl.NumberFormat('ar-EG').format(n);
-    return new Intl.NumberFormat('en-EG').format(n);
+function formatBudget(budget, currency, convertedBudget, convertedCurrency, lang) {
+  const fmt = (n, cur) => {
+    return new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-EG', {
+      style: 'currency',
+      currency: cur || 'USD',
+      maximumFractionDigits: 0
+    }).format(n);
   };
-  if (lang === 'ar') {
-    if (max && min !== max) return `${fmt(min)} ج.م – ${fmt(max)} ج.م`;
-    return `${fmt(min || max)} ج.م`;
+  const originalStr = fmt(budget || 0, currency);
+  if (convertedBudget != null && convertedCurrency != null && convertedCurrency !== currency) {
+    const convertedStr = fmt(convertedBudget, convertedCurrency);
+    return `${originalStr} (${convertedStr})`;
   }
-  if (max && min !== max) return `EGP ${fmt(min)} – ${fmt(max)}`;
-  return `EGP ${fmt(min || max)}`;
+  return originalStr;
 }
 
 function DetailSkeleton() {
@@ -138,7 +141,7 @@ export default function JobDetailsPage() {
                 <Tag className="w-5 h-5" />
               </div>
               <div className="feature-text">
-                <div>{formatBudget(job.budgetMin, job.budgetMax, lang)}</div>
+                <div>{formatBudget(job.budget, job.budgetCurrency, job.convertedBudget, job.convertedCurrency, lang)}</div>
                 <div>{job.jobType === 'FixedPrice' ? t('jobs.fixed_price') : t('jobs.hourly')}</div>
               </div>
             </div>
