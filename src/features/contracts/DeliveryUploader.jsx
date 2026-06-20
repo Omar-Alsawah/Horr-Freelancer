@@ -4,7 +4,7 @@ import { Upload, X, File, AlertCircle, Link as LinkIcon, Trash2 } from 'lucide-r
 import toast from 'react-hot-toast';
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB limit per file
-const BLOCKED_EXTENSIONS = ['.exe', '.bat', '.sh', '.msi', '.cmd', '.com'];
+const BLOCKED_EXTENSIONS = ['.exe', '.bat', '.sh', '.msi', '.cmd', '.com', '.ps1', '.vbs', '.js', '.jar'];
 
 export default function DeliveryUploader({ 
   milestones = [],
@@ -234,6 +234,7 @@ export default function DeliveryUploader({
           <input
             type="file"
             multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.png,.jpg,.jpeg,.gif,.svg,.zip,.rar,.7z,.mp4,.mp3,.wav,.csv,.json,.xml,.html,.css,.md"
             ref={fileInputRef}
             onChange={handleFileSelect}
             className="hidden"

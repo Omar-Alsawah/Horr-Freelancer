@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import { proposalsApi } from '../../api/proposals';
 import { contractsApi } from '../../api/contracts'; // Assuming there's a contracts API
-import { getChatByContract } from '../../api/chatApi';
+import { initiateChat } from '../../api/chatApi';
 
 const ViewOfferPage = () => {
   const { proposalId } = useParams();
@@ -15,6 +15,7 @@ const ViewOfferPage = () => {
   const [offer, setOffer] = useState(state?.proposal || null);
   const [loading, setLoading] = useState(!state?.proposal);
   const [apiError, setApiError] = useState(null);
+  const [contractId, setContractId] = useState(null); // Stored separately for reliable access in action handlers
 
   const fetchedRef = useRef(false);
 
@@ -41,11 +42,15 @@ const ViewOfferPage = () => {
 
         if (currentOffer) {
           cId = currentOffer.contractId ?? currentOffer.ContractId ?? currentOffer.id ?? currentOffer.Id ?? proposalId;
+          setContractId(cId); // Store contract ID in state for use in action handlers
           
           try {
             const contractRes = await proposalsApi.getOffer(cId);
             const contractData = contractRes.data?.data || contractRes.data;
             setOffer({ ...currentOffer, ...contractData });
+            if (contractData?.id) {
+              setContractId(contractData.id);
+            }
           } catch (contractErr) {
             console.error('Error fetching detailed contract offer:', contractErr);
             setOffer(currentOffer);
@@ -70,10 +75,14 @@ const ViewOfferPage = () => {
     if (!window.confirm(t('proposals.accept_offer_confirm'))) return;
     setApiError(null);
 
+    const cId = contractId ?? offer?.contractId ?? offer?.ContractId;
+    if (!cId) {
+      toast.error('No contract ID found to accept offer');
+      return;
+    }
+
     try {
-      // The prompt says POST /api/contracts/{id}/accept-offer
-      // Usually, it's the proposalId or an offerId. We use proposalId here as per prompt "{id}"
-      await contractsApi.acceptOffer(proposalId);
+      await contractsApi.acceptOffer(cId);
       toast.success(t('proposals.accept_offer_success'));
       navigate('/contracts/my-contracts');
     } catch (error) {
@@ -89,8 +98,14 @@ const ViewOfferPage = () => {
     if (!window.confirm(t('proposals.withdraw_confirm') /* reusing generic confirm as decline_confirm is not explicitly asked for without reason, wait, prompt says "show a confirmation dialog" */)) return;
     setApiError(null);
 
+    const cId = contractId ?? offer?.contractId ?? offer?.ContractId;
+    if (!cId) {
+      toast.error('No contract ID found to decline offer');
+      return;
+    }
+
     try {
-      await contractsApi.declineOffer(proposalId);
+      await contractsApi.declineOffer(cId);
       toast(t('proposals.decline_offer_success'), { icon: 'ℹ️' });
       navigate('/proposals/my-proposals');
     } catch (error) {
@@ -103,7 +118,7 @@ const ViewOfferPage = () => {
   };
 
   const handleMessageClient = async () => {
-    const cId = offer?.contractId ?? offer?.ContractId ?? offer?.id ?? offer?.Id ?? proposalId;
+    const cId = contractId ?? offer?.contractId ?? offer?.ContractId;
     if (!cId) {
       toast.error('No contract ID found');
       return;
@@ -111,7 +126,8 @@ const ViewOfferPage = () => {
 
     try {
       setLoading(true);
-      const chatObj = await getChatByContract(cId);
+      // POST /api/chat/initiate with { contractId } in the body
+      const chatObj = await initiateChat(cId);
       const targetChatId = chatObj?.chatId ?? chatObj?.ChatId ?? chatObj?.id ?? chatObj?.Id;
       if (targetChatId) {
         navigate(`/messages/${targetChatId}`);

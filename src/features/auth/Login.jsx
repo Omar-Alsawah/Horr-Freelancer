@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 
 // Detect "email not confirmed" errors from backend
 function isEmailNotConfirmedError(err) {
+  if (err.errorCode === 'EMAIL_NOT_CONFIRMED') return true;
   const msg = ((err.message || '') + (err.title || '')).toLowerCase();
   const errorsStr = JSON.stringify(err.errors || '').toLowerCase();
   return (
@@ -65,7 +66,15 @@ export default function Login() {
       const token = res.data;
 
       loginAction(token);
-      navigate('/');
+      
+      const userRole = useAuthStore.getState().role;
+      if (userRole === 'Admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'Specialist') {
+        navigate('/specialist/queue', { replace: true });
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       if (isEmailNotConfirmedError(err)) {
         setUnverifiedEmail(email);

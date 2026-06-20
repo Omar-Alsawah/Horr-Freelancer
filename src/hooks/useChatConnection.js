@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import toast from 'react-hot-toast';
+import { BASE_URL } from '../api/axios';
 
 export function useChatConnection(chatId, onMessageReceived) {
   const connectionRef = useRef(null);
@@ -19,7 +20,7 @@ export function useChatConnection(chatId, onMessageReceived) {
 
     // 1. Build the connection
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl('https://localhost:7070/hubs/chat', {
+      .withUrl(`${BASE_URL}/hubs/chat`, {
         accessTokenFactory: () => localStorage.getItem('horr_token'),
       })
       .withAutomaticReconnect()

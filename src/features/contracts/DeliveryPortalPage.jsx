@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -12,6 +13,8 @@ import {
   useDeliverWorkMutation,
   useDownloadAttachmentMutation 
 } from '../../hooks/useContractDelivery';
+import { revisionsApi } from '../../api/revisions';
+import { contractsApi } from '../../api/contracts';
 import DeliveryHistory from './DeliveryHistory';
 import DeliveryUploader from './DeliveryUploader';
 
@@ -35,12 +38,18 @@ export default function DeliveryPortalPage() {
     refetch: refetchDeliveries 
   } = useContractDeliveriesQuery(contractId);
 
+  // Revisions State
+  const [pendingAdditionalRequests, setPendingAdditionalRequests] = useState([]);
+
   // Mutations
   const { 
     mutate: submitWork, 
     isLoading: isSubmitting, 
+    error: submitError,
     uploadProgress 
   } = useDeliverWorkMutation();
+
+
 
   const {
     mutate: downloadAttachment
@@ -48,6 +57,19 @@ export default function DeliveryPortalPage() {
 
   const isRtl = i18n.language === 'ar';
   const isFreelancer = role === 'Freelancer';
+
+  // Fetch pending additional revision requests
+  useEffect(() => {
+    if (isFreelancer) {
+      revisionsApi.getPendingAdditionalRevisions()
+        .then(res => {
+          setPendingAdditionalRequests(res.data?.data || res.data || []);
+        })
+        .catch(err => {
+          console.error('Failed to fetch pending additional revisions:', err);
+        });
+    }
+  }, [isFreelancer, contractId]);
 
   const formatCurrency = (amount) => {
     if (amount == null) return '';
@@ -65,16 +87,36 @@ export default function DeliveryPortalPage() {
       // Invalidate queries / Refresh state
       refetchContract();
       refetchDeliveries();
+      if (isFreelancer) {
+        revisionsApi.getPendingAdditionalRevisions()
+          .then(res => {
+            setPendingAdditionalRequests(res.data?.data || res.data || []);
+          });
+      }
     } catch {
       // toast error handled in hook
     }
   };
 
+  const handleAdditionalRevisionResponse = async (requestId, accept) => {
+    try {
+      await revisionsApi.respondToAdditionalRevision(requestId, accept);
+      toast.success(accept ? 'Request accepted!' : 'Request declined!');
+      const res = await revisionsApi.getPendingAdditionalRevisions();
+      setPendingAdditionalRequests(res.data?.data || res.data || []);
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || 'Failed to respond to request.');
+    }
+  };
+
   const handleDownloadAttachment = async (attachmentId, filename) => {
     // Determine the delivery containing this attachment to pass its ID
-    const delivery = deliveries.find(d => 
-      d.attachments && d.attachments.some(a => a.id === attachmentId)
-    );
+    const delivery = deliveries.find(d => {
+      const atts = d.attachments || d.files || [];
+      return atts.some(a => a.id === attachmentId);
+    });
     
     if (!delivery) {
       toast.error('Attachment metadata not found.');
@@ -88,17 +130,37 @@ export default function DeliveryPortalPage() {
     }
   };
 
-  // Client Actions Stub (Client completes review in separate pages)
-  const handleApprove = () => {
-    toast.error('Approve action is client-only and must be performed via Client portal.');
+  const handleApprove = async (deliveryId) => {
+    try {
+      await contractsApi.approveDelivery(deliveryId);
+      toast.success(t('delivery.review.approveSuccess', 'Delivery approved successfully!'));
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    }
   };
 
-  const handleRevision = () => {
-    toast.error('Revision action is client-only.');
+  const handleRevision = async (deliveryId, reason) => {
+    try {
+      await contractsApi.requestDeliveryRevision(deliveryId, { reason });
+      toast.success(t('delivery.review.revisionSuccess', 'Revision requested successfully!'));
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    }
   };
 
-  const handleDispute = () => {
-    toast.error('Dispute action is client-only.');
+  const handleDispute = async (deliveryId, reason) => {
+    try {
+      await contractsApi.disputeDelivery(deliveryId, { contractId: Number(contractId), reason });
+      toast.success(t('delivery.review.disputeSuccess', 'Dispute opened successfully!'));
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.title || t('common.error'));
+    }
   };
 
   if (contractError || deliveriesError) {
@@ -147,10 +209,18 @@ export default function DeliveryPortalPage() {
     const status = String(d.status || d.Status || '').toLowerCase();
     return status === 'pending' || status === '0';
   });
+  const pendingDelivery = deliveries.find((d) => {
+    const status = String(d.status || d.Status || '').toLowerCase();
+    return status === 'pending' || status === '0';
+  });
+  const isPendingPaused = pendingDelivery?.isPaused || pendingDelivery?.IsPaused;
+  const pendingPauseReason = pendingDelivery?.pauseReason || pendingDelivery?.PauseReason;
   const statusVal = contract.status !== undefined ? contract.status : contract.Status;
   const statusStr = String(statusVal != null ? statusVal : '').toLowerCase();
   const isActive = statusStr === 'active' || statusStr === '1';
   const isCompleted = statusStr === 'completed' || statusStr === 'closed' || statusStr === '2' || statusStr === '5';
+  const activeRevisionDelivery = deliveries.find(d => String(d.status || d.Status || '').toLowerCase() === 'revisionrequested');
+  const pendingAdditionalRequest = pendingAdditionalRequests.find(req => deliveries?.some(d => d.id === req.deliveryId));
 
   const cId = contract.id || contract.Id;
   const title = contract.proposal_Title || contract.proposalTitle || contract.jobTitle || contract.JobTitle || contract.title || 'Contract';
@@ -187,7 +257,7 @@ export default function DeliveryPortalPage() {
             </span>
             <span className="text-xs font-bold uppercase bg-slate-800 text-slate-350 px-3 py-1 rounded-full tracking-wider flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              {t('escrow.clientView', 'Escrow Protected')}
+              {isFreelancer ? t('escrow.freelancerView', 'Freelancer View') : t('escrow.clientView', 'Client View')}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
@@ -237,28 +307,125 @@ export default function DeliveryPortalPage() {
           {isFreelancer && (
             <div className="space-y-6">
               
-              {/* Active & No Pending Delivery -> Show Submit Work Area */}
-              {isActive && !hasPendingDelivery && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="h-5 w-5 text-amber-500" />
-                      <h3 className="text-lg font-bold text-gray-850">
-                        {t('delivery.pageTitle', 'Submit Deliverables')}
-                      </h3>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {t('delivery.history.freelancerDesc', 'Submit completed files and description to request milestone release.')}
-                    </p>
+              {/* Additional Revisions Request Card (Step 6) */}
+              {pendingAdditionalRequest && (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                  <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-amber-500" />
+                    Request for Additional Revisions
+                  </h4>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    Client is requesting <strong>{pendingAdditionalRequest.requestedCount}</strong> more revisions for: 
+                    <em className="block mt-1 bg-white p-2 rounded border border-slate-200 font-medium text-left">{pendingAdditionalRequest.reason}</em>
+                  </p>
+                  <div className="flex gap-2 text-xs">
+                    <button 
+                      onClick={() => handleAdditionalRevisionResponse(pendingAdditionalRequest.id, true)} 
+                      className="flex-1 bg-slate-900 text-white font-bold py-2 rounded-lg hover:bg-slate-800 transition"
+                    >
+                      Accept
+                    </button>
+                    <button 
+                      onClick={() => handleAdditionalRevisionResponse(pendingAdditionalRequest.id, false)} 
+                      className="flex-1 bg-white text-slate-800 border border-slate-350 font-bold py-2 rounded-lg hover:bg-slate-50 transition"
+                    >
+                      Decline
+                    </button>
                   </div>
-
-                  <DeliveryUploader
-                    milestones={milestones}
-                    onSubmit={handleFreelancerSubmit}
-                    isSubmitting={isSubmitting}
-                    uploadProgress={uploadProgress}
-                  />
                 </div>
+              )}
+
+              {/* In Dispute -> Show Warning Banner instead of uploader/revision forms */}
+              {contract.inDispute ? (
+                <div className="bg-white rounded-2xl shadow-sm border border-red-200 p-5 sm:p-6 space-y-4">
+                  <div className="flex items-center gap-1.5 text-red-650">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <h3 className="text-lg font-bold text-gray-850">
+                      Submission Blocked
+                    </h3>
+                  </div>
+                  <p className="text-xs text-red-800 leading-relaxed font-medium bg-red-50 p-3.5 rounded-xl border border-red-100">
+                    This contract is currently in dispute. Freelancers are prohibited from submitting any new deliverables or uploading files on a contract that is currently in dispute.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Active & Revision Requested -> Show Revision Instructions + Re-upload Area */}
+                  {isActive && activeRevisionDelivery && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 sm:p-6 space-y-5 text-left">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-amber-600">
+                          <Sparkles className="h-5 w-5" />
+                          <h3 className="text-lg font-bold text-gray-850">
+                            Submit Revision
+                          </h3>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          Upload your updated work and notes in response to the client's revision request.
+                        </p>
+                      </div>
+
+                      <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
+                        <span className="font-bold block">⚠️ Revision Feedback:</span>
+                        <p className="leading-relaxed bg-white p-2.5 rounded border border-amber-100/60 font-medium">
+                          {activeRevisionDelivery.revisionRequest?.reason || (Array.isArray(activeRevisionDelivery.revisionRequests) && activeRevisionDelivery.revisionRequests[activeRevisionDelivery.revisionRequests.length - 1]?.reason) || 'Please review the requested changes in the history log.'}
+                        </p>
+                      </div>
+
+                      {submitError && (
+                        <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
+                          <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold block">Submission Blocked</span>
+                            <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <DeliveryUploader
+                        milestones={milestones}
+                        onSubmit={handleFreelancerSubmit}
+                        isSubmitting={isSubmitting}
+                        uploadProgress={uploadProgress}
+                        buttonLabel={t('delivery.submit_revision', 'Submit Revision')}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Active & No Pending Delivery -> Show Submit Work Area */}
+                  {isActive && !hasPendingDelivery && !activeRevisionDelivery && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="h-5 w-5 text-amber-500" />
+                          <h3 className="text-lg font-bold text-gray-850">
+                            {t('delivery.pageTitle', 'Submit Deliverables')}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {t('delivery.history.freelancerDesc', 'Submit completed files and description to request milestone release.')}
+                        </p>
+                      </div>
+
+                      {submitError && (
+                        <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
+                          <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold block">Submission Blocked</span>
+                            <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <DeliveryUploader
+                        milestones={milestones}
+                        onSubmit={handleFreelancerSubmit}
+                        isSubmitting={isSubmitting}
+                        uploadProgress={uploadProgress}
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Active & Pending Delivery Submitted -> Show Under Review Status Card */}
@@ -268,17 +435,30 @@ export default function DeliveryPortalPage() {
                   <div className="inline-flex p-3 bg-amber-50 border border-amber-100 rounded-2xl text-amber-600">
                     <Clock className="h-7 w-7 animate-pulse" />
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-gray-850">
-                      {t('delivery.status.pending', 'Under Review')}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                      {t('delivery.uploader.underReviewDesc', 'Your submission is currently pending review by the client. The client has 3 days to approve or request revisions.')}
-                    </p>
-                  </div>
-                  <div className="text-xs text-gray-400 pt-2 border-t border-gray-100 font-medium">
-                    {t('delivery.uploader.autoApproves', 'Auto-approves if no client action is taken within 3 days.')}
-                  </div>
+                  {isPendingPaused ? (
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold text-gray-850">
+                        {t('delivery.status.paused', 'Review Paused')}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                        {pendingPauseReason || t('delivery.uploader.pausedDesc', 'The automatic approval countdown is paused while a specialist review is being conducted.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-gray-850">
+                          {t('delivery.status.pending', 'Under Review')}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                          {t('delivery.uploader.underReviewDesc', 'Your submission is currently pending review by the client. The client has 3 days to approve or request revisions.')}
+                        </p>
+                      </div>
+                      <div className="text-xs text-gray-400 pt-2 border-t border-gray-100 font-medium">
+                        {t('delivery.uploader.autoApproves', 'Auto-approves if no client action is taken within 3 days.')}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -307,7 +487,7 @@ export default function DeliveryPortalPage() {
           {!isFreelancer && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
               <div className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-indigo-500" />
+                <Info className="h-5 w-5 text-amber-500" />
                 <h3 className="text-lg font-bold text-gray-850">
                   {t('milestone.pageTitle', 'Milestone Status')}
                 </h3>

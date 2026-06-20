@@ -11,9 +11,48 @@ export default function DepositRequestsPage() {
   const [loading, setLoading] = useState(true);
   
   const [receiptImage, setReceiptImage] = useState(null);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
   
   const [approveDialogState, setApproveDialogState] = useState({ isOpen: false, id: null, error: null });
   const [rejectDialogState, setRejectDialogState] = useState({ isOpen: false, id: null, note: '', error: null });
+
+  const handleViewReceipt = async (request) => {
+    try {
+      setReceiptImage(request);
+      const response = await api.get(`/api/billing/deposit-requests/${request.id}/receipt`, { responseType: 'blob' });
+      const blob = response.data || response;
+      const objectUrl = URL.createObjectURL(blob);
+      setLightboxUrl(objectUrl);
+    } catch (err) {
+      toast.error('Failed to load receipt image.');
+      setReceiptImage(null);
+    }
+  };
+
+  const handleCloseLightbox = () => {
+    if (lightboxUrl) {
+      URL.revokeObjectURL(lightboxUrl);
+    }
+    setLightboxUrl(null);
+    setReceiptImage(null);
+  };
+
+  const handleDownloadReceipt = async (request) => {
+    try {
+      const response = await api.get(`/api/billing/deposit-requests/${request.id}/receipt`, { responseType: 'blob' });
+      const blob = response.data || response;
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt_${request.receiptNumber || request.id}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error('Download failed.');
+    }
+  };
 
   useEffect(() => {
     fetchRequests();
@@ -23,7 +62,8 @@ export default function DepositRequestsPage() {
     setLoading(true);
     try {
       const response = await api.get('/api/admin/billing/deposit-requests/pending');
-      setRequests(response.data || []);
+      const payload = response.data?.data || response.data;
+      setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
       toast.error(err.title || t('common.error'));
     } finally {
@@ -80,7 +120,7 @@ export default function DepositRequestsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-sm">
-                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.clientName')}</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.clientId')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.amount')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.receiptNumber')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.submittedDate')}</th>
@@ -107,22 +147,31 @@ export default function DepositRequestsPage() {
               ) : (
                 requests.map((request, idx) => (
                   <tr key={request.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{request.clientName}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900 font-mono text-xs">{request.clientId || '—'}</td>
                     <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                       {new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP' }).format(request.amount || 0)}
                     </td>
                     <td className="px-6 py-4 text-gray-500 font-mono text-xs">{request.receiptNumber || '—'}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {request.submittedDate ? new Date(request.submittedDate).toLocaleDateString() : '—'}
+                      {request.submittedAt ? new Date(request.submittedAt).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setReceiptImage(request.receiptUrl)}
+                          onClick={() => handleViewReceipt(request)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                           {t('admin.viewReceipt')}
+                        </button>
+                        <button
+                          onClick={() => handleDownloadReceipt(request)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 text-blue-700 text-xs font-medium rounded-md transition-colors border border-blue-100"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          {t('admin.download', 'Download')}
                         </button>
                         <button
                           onClick={() => setApproveDialogState({ isOpen: true, id: request.id, error: null })}
@@ -147,22 +196,35 @@ export default function DepositRequestsPage() {
           </table>
         </div>
       </div>
-
+ 
       {/* Lightbox Modal */}
       {receiptImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col items-center justify-center">
             <button
-              onClick={() => setReceiptImage(null)}
+              onClick={handleCloseLightbox}
               className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 rounded-full transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
-            <img
-              src={getImageUrl(receiptImage)}
-              alt="Receipt"
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-            />
+            <button
+              onClick={() => handleDownloadReceipt(receiptImage)}
+              className="absolute -top-12 right-12 p-2 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 rounded-full transition-colors flex items-center gap-1 text-xs px-3 font-semibold"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download
+            </button>
+            {lightboxUrl ? (
+              <img
+                src={lightboxUrl}
+                alt="Receipt"
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              />
+            ) : (
+              <div className="text-white text-sm animate-pulse">Loading image...</div>
+            )}
           </div>
         </div>
       )}

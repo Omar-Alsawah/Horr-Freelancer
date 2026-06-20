@@ -71,7 +71,7 @@ export function useContractDeliveriesQuery(contractId) {
     setError(null);
     try {
       const res = await contractsApi.getDeliveries(contractId);
-      setData(res.data || []);
+      setData(res.data?.data || res.data || []);
     } catch (err) {
       setError(err);
       toast.error(err.title || 'Failed to load deliveries history.');
@@ -117,34 +117,50 @@ export function useDeliverWorkMutation() {
     setUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      if (milestoneId) {
-        formData.append('MilestoneId', milestoneId);
-      }
-      if (deliveryNote?.trim()) {
-        formData.append('DeliveryNote', deliveryNote.trim());
-      }
+      // 1. Upload files first if any exist
+      let uploadedAttachments = [];
       if (attachments && attachments.length > 0) {
+        const formData = new FormData();
         attachments.forEach((file) => {
-          formData.append('Attachments', file);
+          formData.append('files', file);
         });
-      }
-      if (links && links.length > 0) {
-        links.forEach((link) => {
-          if (link?.trim()) {
-            formData.append('Links', link.trim());
+
+        const uploadRes = await contractsApi.uploadFiles(formData, {
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress(percentCompleted);
+            }
           }
         });
+
+        const uploadedFiles = uploadRes.data?.data || uploadRes.data || [];
+        uploadedAttachments = uploadedFiles.map(file => ({
+          fileUrl: file.fileUrl || file.storagePath,
+          fileType: file.fileType || file.name.substring(file.name.lastIndexOf('.')).toLowerCase(),
+          originalFileName: file.originalFileName || file.fileName,
+          fileSizeBytes: file.fileSizeBytes
+        }));
       }
 
-      const res = await contractsApi.deliverWork(contractId, formData, {
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setUploadProgress(percentCompleted);
-          }
+      // Appending links to note text if backend does not directly support it as JSON key
+      let formattedNote = deliveryNote?.trim() || '';
+      if (links && links.length > 0) {
+        const activeLinks = links.filter(l => l?.trim());
+        if (activeLinks.length > 0) {
+          formattedNote += `\n\nLinks:\n${activeLinks.join('\n')}`;
         }
-      });
+      }
+
+      // 2. Submit the delivery JSON
+      const submitPayload = {
+        contractId: Number(contractId),
+        contractMilestoneId: milestoneId || undefined,
+        deliveryNote: formattedNote,
+        attachments: uploadedAttachments
+      };
+
+      const res = await contractsApi.submitDelivery(submitPayload);
       setIsSuccess(true);
       toast.success('Work submitted successfully!');
       return res.data;
@@ -181,7 +197,7 @@ export function useDownloadAttachmentMutation() {
     setError(null);
 
     try {
-      const res = await contractsApi.downloadAttachment(contractId, deliveryId, attachmentId);
+      const res = await contractsApi.downloadAttachment(attachmentId);
       
       // Trigger file download using window.URL
       const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -203,3 +219,4 @@ export function useDownloadAttachmentMutation() {
 
   return { mutate, isLoading, error };
 }
+

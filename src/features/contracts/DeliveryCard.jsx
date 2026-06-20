@@ -80,6 +80,8 @@ export default function DeliveryCard({
     { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
   );
 
+  const isPaused = delivery.isPaused || delivery.IsPaused;
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:border-gray-300 transition-all">
       {/* Card Header */}
@@ -93,6 +95,20 @@ export default function DeliveryCard({
 
       {/* Card Body */}
       <div className="p-4 sm:p-5 space-y-4">
+        {isPaused && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3 text-amber-900 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold block">
+                {i18n.language === 'ar' ? 'تم إيقاف مراجعة التسليم مؤقتاً' : 'Delivery Review Paused'}
+              </span>
+              <span className="mt-1 block text-xs text-amber-800 leading-relaxed">
+                {delivery.pauseReason || delivery.PauseReason || (i18n.language === 'ar' ? 'تم إيقاف المراجعة التلقائية مؤقتاً أثناء مراجعة المختص.' : 'Auto-approval worker is paused while a specialist review is in progress.')}
+              </span>
+            </div>
+          </div>
+        )}
+
         {delivery.deliveryNote && (
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
             {delivery.deliveryNote}
@@ -100,13 +116,81 @@ export default function DeliveryCard({
         )}
 
         <DeliveryFilesList 
-          attachments={delivery.attachments} 
+          attachments={delivery.attachments || delivery.files || []} 
           onDownload={onDownloadAttachment} 
         />
+
+        {/* Revision & Additional Requests Log */}
+        {((delivery.revisionRequests && delivery.revisionRequests.length > 0) || delivery.revisionRequest || (delivery.additionalRevisionRequests && delivery.additionalRevisionRequests.length > 0)) && (
+          <div className="mt-5 pt-4 border-t border-gray-150 space-y-3">
+            <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+              {t('delivery.history.revisions_log', 'Revision & Additional Requests Log')}
+            </span>
+            <div className="space-y-3">
+              {/* Revision Requests */}
+              {Array.isArray(delivery.revisionRequests) ? (
+                delivery.revisionRequests.map((rev, index) => (
+                  <div key={rev.id || index} className="p-3 bg-amber-50/40 border border-amber-100 rounded-xl text-xs space-y-1.5 text-left">
+                    <div className="flex justify-between items-center text-amber-800 font-semibold">
+                      <span>{t('delivery.history.revision_num', 'Revision')} #{index + 1}</span>
+                      <span className="text-[10px] bg-amber-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {rev.status || 'Pending'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">{rev.reason}</p>
+                    {rev.requestedAt && (
+                      <span className="block text-[10px] text-gray-405">
+                        {t('delivery.history.requested_at', 'Requested')}: {new Date(rev.requestedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                ))
+              ) : (
+                delivery.revisionRequest && (
+                  <div className="p-3 bg-amber-50/40 border border-amber-100 rounded-xl text-xs space-y-1.5 text-left">
+                    <div className="flex justify-between items-center text-amber-800 font-semibold">
+                      <span>{t('delivery.history.revision_request', 'Revision Request')}</span>
+                      <span className="text-[10px] bg-amber-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {delivery.revisionRequest.status || 'Pending'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">{delivery.revisionRequest.reason}</p>
+                    {delivery.revisionRequest.requestedAt && (
+                      <span className="block text-[10px] text-gray-405">
+                        {t('delivery.history.requested_at', 'Requested')}: {new Date(delivery.revisionRequest.requestedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                )
+              )}
+
+              {/* Additional Revision Requests */}
+              {Array.isArray(delivery.additionalRevisionRequests) && delivery.additionalRevisionRequests.map((req, idx) => (
+                <div key={req.id || idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1.5 text-left">
+                  <div className="flex justify-between items-center text-slate-800 font-semibold">
+                    <span>{t('delivery.history.additional_revisions_req', 'Requested Additional Revisions')} (+{req.requestedCount})</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      req.status === 'Approved' || req.status === 'Accepted' ? 'bg-emerald-100 text-emerald-800' :
+                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-800'
+                    }`}>
+                      {req.status || 'Pending'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed font-medium">{req.reason}</p>
+                  {req.requestedAt && (
+                    <span className="block text-[10px] text-gray-450">
+                      {t('delivery.history.requested_at', 'Requested')}: {new Date(req.requestedAt).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action Area for Client (Pending items only) */}
-      {isClient && isPending && (
+      {isClient && isPending && !isPaused && (
         <div className="bg-gray-50 border-t border-gray-100 p-4 sm:p-5 space-y-4">
           {!activeAction ? (
             <div className="flex flex-wrap gap-2.5">

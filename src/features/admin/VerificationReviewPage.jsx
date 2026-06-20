@@ -10,6 +10,7 @@ export default function VerificationReviewPage() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterMode, setFilterMode] = useState('pending'); // 'pending' | 'all'
 
   // Lightbox state
   const [lightbox, setLightbox] = useState({ isOpen: false, requestId: null, currentIndex: 0 });
@@ -20,12 +21,16 @@ export default function VerificationReviewPage() {
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [filterMode]);
 
   const fetchRequests = async () => {
     setLoading(true);
+    setRequests([]);
     try {
-      const response = await api.get('/api/Verification/pending');
+      const endpoint = filterMode === 'pending'
+        ? '/api/Verification/pending'
+        : '/api/Verification/all';
+      const response = await api.get(endpoint);
       setRequests(response.data || []);
     } catch (err) {
       toast.error(err.title || t('common.error'));
@@ -87,6 +92,23 @@ export default function VerificationReviewPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">{t('admin.verificationRequests')}</h1>
 
+      {/* Filter Toggle */}
+      <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg w-fit">
+        {['pending', 'all'].map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setFilterMode(mode)}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+              filterMode === mode
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {mode === 'pending' ? t('admin.pendingOnly') : t('admin.allRequests')}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -133,20 +155,42 @@ export default function VerificationReviewPage() {
               </div>
 
               <div className="flex gap-2 pt-2 mt-auto">
-                <button
-                  onClick={() => setApproveDialog({ isOpen: true, id: request.id, error: null })}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <Check className="w-4 h-4" />
-                  {t('admin.approve')}
-                </button>
-                <button
-                  onClick={() => setRejectDialog({ isOpen: true, id: request.id, reason: '', error: null, clientError: null })}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                  {t('admin.reject')}
-                </button>
+                {(filterMode === 'all' && (request.status === 1 || request.status === 2)) ? (
+                  // Already reviewed — show status badge only
+                  <div className="w-full">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold ${
+                      request.status === 1
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {request.status === 1 ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                      {request.status === 1 ? t('admin.approved') : t('admin.rejected')}
+                    </span>
+                    {request.status === 2 && request.rejectionReason && (
+                      <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                        <span className="font-medium">{t('admin.reason')}:</span> {request.rejectionReason}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  // Pending — show action buttons
+                  <>
+                    <button
+                      onClick={() => setApproveDialog({ isOpen: true, id: request.id, error: null })}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                    >
+                      <Check className="w-4 h-4" />
+                      {t('admin.approve')}
+                    </button>
+                    <button
+                      onClick={() => setRejectDialog({ isOpen: true, id: request.id, reason: '', error: null, clientError: null })}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      {t('admin.reject')}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}

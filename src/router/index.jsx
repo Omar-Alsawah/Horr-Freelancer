@@ -1,7 +1,8 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import AdminLayout from '../layouts/AdminLayout';
+import SpecialistLayout from '../layouts/SpecialistLayout';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Login from '../features/auth/Login';
 import Register from '../features/auth/Register';
@@ -16,6 +17,7 @@ import SubmitProposalPage from '../features/proposals/SubmitProposalPage';
 import MyProposalsPage from '../features/proposals/MyProposalsPage';
 import ViewProposalPage from '../features/proposals/ViewProposalPage';
 import ViewOfferPage from '../features/proposals/ViewOfferPage';
+import JobInvitationsPage from '../features/proposals/JobInvitationsPage';
 import MyContractsPage from '../features/contracts/MyContractsPage';
 import ContractDetailsPage from '../features/contracts/ContractDetailsPage';
 import MyProfilePage from '../features/profile/MyProfilePage';
@@ -35,6 +37,10 @@ import DepositRequestsPage from '../features/admin/DepositRequestsPage';
 import WithdrawalRequestsPage from '../features/admin/WithdrawalRequestsPage';
 import VerificationReviewPage from '../features/admin/VerificationReviewPage';
 import DeliveryPortalPage from '../features/contracts/DeliveryPortalPage';
+import AdminDashboardPage from '../features/admin/AdminDashboardPage';
+import DisputeManagementPage from '../features/admin/DisputeManagementPage';
+import RevisionQueuePage from '../features/specialist/RevisionQueuePage';
+import SpecialistReviewSubmitPage from '../features/specialist/SpecialistReviewSubmitPage';
 import MyServicesPage from '../features/services/MyServicesPage';
 import CreateServicePage from '../features/services/CreateServicePage';
 import ServiceDetailsPage from '../features/services/ServiceDetailsPage';
@@ -55,6 +61,7 @@ export const router = createBrowserRouter([
           { path: 'jobs/:id', element: <JobDetailsPage /> },
           { path: 'proposals/submit', element: <SubmitProposalPage /> },
           { path: 'proposals/my-proposals', element: <MyProposalsPage /> },
+          { path: 'proposals/job-invitations', element: <JobInvitationsPage /> },
           { path: 'proposals/:id', element: <ViewProposalPage /> },
           { path: 'offers/:proposalId', element: <ViewOfferPage /> },
           { path: 'contracts/my-contracts', element: <MyContractsPage /> },
@@ -91,9 +98,26 @@ export const router = createBrowserRouter([
       {
         element: <AdminLayout />,
         children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: 'dashboard', element: <AdminDashboardPage /> },
           { path: 'deposits', element: <DepositRequestsPage /> },
           { path: 'withdrawals', element: <WithdrawalRequestsPage /> },
-          { path: 'verification', element: <VerificationReviewPage /> }
+          { path: 'verification', element: <VerificationReviewPage /> },
+          { path: 'disputes', element: <DisputeManagementPage /> }
+        ]
+      }
+    ]
+  },
+  {
+    path: '/specialist',
+    element: <ProtectedRoute requiredRoles={['Specialist']} />,
+    children: [
+      {
+        element: <SpecialistLayout />,
+        children: [
+          { index: true, element: <Navigate to="/specialist/queue" replace /> },
+          { path: 'queue', element: <RevisionQueuePage /> },
+          { path: 'reviews/:contractId/:deliveryId', element: <SpecialistReviewSubmitPage /> }
         ]
       }
     ]

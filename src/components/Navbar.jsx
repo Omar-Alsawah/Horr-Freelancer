@@ -5,7 +5,7 @@ import { Search, ChevronDown, Bell, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function Navbar() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -92,6 +92,13 @@ export default function Navbar() {
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Proposals and Offers
+                    </Link>
+                    <Link
+                      to="/proposals/job-invitations"
+                      onClick={() => setFindWorkDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {t('nav.job_invitations', 'Job invitations')}
                     </Link>
 
                     <div className="border-t border-gray-200 my-1"></div>
@@ -206,6 +213,7 @@ export default function Navbar() {
             <Link to="/find-work" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Find Work</Link>
             <Link to="/saved-jobs" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Saved Jobs</Link>
             <Link to="/proposals/my-proposals" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Proposals and Offers</Link>
+            <Link to="/proposals/job-invitations" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">{t('nav.job_invitations', 'Job invitations')}</Link>
             {/* TODO: page not implemented */}
             <Link to="/services/my-services" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Your Services</Link>
             {/* TODO: page not implemented */}

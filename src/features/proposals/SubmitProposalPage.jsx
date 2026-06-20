@@ -20,6 +20,7 @@ const SubmitProposalPage = () => {
   const [submitAsType, setSubmitAsType] = useState('Freelancer');
   const [bidRate, setBidRate] = useState(0);
   const [coverLetter, setCoverLetter] = useState('');
+  const [durationDays, setDurationDays] = useState('');
 
   // Validation State
   const [errors, setErrors] = useState({});
@@ -57,6 +58,10 @@ const SubmitProposalPage = () => {
       newErrors.bidRate = t('proposals.validation.bid_rate_required');
     }
 
+    if (!durationDays || durationDays < 1 || durationDays > 365) {
+      newErrors.durationDays = t('proposals.validation.duration_invalid');
+    }
+
     if (coverLetter.length < 50) {
       newErrors.coverLetter = t('proposals.validation.cover_letter_min');
     } else if (coverLetter.length > 2000) {
@@ -84,7 +89,8 @@ const SubmitProposalPage = () => {
         jobPostId: jobId,
         submitAsType,
         bidRate,
-        coverLetter
+        coverLetter,
+        durationDays
       };
 
       await proposalsApi.submitProposal(proposalData);
@@ -203,6 +209,26 @@ const SubmitProposalPage = () => {
               />
             </div>
           </div>
+
+          <div className="rate-grid">
+            <div>
+              <strong>{t('proposals.duration_label')}</strong>
+              <div className="text-sm text-gray-500">{t('proposals.duration_hint')}</div>
+            </div>
+            <div className="rate-input-group">
+              <input 
+                type="number" 
+                min="1"
+                max="365"
+                placeholder="Days"
+                value={durationDays} 
+                onChange={(e) => setDurationDays(parseInt(e.target.value) || '')}
+                className={errors.durationDays ? 'border-red-500' : ''}
+                style={{ paddingLeft: '0.6rem', textAlign: 'right' }}
+              />
+            </div>
+          </div>
+          {errors.durationDays && <div className="error-message mb-4">{errors.durationDays}</div>}
         </div>
 
 

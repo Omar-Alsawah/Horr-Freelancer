@@ -160,7 +160,7 @@ export default function DeliverySubmitPage() {
 
   if (!contract) return null;
 
-  const submitDisabled = !contract.escrowFunded || isSubmitting || isSuccess;
+  const submitDisabled = !contract.escrowFunded || contract.inDispute || isSubmitting || isSuccess;
 
   return (
     <div className="max-w-4xl mx-auto my-8 p-6 space-y-6">
@@ -207,6 +207,16 @@ export default function DeliverySubmitPage() {
           <AlertTriangle className="h-6 w-6 text-amber-600 mr-3 flex-shrink-0" />
           <p className="text-amber-800 font-medium">
             {t('delivery.noEscrowWarning')}
+          </p>
+        </div>
+      )}
+
+      {/* Dispute Warning Banner */}
+      {contract.inDispute && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md flex items-start">
+          <AlertTriangle className="h-6 w-6 text-red-600 mr-3 flex-shrink-0" />
+          <p className="text-red-800 font-medium">
+            This contract is currently in dispute. Freelancers are prohibited from submitting any new deliverables or uploading files on a contract that is currently in dispute.
           </p>
         </div>
       )}

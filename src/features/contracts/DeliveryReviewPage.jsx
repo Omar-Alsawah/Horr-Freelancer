@@ -127,7 +127,7 @@ export default function DeliveryReviewPage() {
     setReasonError('');
     setIsSubmitting(true);
     try {
-      await contractsApi.requestDeliveryRevision(deliveryId, { Reason: reason.trim() });
+      await contractsApi.requestDeliveryRevision(deliveryId, { reason: reason.trim() });
       setDelivery(prev => ({ ...prev, status: 'RevisionRequested' }));
       setActiveAction(null);
     } catch (err) {
@@ -145,7 +145,7 @@ export default function DeliveryReviewPage() {
     setReasonError('');
     setIsSubmitting(true);
     try {
-      await contractsApi.disputeDelivery(deliveryId, { ContractId: contractId, DeliveryId: deliveryId, Reason: reason.trim() });
+      await contractsApi.disputeDelivery(deliveryId, { contractId: Number(contractId), reason: reason.trim() });
       setDelivery(prev => ({ ...prev, status: 'Disputed' }));
       setActiveAction(null);
     } catch (err) {
@@ -233,8 +233,8 @@ export default function DeliveryReviewPage() {
           </div>
         )}
 
-        <div className="p-6 bg-indigo-50 border-t border-indigo-100">
-          <p className="text-indigo-800 font-medium flex items-center">
+        <div className="p-6 bg-slate-50 border-t border-slate-200">
+          <p className="text-slate-800 font-medium flex items-center">
              {t('delivery.review.escrowAtStake').replace('{{amount}}', formatCurrency(delivery.escrowAmount, i18n.language))}
           </p>
         </div>
