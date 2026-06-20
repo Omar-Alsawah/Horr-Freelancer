@@ -309,25 +309,25 @@ export default function DeliveryPortalPage() {
               
               {/* Additional Revisions Request Card (Step 6) */}
               {pendingAdditionalRequest && (
-                <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 space-y-4">
-                  <h4 className="font-bold text-indigo-950 text-sm flex items-center gap-1.5">
-                    <Info className="h-4 w-4 text-indigo-600" />
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+                  <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-amber-500" />
                     Request for Additional Revisions
                   </h4>
-                  <p className="text-xs text-indigo-800 leading-relaxed">
+                  <p className="text-xs text-slate-700 leading-relaxed">
                     Client is requesting <strong>{pendingAdditionalRequest.requestedCount}</strong> more revisions for: 
-                    <em className="block mt-1 bg-white p-2 rounded border border-indigo-100 font-medium text-left">{pendingAdditionalRequest.reason}</em>
+                    <em className="block mt-1 bg-white p-2 rounded border border-slate-200 font-medium text-left">{pendingAdditionalRequest.reason}</em>
                   </p>
                   <div className="flex gap-2 text-xs">
                     <button 
                       onClick={() => handleAdditionalRevisionResponse(pendingAdditionalRequest.id, true)} 
-                      className="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition"
+                      className="flex-1 bg-slate-900 text-white font-bold py-2 rounded-lg hover:bg-slate-800 transition"
                     >
                       Accept
                     </button>
                     <button 
                       onClick={() => handleAdditionalRevisionResponse(pendingAdditionalRequest.id, false)} 
-                      className="flex-1 bg-white text-indigo-900 border border-indigo-300 font-bold py-2 rounded-lg hover:bg-indigo-50 transition"
+                      className="flex-1 bg-white text-slate-800 border border-slate-350 font-bold py-2 rounded-lg hover:bg-slate-50 transition"
                     >
                       Decline
                     </button>
@@ -335,80 +335,97 @@ export default function DeliveryPortalPage() {
                 </div>
               )}
 
-              {/* Active & Revision Requested -> Show Revision Instructions + Re-upload Area */}
-              {isActive && activeRevisionDelivery && (
-                <div className="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 sm:p-6 space-y-5 text-left">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-amber-600">
-                      <Sparkles className="h-5 w-5" />
-                      <h3 className="text-lg font-bold text-gray-850">
-                        Submit Revision
-                      </h3>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Upload your updated work and notes in response to the client's revision request.
-                    </p>
+              {/* In Dispute -> Show Warning Banner instead of uploader/revision forms */}
+              {contract.inDispute ? (
+                <div className="bg-white rounded-2xl shadow-sm border border-red-200 p-5 sm:p-6 space-y-4">
+                  <div className="flex items-center gap-1.5 text-red-650">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <h3 className="text-lg font-bold text-gray-850">
+                      Submission Blocked
+                    </h3>
                   </div>
-
-                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
-                    <span className="font-bold block">⚠️ Revision Feedback:</span>
-                    <p className="leading-relaxed bg-white p-2.5 rounded border border-amber-100/60 font-medium">
-                      {activeRevisionDelivery.revisionRequest?.reason || (Array.isArray(activeRevisionDelivery.revisionRequests) && activeRevisionDelivery.revisionRequests[activeRevisionDelivery.revisionRequests.length - 1]?.reason) || 'Please review the requested changes in the history log.'}
-                    </p>
-                  </div>
-
-                  {submitError && (
-                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
-                      <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-bold block">Submission Blocked</span>
-                        <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                  <p className="text-xs text-red-800 leading-relaxed font-medium bg-red-50 p-3.5 rounded-xl border border-red-100">
+                    This contract is currently in dispute. Freelancers are prohibited from submitting any new deliverables or uploading files on a contract that is currently in dispute.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Active & Revision Requested -> Show Revision Instructions + Re-upload Area */}
+                  {isActive && activeRevisionDelivery && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 sm:p-6 space-y-5 text-left">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-amber-600">
+                          <Sparkles className="h-5 w-5" />
+                          <h3 className="text-lg font-bold text-gray-850">
+                            Submit Revision
+                          </h3>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          Upload your updated work and notes in response to the client's revision request.
+                        </p>
                       </div>
+
+                      <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
+                        <span className="font-bold block">⚠️ Revision Feedback:</span>
+                        <p className="leading-relaxed bg-white p-2.5 rounded border border-amber-100/60 font-medium">
+                          {activeRevisionDelivery.revisionRequest?.reason || (Array.isArray(activeRevisionDelivery.revisionRequests) && activeRevisionDelivery.revisionRequests[activeRevisionDelivery.revisionRequests.length - 1]?.reason) || 'Please review the requested changes in the history log.'}
+                        </p>
+                      </div>
+
+                      {submitError && (
+                        <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
+                          <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold block">Submission Blocked</span>
+                            <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <DeliveryUploader
+                        milestones={milestones}
+                        onSubmit={handleFreelancerSubmit}
+                        isSubmitting={isSubmitting}
+                        uploadProgress={uploadProgress}
+                        buttonLabel={t('delivery.submit_revision', 'Submit Revision')}
+                      />
                     </div>
                   )}
-
-                  <DeliveryUploader
-                    milestones={milestones}
-                    onSubmit={handleFreelancerSubmit}
-                    isSubmitting={isSubmitting}
-                    uploadProgress={uploadProgress}
-                    buttonLabel={t('delivery.submit_revision', 'Submit Revision')}
-                  />
-                </div>
-              )}
-              
-              {/* Active & No Pending Delivery -> Show Submit Work Area */}
-              {isActive && !hasPendingDelivery && !activeRevisionDelivery && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="h-5 w-5 text-amber-500" />
-                      <h3 className="text-lg font-bold text-gray-850">
-                        {t('delivery.pageTitle', 'Submit Deliverables')}
-                      </h3>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {t('delivery.history.freelancerDesc', 'Submit completed files and description to request milestone release.')}
-                    </p>
-                  </div>
-
-                  {submitError && (
-                    <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
-                      <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-bold block">Submission Blocked</span>
-                        <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                  
+                  {/* Active & No Pending Delivery -> Show Submit Work Area */}
+                  {isActive && !hasPendingDelivery && !activeRevisionDelivery && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="h-5 w-5 text-amber-500" />
+                          <h3 className="text-lg font-bold text-gray-850">
+                            {t('delivery.pageTitle', 'Submit Deliverables')}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {t('delivery.history.freelancerDesc', 'Submit completed files and description to request milestone release.')}
+                        </p>
                       </div>
+
+                      {submitError && (
+                        <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-2.5 text-rose-800 text-xs">
+                          <AlertTriangle className="h-5 w-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold block">Submission Blocked</span>
+                            <span className="mt-0.5 block">{submitError.title || 'An error occurred during submission.'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <DeliveryUploader
+                        milestones={milestones}
+                        onSubmit={handleFreelancerSubmit}
+                        isSubmitting={isSubmitting}
+                        uploadProgress={uploadProgress}
+                      />
                     </div>
                   )}
-
-                  <DeliveryUploader
-                    milestones={milestones}
-                    onSubmit={handleFreelancerSubmit}
-                    isSubmitting={isSubmitting}
-                    uploadProgress={uploadProgress}
-                  />
-                </div>
+                </>
               )}
 
               {/* Active & Pending Delivery Submitted -> Show Under Review Status Card */}
@@ -470,7 +487,7 @@ export default function DeliveryPortalPage() {
           {!isFreelancer && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6 space-y-5">
               <div className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-indigo-500" />
+                <Info className="h-5 w-5 text-amber-500" />
                 <h3 className="text-lg font-bold text-gray-850">
                   {t('milestone.pageTitle', 'Milestone Status')}
                 </h3>

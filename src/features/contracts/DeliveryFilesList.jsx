@@ -27,7 +27,7 @@ export default function DeliveryFilesList({ attachments = [], onDownload }) {
       </h4>
       <div className="flex flex-col gap-2">
         {attachments.map((item, idx) => {
-          const isFile = item.type !== 'LINK';
+          const isFile = !item.type || item.type.toString().toUpperCase() !== 'LINK';
           const displayName = item.name || item.originalFileName || item.fileName || 'Attachment';
           const itemUrl = item.url || item.fileUrl || '#';
           

@@ -13,12 +13,23 @@ import {
 } from 'lucide-react';
 import { revisionsApi } from '../../api/revisions';
 import { useAuthStore } from '../../store/authStore';
+import DeliveryFilesList from '../contracts/DeliveryFilesList';
+import { useDownloadAttachmentMutation } from '../../hooks/useContractDelivery';
 
 export default function SpecialistReviewSubmitPage() {
   const { t } = useTranslation();
   const { contractId, deliveryId } = useParams();
   const navigate = useNavigate();
   const role = useAuthStore(state => state.role);
+  const { mutate: downloadAttachment } = useDownloadAttachmentMutation();
+
+  const handleDownloadAttachment = async (attachmentId, filename) => {
+    try {
+      await downloadAttachment(contractId, deliveryId, attachmentId, filename);
+    } catch (err) {
+      // already toasted
+    }
+  };
 
   const [reviewData, setReviewData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -192,13 +203,32 @@ export default function SpecialistReviewSubmitPage() {
           </p>
         </div>
         <div>
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider text-amber-900">
+            {t('specialist.requirementsSummaryLabel', 'Evaluation Scope / Requirements')}
+          </span>
+          <div className="mt-1 bg-amber-50/30 rounded-lg p-4 border border-amber-100/70 text-gray-700 text-sm whitespace-pre-wrap font-normal">
+            {reviewData.requirementsSummary || t('specialist.noRequirementsSummary', 'No requirements specified.')}
+          </div>
+        </div>
+        <div>
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             {t('specialist.deliveryNoteLabel', 'Delivery Note')}
           </span>
-          <div className="mt-1 bg-gray-50 rounded-lg p-4 border border-gray-155 text-gray-700 text-sm whitespace-pre-wrap font-normal">
-            {displayNote || t('specialist.noDeliveryNote', 'No delivery details provided.')}
+          <div className="mt-1 bg-gray-50 rounded-lg p-4 border border-gray-150 text-gray-700 text-sm whitespace-pre-wrap font-normal">
+            {reviewData.deliveryNote || t('specialist.noDeliveryNote', 'No delivery details provided.')}
           </div>
         </div>
+        {reviewData.attachments && reviewData.attachments.length > 0 && (
+          <div className="pt-2">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
+              {t('specialist.deliveryAttachmentsLabel', 'Submitted Files / Attachments')}
+            </span>
+            <DeliveryFilesList 
+              attachments={reviewData.attachments} 
+              onDownload={handleDownloadAttachment} 
+            />
+          </div>
+        )}
       </div>
 
       {/* Form */}

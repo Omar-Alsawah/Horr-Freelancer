@@ -8,18 +8,36 @@ const METHOD_DETAILS_MAP = {
   0: 'instapayUsername',
   1: 'bankAccountDetails',
   2: 'eWalletNumber',
+  'InstaPay': 'instapayUsername',
+  'BankTransfer': 'bankAccountDetails',
+  'EWallet': 'eWalletNumber',
+  'instapay': 'instapayUsername',
+  'banktransfer': 'bankAccountDetails',
+  'ewallet': 'eWalletNumber'
 };
 
 const METHOD_BADGE_STYLES = {
   0: 'bg-blue-100 text-blue-700',
   1: 'bg-purple-100 text-purple-700',
   2: 'bg-orange-100 text-orange-700',
+  'InstaPay': 'bg-blue-100 text-blue-700',
+  'BankTransfer': 'bg-purple-100 text-purple-700',
+  'EWallet': 'bg-orange-100 text-orange-700',
+  'instapay': 'bg-blue-100 text-blue-700',
+  'banktransfer': 'bg-purple-100 text-purple-700',
+  'ewallet': 'bg-orange-100 text-orange-700'
 };
 
 const METHOD_LABEL_MAP = {
   0: 'admin.instapay',
   1: 'admin.bankTransfer',
   2: 'admin.ewallet',
+  'InstaPay': 'admin.instapay',
+  'BankTransfer': 'admin.bankTransfer',
+  'EWallet': 'admin.ewallet',
+  'instapay': 'admin.instapay',
+  'banktransfer': 'admin.bankTransfer',
+  'ewallet': 'admin.ewallet'
 };
 
 export default function WithdrawalRequestsPage() {
@@ -28,7 +46,7 @@ export default function WithdrawalRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const [approveDialogState, setApproveDialogState] = useState({ isOpen: false, id: null, error: null });
+  const [approveDialogState, setApproveDialogState] = useState({ isOpen: false, id: null, note: '', error: null });
   const [rejectDialogState, setRejectDialogState] = useState({ isOpen: false, id: null, note: '', error: null, clientError: null });
 
   useEffect(() => {
@@ -49,13 +67,13 @@ export default function WithdrawalRequestsPage() {
   };
 
   const handleApprove = async () => {
-    const { id } = approveDialogState;
+    const { id, note } = approveDialogState;
     if (!id) return;
     try {
-      await api.patch(`/api/admin/billing/withdrawal-requests/${id}/review`, { status: 1 });
+      await api.patch(`/api/admin/billing/withdrawal-requests/${id}/review`, { status: 1, adminNote: note });
       setRequests(prev => prev.filter(r => r.id !== id));
       toast.success(t('admin.withdrawApproveSuccess'));
-      setApproveDialogState({ isOpen: false, id: null, error: null });
+      setApproveDialogState({ isOpen: false, id: null, note: '', error: null });
     } catch (err) {
       const isAlready = err.status === 409 || err.status === 422 || (err.title && err.title.toLowerCase().includes('already'));
       if (isAlready) {
@@ -95,7 +113,7 @@ export default function WithdrawalRequestsPage() {
 
   const getMethodDetail = (request) => {
     const field = METHOD_DETAILS_MAP[request.method];
-    return request[field] || '—';
+    return request[field] || request.instapayUsername || request.bankAccountDetails || request.eWalletNumber || request.ewalletNumber || request.instaPayUsername || '—';
   };
 
   return (
@@ -108,7 +126,7 @@ export default function WithdrawalRequestsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-sm">
-                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.freelancerId')}</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.freelancerName')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.amount')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.method')}</th>
                 <th className="px-6 py-4 font-semibold text-gray-700">{t('admin.methodDetail')}</th>
@@ -137,7 +155,10 @@ export default function WithdrawalRequestsPage() {
               ) : (
                 requests.map((request, idx) => (
                   <tr key={request.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 font-medium text-gray-900 font-mono text-xs">{request.freelancerId || '—'}</td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-gray-900">{request.freelancerName || '—'}</div>
+                      <div className="text-gray-500 font-mono text-xs mt-0.5">{request.freelancerId || '—'}</div>
+                    </td>
                     <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                       {new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP' }).format(request.amount || 0)}
                     </td>
@@ -153,7 +174,7 @@ export default function WithdrawalRequestsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setApproveDialogState({ isOpen: true, id: request.id, error: null })}
+                          onClick={() => setApproveDialogState({ isOpen: true, id: request.id, note: '', error: null })}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md transition-colors"
                         >
                           <Check className="w-4 h-4" />
@@ -179,7 +200,7 @@ export default function WithdrawalRequestsPage() {
       {/* Confirmation Dialog - Approve */}
       {approveDialogState.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <h3 className="text-lg font-bold text-gray-900">{t('admin.approveDepositTitle')}</h3>
             
             {approveDialogState.error && (
@@ -193,9 +214,22 @@ export default function WithdrawalRequestsPage() {
             </div>
 
             <p className="text-gray-600 text-sm">{t('admin.approveDepositConfirm')}</p>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                {t('admin.rejectDepositNoteLabel')}
+              </label>
+              <textarea
+                value={approveDialogState.note}
+                onChange={(e) => setApproveDialogState(prev => ({ ...prev, note: e.target.value, error: null }))}
+                placeholder={t('admin.approveDepositNotePlaceholder')}
+                className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#eab308] focus:border-transparent text-sm resize-none"
+              />
+            </div>
+
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
               <button 
-                onClick={() => setApproveDialogState({ isOpen: false, id: null, error: null })}
+                onClick={() => setApproveDialogState({ isOpen: false, id: null, note: '', error: null })}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md transition-colors"
               >
                 {t('admin.cancel')}

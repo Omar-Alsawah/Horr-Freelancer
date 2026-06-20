@@ -356,6 +356,12 @@
     "resolving": "جاري الحل...",
     "resolvedFreelancer": "تم حل النزاع — تم الإفراج عن الأموال للمستقل",
     "resolvedClient": "تم حل النزاع — تم استرداد الأموال للعميل",
+    "refundSplitPercentages": "نسب توزيع الاسترداد",
+    "refundSplitHint": "حدد كيفية توزيع أموال الضمان. يتم استرداد أموال العميل، ويتم دفع أموال المستقل مطروحًا منها عمولة المنصة البالغة 15%.",
+    "clientRefundPercentage": "نسبة استرداد العميل",
+    "freelancerPayoutPercentage": "نسبة دفع المستقل",
+    "resolveSplit": "حل النزاع",
+    "resolvedSuccessfully": "تم حل النزاع بنجاح.",
     "status": {
       "open": "مفتوح",
       "underReview": "قيد المراجعة"
@@ -430,6 +436,7 @@
     "rejectDepositTitle": "رفض الإيداع",
     "rejectDepositNoteLabel": "ملاحظة الإدارة (اختياري)",
     "rejectDepositNotePlaceholder": "سبب الرفض...",
+    "approveDepositNotePlaceholder": "ملاحظات أو تعليمات للموافقة...",
     "cancel": "إلغاء",
     "alreadyReviewed": "تم مراجعة هذا الطلب بالفعل.",
     "noDepositRequests": "لا توجد طلبات إيداع معلقة.",

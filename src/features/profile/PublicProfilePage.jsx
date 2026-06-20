@@ -319,6 +319,31 @@ const PublicProfilePage = () => {
                 <div>
                   <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700 }}>{profile.fullName}</h1>
                   <p style={{ margin: '0.1rem 0', fontSize: '1.1rem', fontWeight: 600, color: '#333' }}>{profile.title}</p>
+                  
+                  {/* Rating Stars */}
+                  {profile.totalReviews > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.3rem' }}>
+                      <div style={{ display: 'flex', gap: '2px' }}>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <Star
+                            key={i}
+                            size={14}
+                            className={
+                              i <= profile.averageRating
+                                ? "text-[#C5A065] fill-[#C5A065]"
+                                : i - 0.5 <= profile.averageRating
+                                ? "text-[#C5A065] fill-[#C5A065] opacity-50"
+                                : "text-gray-200"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#555', marginLeft: '0.2rem' }}>
+                        {profile.averageRating.toFixed(1)} ({profile.totalReviews} reviews)
+                      </span>
+                    </div>
+                  )}
+
                   <div style={{ color: '#666', marginTop: '0.2rem', fontSize: '0.9rem' }}>
                     {profile.city && profile.country ? `${profile.city}, ${profile.country}` : (profile.city || profile.country || 'Location not specified')}
                   </div>
@@ -339,7 +364,7 @@ const PublicProfilePage = () => {
 
               <div style={{ display: 'flex', gap: '3rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.trustScore || '0'}%</div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{profile.jobSuccessPercentage ?? 100}%</div>
                   <div style={{ fontSize: '0.85rem', color: '#666' }}>Job Success</div>
                 </div>
                 <div>
@@ -472,6 +497,44 @@ const PublicProfilePage = () => {
                   <div className="text-gray-400 italic py-4 col-span-full">No portfolio items added yet.</div>
                 )}
               </div>
+            </div>
+
+            <div className="card" style={{ padding: '2rem' }}>
+              <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontWeight: 600, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Star className="text-[#C5A065] fill-[#C5A065]" size={18} /> Ratings & Reviews
+              </h3>
+              {profile.reviews && profile.reviews.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {profile.reviews.map((review) => (
+                    <div key={review.id} style={{ borderBottom: '1px solid #eee', paddingBottom: '1.5rem' }} className="last:border-0 last:pb-0">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <h4 style={{ margin: 0, fontWeight: 600, fontSize: '1rem', color: '#1A1A1A' }}>{review.clientName}</h4>
+                          <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#666' }}>
+                            {review.projectTitle} • {new Date(review.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '2px' }}>
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Star
+                              key={i}
+                              size={14}
+                              className={i <= review.rating ? "text-[#C5A065] fill-[#C5A065]" : "text-gray-200"}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {review.comment && (
+                        <p style={{ margin: '0.8rem 0 0 0', fontSize: '0.9rem', color: '#555', fontStyle: 'italic', lineHeight: '1.5' }}>
+                          "{review.comment}"
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', padding: '2rem 0' }}>No reviews received yet.</div>
+              )}
             </div>
 
             <div className="card" style={{ padding: '2rem' }}>

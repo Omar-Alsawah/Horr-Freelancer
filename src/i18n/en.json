@@ -356,6 +356,12 @@
     "resolving": "Resolving...",
     "resolvedFreelancer": "Dispute resolved — funds have been released to freelancer",
     "resolvedClient": "Dispute resolved — funds have been refunded to client",
+    "refundSplitPercentages": "Refund Split Percentages",
+    "refundSplitHint": "Specify how the escrow funds will be distributed. Client gets refunded, freelancer gets paid minus the standard 15% platform commission.",
+    "clientRefundPercentage": "Client Refund %",
+    "freelancerPayoutPercentage": "Freelancer Payout %",
+    "resolveSplit": "Resolve Dispute",
+    "resolvedSuccessfully": "Dispute resolved successfully.",
     "status": {
       "open": "Open",
       "underReview": "Under Review"
@@ -430,6 +436,7 @@
     "rejectDepositTitle": "Reject Deposit",
     "rejectDepositNoteLabel": "Admin Note (Optional)",
     "rejectDepositNotePlaceholder": "Reason for rejection...",
+    "approveDepositNotePlaceholder": "Notes or instructions for approval...",
     "cancel": "Cancel",
     "alreadyReviewed": "This request has already been reviewed.",
     "noDepositRequests": "No pending deposit requests.",

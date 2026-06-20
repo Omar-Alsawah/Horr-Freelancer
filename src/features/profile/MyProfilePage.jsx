@@ -640,7 +640,8 @@ const MyProfilePage = () => {
             )}
             
             <div className="mt-2 flex items-center gap-2">
-              {renderStars(profile.trustScore)}
+              {renderStars(profile.averageRating)}
+              {profile.totalReviews > 0 && <span className="text-xs text-gray-500 font-medium">({profile.totalReviews} reviews)</span>}
               {profile.isVerified && <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Verified</span>}
             </div>
           </div>
@@ -950,6 +951,47 @@ const MyProfilePage = () => {
                 <p className="subtext italic col-span-2 text-center py-8">No portfolio items added yet.</p>
               )}
             </div>
+          </section>
+
+          {/* Ratings & Reviews Section */}
+          <section className="p-card section-reviews mt-6">
+            <div className="section-header flex justify-between items-center mb-6">
+              <h2 className="flex items-center gap-2 font-bold text-lg text-gray-900">
+                <Star className="text-[#C5A065] fill-[#C5A065]" size={20} /> Ratings & Reviews
+              </h2>
+            </div>
+            {profile.reviews && profile.reviews.length > 0 ? (
+              <div className="space-y-6">
+                {profile.reviews.map((review) => (
+                  <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                    <div className="flex justify-between items-start flex-wrap gap-2">
+                      <div>
+                        <h4 className="font-bold text-gray-900">{review.clientName}</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {review.projectTitle} • {new Date(review.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <Star
+                            key={i}
+                            size={14}
+                            className={i <= review.rating ? "text-[#C5A065] fill-[#C5A065]" : "text-gray-200"}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-gray-600 mt-3 italic leading-relaxed">
+                        "{review.comment}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="subtext italic text-center py-8 text-gray-400">No reviews received yet.</p>
+            )}
           </section>
 
         </main>

@@ -25,6 +25,8 @@ export default function DisputeManagementPage() {
 
   // Detail panel state
   const [activeDisputeId, setActiveDisputeId] = useState(null);
+  const [clientPct, setClientPct] = useState(50);
+  const [freelancerPct, setFreelancerPct] = useState(50);
   const [adminNotes, setAdminNotes] = useState('');
   const [notesError, setNotesError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,12 +81,37 @@ export default function DisputeManagementPage() {
       setActiveDisputeId(id);
       setAdminNotes('');
       setNotesError(false);
+      setClientPct(50);
+      setFreelancerPct(50);
     }
   };
 
-  const handleResolve = async (decision) => {
+  const handleClientPctChange = (val) => {
+    let num = parseInt(val);
+    if (isNaN(num)) num = 0;
+    if (num < 0) num = 0;
+    if (num > 100) num = 100;
+    setClientPct(num);
+    setFreelancerPct(100 - num);
+  };
+
+  const handleFreelancerPctChange = (val) => {
+    let num = parseInt(val);
+    if (isNaN(num)) num = 0;
+    if (num < 0) num = 0;
+    if (num > 100) num = 100;
+    setFreelancerPct(num);
+    setClientPct(100 - num);
+  };
+
+  const handleResolveSplit = async () => {
     if (!adminNotes.trim()) {
       setNotesError(true);
+      return;
+    }
+    
+    if (clientPct + freelancerPct !== 100) {
+      toast.error('The sum of client and freelancer percentages must equal 100%.');
       return;
     }
     
@@ -93,7 +120,8 @@ export default function DisputeManagementPage() {
     
     try {
       await disputesApi.resolveDispute(activeDisputeId, {
-        Decision: decision,
+        ClientPercentage: clientPct,
+        FreelancerPercentage: freelancerPct,
         AdminDecision: adminNotes
       });
       
@@ -101,12 +129,7 @@ export default function DisputeManagementPage() {
       setDisputes(prev => prev.filter(d => d.id !== activeDisputeId));
       setActiveDisputeId(null);
       setAdminNotes('');
-      
-      if (decision === 'ForFreelancer') {
-        toast.success(t('disputes.resolvedFreelancer'));
-      } else {
-        toast.success(t('disputes.resolvedClient'));
-      }
+      toast.success(t('disputes.resolvedSuccessfully', 'Dispute resolved successfully.'));
     } catch (err) {
       toast.error(err.title || t('common.error'));
     } finally {
@@ -276,41 +299,100 @@ export default function DisputeManagementPage() {
                                   )}
 
                                   {/* Resolution Form */}
-                                  <div className="pt-4 border-t border-gray-200">
-                                    <label className="block text-sm font-bold text-gray-900 mb-2">
-                                      {t('disputes.adminNotes')}
-                                    </label>
-                                    <textarea
-                                      rows={3}
-                                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm resize-none p-3 border"
-                                      placeholder="Explain the administrative ruling explicitly before closing..."
-                                      value={adminNotes}
-                                      onChange={(e) => {
-                                        setAdminNotes(e.target.value);
-                                        if (e.target.value.trim()) setNotesError(false);
-                                      }}
-                                    />
-                                    {notesError && (
-                                      <p className="mt-2 text-sm text-red-600 font-medium flex items-center">
-                                        <AlertCircle className="w-4 h-4 mr-1" />
-                                        {t('disputes.notesRequired')}
+                                  <div className="pt-4 border-t border-gray-200 space-y-6">
+                                    {/* Percentages Section */}
+                                    <div className="space-y-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                      <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                        <RefreshCw className="w-4 h-4 text-amber-600" />
+                                        {t('disputes.refundSplitPercentages', 'Refund Split Percentages')}
+                                      </h4>
+                                      <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                                        {t('disputes.refundSplitHint', 'Specify how the escrow funds will be distributed. Client gets refunded, freelancer gets paid minus the standard 15% platform commission.')}
                                       </p>
-                                    )}
+                                      
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            {t('disputes.clientRefundPercentage', 'Client Refund %')}
+                                          </label>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm p-2.5 border"
+                                            value={clientPct}
+                                            onChange={(e) => handleClientPctChange(e.target.value)}
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                            {t('disputes.freelancerPayoutPercentage', 'Freelancer Payout %')}
+                                          </label>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm p-2.5 border"
+                                            value={freelancerPct}
+                                            onChange={(e) => handleFreelancerPctChange(e.target.value)}
+                                          />
+                                        </div>
+                                      </div>
 
-                                    <div className="mt-5 flex flex-col sm:flex-row gap-4">
+                                      <div className="flex flex-wrap gap-2 pt-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => { setClientPct(100); setFreelancerPct(0); }}
+                                          className={`text-xs px-3 py-1.5 rounded-lg border transition-all font-semibold ${clientPct === 100 ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'}`}
+                                        >
+                                          100% Client / 0% Freelancer
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => { setClientPct(50); setFreelancerPct(50); }}
+                                          className={`text-xs px-3 py-1.5 rounded-lg border transition-all font-semibold ${clientPct === 50 ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'}`}
+                                        >
+                                          50% Client / 50% Freelancer
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => { setClientPct(0); setFreelancerPct(100); }}
+                                          className={`text-xs px-3 py-1.5 rounded-lg border transition-all font-semibold ${clientPct === 0 ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'}`}
+                                        >
+                                          0% Client / 100% Freelancer
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    <div>
+                                      <label className="block text-sm font-bold text-gray-900 mb-2">
+                                        {t('disputes.adminNotes')}
+                                      </label>
+                                      <textarea
+                                        rows={3}
+                                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm resize-none p-3 border"
+                                        placeholder="Explain the administrative ruling explicitly before closing..."
+                                        value={adminNotes}
+                                        onChange={(e) => {
+                                          setAdminNotes(e.target.value);
+                                          if (e.target.value.trim()) setNotesError(false);
+                                        }}
+                                      />
+                                      {notesError && (
+                                        <p className="mt-2 text-sm text-red-600 font-medium flex items-center">
+                                          <AlertCircle className="w-4 h-4 mr-1" />
+                                          {t('disputes.notesRequired')}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    <div className="mt-5">
                                       <button
-                                        onClick={() => handleResolve('ForFreelancer')}
+                                        onClick={handleResolveSplit}
                                         disabled={isSubmitting}
-                                        className="flex-1 inline-flex justify-center flex-row-reverse items-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-bold rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                        className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-bold rounded-lg text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 transition-colors"
                                       >
-                                        {(isSubmitting && !notesError) ? <Loader2 className="animate-spin w-4 h-4" /> : t('disputes.releaseToFreelancer')}
-                                      </button>
-                                      <button
-                                        onClick={() => handleResolve('ForClient')}
-                                        disabled={isSubmitting}
-                                        className="flex-1 inline-flex justify-center flex-row-reverse items-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-bold rounded-lg text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 transition-colors"
-                                      >
-                                        {(isSubmitting && !notesError) ? <Loader2 className="animate-spin w-4 h-4" /> : t('disputes.refundToClient')}
+                                        {isSubmitting ? <Loader2 className="animate-spin w-5 h-5" /> : t('disputes.resolveSplit', 'Resolve Dispute')}
                                       </button>
                                     </div>
                                   </div>

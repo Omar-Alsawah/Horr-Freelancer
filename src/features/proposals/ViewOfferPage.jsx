@@ -48,6 +48,9 @@ const ViewOfferPage = () => {
             const contractRes = await proposalsApi.getOffer(cId);
             const contractData = contractRes.data?.data || contractRes.data;
             setOffer({ ...currentOffer, ...contractData });
+            if (contractData?.id) {
+              setContractId(contractData.id);
+            }
           } catch (contractErr) {
             console.error('Error fetching detailed contract offer:', contractErr);
             setOffer(currentOffer);

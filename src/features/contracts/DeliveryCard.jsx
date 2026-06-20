@@ -166,12 +166,12 @@ export default function DeliveryCard({
 
               {/* Additional Revision Requests */}
               {Array.isArray(delivery.additionalRevisionRequests) && delivery.additionalRevisionRequests.map((req, idx) => (
-                <div key={req.id || idx} className="p-3 bg-indigo-50/40 border border-indigo-100 rounded-xl text-xs space-y-1.5 text-left">
-                  <div className="flex justify-between items-center text-indigo-800 font-semibold">
+                <div key={req.id || idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1.5 text-left">
+                  <div className="flex justify-between items-center text-slate-800 font-semibold">
                     <span>{t('delivery.history.additional_revisions_req', 'Requested Additional Revisions')} (+{req.requestedCount})</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
                       req.status === 'Approved' || req.status === 'Accepted' ? 'bg-emerald-100 text-emerald-800' :
-                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'
+                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-800'
                     }`}>
                       {req.status || 'Pending'}
                     </span>
