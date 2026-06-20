@@ -27,6 +27,7 @@ function isEmailNotConfirmedError(err) {
 }
 
 export default function Login() {
+  console.log(import.meta.env.VITE_API_URL);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const loginAction = useAuthStore(state => state.login);
