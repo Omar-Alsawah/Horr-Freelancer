@@ -169,6 +169,12 @@ export default function DeliveryPortalPage() {
     const status = String(d.status || d.Status || '').toLowerCase();
     return status === 'pending' || status === '0';
   });
+  const pendingDelivery = deliveries.find((d) => {
+    const status = String(d.status || d.Status || '').toLowerCase();
+    return status === 'pending' || status === '0';
+  });
+  const isPendingPaused = pendingDelivery?.isPaused || pendingDelivery?.IsPaused;
+  const pendingPauseReason = pendingDelivery?.pauseReason || pendingDelivery?.PauseReason;
   const statusVal = contract.status !== undefined ? contract.status : contract.Status;
   const statusStr = String(statusVal != null ? statusVal : '').toLowerCase();
   const isActive = statusStr === 'active' || statusStr === '1';
@@ -300,17 +306,30 @@ export default function DeliveryPortalPage() {
                   <div className="inline-flex p-3 bg-amber-50 border border-amber-100 rounded-2xl text-amber-600">
                     <Clock className="h-7 w-7 animate-pulse" />
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-gray-850">
-                      {t('delivery.status.pending', 'Under Review')}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                      {t('delivery.uploader.underReviewDesc', 'Your submission is currently pending review by the client. The client has 3 days to approve or request revisions.')}
-                    </p>
-                  </div>
-                  <div className="text-xs text-gray-400 pt-2 border-t border-gray-100 font-medium">
-                    {t('delivery.uploader.autoApproves', 'Auto-approves if no client action is taken within 3 days.')}
-                  </div>
+                  {isPendingPaused ? (
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold text-gray-850">
+                        {t('delivery.status.paused', 'Review Paused')}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                        {pendingPauseReason || t('delivery.uploader.pausedDesc', 'The automatic approval countdown is paused while a specialist review is being conducted.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-gray-850">
+                          {t('delivery.status.pending', 'Under Review')}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                          {t('delivery.uploader.underReviewDesc', 'Your submission is currently pending review by the client. The client has 3 days to approve or request revisions.')}
+                        </p>
+                      </div>
+                      <div className="text-xs text-gray-400 pt-2 border-t border-gray-100 font-medium">
+                        {t('delivery.uploader.autoApproves', 'Auto-approves if no client action is taken within 3 days.')}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 

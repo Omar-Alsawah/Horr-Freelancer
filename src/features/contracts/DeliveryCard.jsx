@@ -80,6 +80,8 @@ export default function DeliveryCard({
     { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
   );
 
+  const isPaused = delivery.isPaused || delivery.IsPaused;
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:border-gray-300 transition-all">
       {/* Card Header */}
@@ -93,6 +95,20 @@ export default function DeliveryCard({
 
       {/* Card Body */}
       <div className="p-4 sm:p-5 space-y-4">
+        {isPaused && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3 text-amber-900 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold block">
+                {i18n.language === 'ar' ? 'تم إيقاف مراجعة التسليم مؤقتاً' : 'Delivery Review Paused'}
+              </span>
+              <span className="mt-1 block text-xs text-amber-800 leading-relaxed">
+                {delivery.pauseReason || delivery.PauseReason || (i18n.language === 'ar' ? 'تم إيقاف المراجعة التلقائية مؤقتاً أثناء مراجعة المختص.' : 'Auto-approval worker is paused while a specialist review is in progress.')}
+              </span>
+            </div>
+          </div>
+        )}
+
         {delivery.deliveryNote && (
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
             {delivery.deliveryNote}
@@ -106,7 +122,7 @@ export default function DeliveryCard({
       </div>
 
       {/* Action Area for Client (Pending items only) */}
-      {isClient && isPending && (
+      {isClient && isPending && !isPaused && (
         <div className="bg-gray-50 border-t border-gray-100 p-4 sm:p-5 space-y-4">
           {!activeAction ? (
             <div className="flex flex-wrap gap-2.5">
