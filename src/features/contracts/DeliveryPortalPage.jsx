@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -10,8 +11,11 @@ import {
   useContractQuery, 
   useContractDeliveriesQuery, 
   useDeliverWorkMutation,
+  useUpdateDeliverWorkMutation,
   useDownloadAttachmentMutation 
 } from '../../hooks/useContractDelivery';
+import { revisionsApi } from '../../api/revisions';
+import { contractsApi } from '../../api/contracts';
 import DeliveryHistory from './DeliveryHistory';
 import DeliveryUploader from './DeliveryUploader';
 
@@ -35,6 +39,9 @@ export default function DeliveryPortalPage() {
     refetch: refetchDeliveries 
   } = useContractDeliveriesQuery(contractId);
 
+  // Revisions State
+  const [pendingAdditionalRequests, setPendingAdditionalRequests] = useState([]);
+
   // Mutations
   const { 
     mutate: submitWork, 
@@ -44,11 +51,31 @@ export default function DeliveryPortalPage() {
   } = useDeliverWorkMutation();
 
   const {
+    mutate: updateWork,
+    isLoading: isUpdating,
+    error: updateError,
+    uploadProgress: updateUploadProgress
+  } = useUpdateDeliverWorkMutation();
+
+  const {
     mutate: downloadAttachment
   } = useDownloadAttachmentMutation();
 
   const isRtl = i18n.language === 'ar';
   const isFreelancer = role === 'Freelancer';
+
+  // Fetch pending additional revision requests
+  useEffect(() => {
+    if (isFreelancer) {
+      revisionsApi.getPendingAdditionalRevisions()
+        .then(res => {
+          setPendingAdditionalRequests(res.data?.data || res.data || []);
+        })
+        .catch(err => {
+          console.error('Failed to fetch pending additional revisions:', err);
+        });
+    }
+  }, [isFreelancer, contractId]);
 
   const formatCurrency = (amount) => {
     if (amount == null) return '';
@@ -68,6 +95,35 @@ export default function DeliveryPortalPage() {
       refetchDeliveries();
     } catch {
       // toast error handled in hook
+    }
+  };
+
+  const handleFreelancerUpdateDelivery = async (deliveryId, payload) => {
+    try {
+      await updateWork(deliveryId, payload);
+      refetchContract();
+      refetchDeliveries();
+      if (isFreelancer) {
+        revisionsApi.getPendingAdditionalRevisions()
+          .then(res => {
+            setPendingAdditionalRequests(res.data?.data || res.data || []);
+          });
+      }
+    } catch {
+      // handled in hook
+    }
+  };
+
+  const handleAdditionalRevisionResponse = async (requestId, accept) => {
+    try {
+      await revisionsApi.respondToAdditionalRevision(requestId, accept);
+      toast.success(accept ? 'Request accepted!' : 'Request declined!');
+      const res = await revisionsApi.getPendingAdditionalRevisions();
+      setPendingAdditionalRequests(res.data?.data || res.data || []);
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || 'Failed to respond to request.');
     }
   };
 

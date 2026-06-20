@@ -11,6 +11,7 @@ export const contractsApi = {
   }),
   submitReview: (id, payload) => api.post(`/api/contracts/${id}/reviews`, payload),
   submitDelivery: (payload) => api.post('/api/deliveries/submit', payload),
+  updateDelivery: (deliveryId, payload) => api.put(`/api/deliveries/${deliveryId}`, payload),
   uploadFiles: (formData, config = {}) => api.post('/api/deliveries/upload', formData, config),
   getDelivery: (contractId, deliveryId) => api.get(`/api/contracts/${contractId}/deliveries/${deliveryId}`),
   approveDelivery: (deliveryId) => api.post(`/api/deliveries/${deliveryId}/approve`),

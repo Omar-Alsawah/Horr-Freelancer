@@ -219,3 +219,84 @@ export function useDownloadAttachmentMutation() {
 
   return { mutate, isLoading, error };
 }
+
+/**
+ * Hook to update a work delivery (mutation).
+ */
+export function useUpdateDeliverWorkMutation() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const mutate = useCallback(async (deliveryId, payload) => {
+    const { deliveryNote, attachments, links } = payload;
+    setIsLoading(true);
+    setError(null);
+    setIsSuccess(false);
+    setUploadProgress(0);
+
+    try {
+      // 1. Upload files first if any exist
+      let uploadedAttachments = [];
+      if (attachments && attachments.length > 0) {
+        const formData = new FormData();
+        attachments.forEach((file) => {
+          formData.append('files', file);
+        });
+
+        const uploadRes = await contractsApi.uploadFiles(formData, {
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress(percentCompleted);
+            }
+          }
+        });
+
+        const uploadedFiles = uploadRes.data?.data || uploadRes.data || [];
+        uploadedAttachments = uploadedFiles.map(file => ({
+          fileUrl: file.fileUrl || file.storagePath,
+          fileType: file.fileType || file.name.substring(file.name.lastIndexOf('.')).toLowerCase(),
+          originalFileName: file.originalFileName || file.fileName,
+          fileSizeBytes: file.fileSizeBytes
+        }));
+      }
+
+      // Appending links to note text
+      let formattedNote = deliveryNote?.trim() || '';
+      if (links && links.length > 0) {
+        const activeLinks = links.filter(l => l?.trim());
+        if (activeLinks.length > 0) {
+          formattedNote += `\n\nLinks:\n${activeLinks.join('\n')}`;
+        }
+      }
+
+      // 2. Update the delivery JSON
+      const updatePayload = {
+        deliveryNote: formattedNote,
+        attachments: uploadedAttachments
+      };
+
+      const res = await contractsApi.updateDelivery(deliveryId, updatePayload);
+      setIsSuccess(true);
+      toast.success('Work updated successfully!');
+      return res.data;
+    } catch (err) {
+      setError(err);
+      toast.error(err.title || 'Failed to update work.');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const reset = useCallback(() => {
+    setIsLoading(false);
+    setError(null);
+    setIsSuccess(false);
+    setUploadProgress(0);
+  }, []);
+
+  return { mutate, isLoading, error, isSuccess, uploadProgress, reset };
+}
