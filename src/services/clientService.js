@@ -88,9 +88,10 @@ export const getWalletBalance = async () => {
   return response.data;
 };
 
-export const submitDepositRequest = async (formData) => {
-  const response = await apiClient.post(ENDPOINTS.BILLING.SUBMIT_DEPOSIT_REQUEST, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+export const submitDepositRequest = async (formData, options = {}) => {
+  const response = await apiClient.post(ENDPOINTS.BILLING.DEPOSIT_REQUESTS, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    ...options
   });
   return response.data;
 };
@@ -133,7 +134,7 @@ export const getCategories = async (options = {}) => {
 };
 
 export const getSkills = async (options = {}) => {
-  const response = await apiClient.get(ENDPOINTS.SKILLS, options);
+  const response = await apiClient.get(ENDPOINTS.SKILLS.BASE, options);
   return response.data;
 };
 

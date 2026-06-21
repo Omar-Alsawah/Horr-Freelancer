@@ -144,6 +144,7 @@ export const ENDPOINTS = {
     APPROVE: (id) => `/api/deliveries/${id}/approve`,
     REVISION: (id) => `/api/deliveries/${id}/revision`,
     SUBMIT_SPECIALIST_REVIEW: (contractId, deliveryId) => `/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`,
+    SPECIALIST_REVIEW: (contractId, deliveryId) => `/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`,
     DISPUTE: (id) => `/api/deliveries/${id}/dispute`,
     DOWNLOAD: (id) => `/api/deliveries/attachments/${id}/download`,
     // New ones:

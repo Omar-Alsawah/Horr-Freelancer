@@ -19,8 +19,6 @@ const ViewProposalPage = () => {
   const [editCoverLetter, setEditCoverLetter] = useState('');
   const [errors, setErrors] = useState({});
 
-  const fetchedRef = useRef(false);
-
   useEffect(() => {
     if (proposal) {
       setEditBidRate(proposal.bidRate ?? proposal.BidRate ?? 0);
@@ -29,17 +27,16 @@ const ViewProposalPage = () => {
   }, [proposal]);
 
   useEffect(() => {
-    if (proposal || fetchedRef.current) {
+    if (proposal) {
       setLoading(false);
       return;
     }
-    fetchedRef.current = true;
 
     const controller = new AbortController();
 
     const fetchProposal = async () => {
       try {
-        const response = await proposalsApi.getMyProposals({ signal: controller.signal });
+        const response = await proposalsApi.getMyProposals(undefined, { signal: controller.signal });
         const payload = response.data?.data || response.data;
         const activeList = payload?.activeProposals || payload?.active || [];
         const submittedList = payload?.submittedProposals || payload?.submitted || [];
@@ -49,11 +46,13 @@ const ViewProposalPage = () => {
         const found = allProposals.find(p => String(p.id || p.Id) === String(id));
         setProposal(found || null);
       } catch (error) {
-        if (axios.isCancel(error)) return;
+        if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED' || axios.isCancel(error)) return;
         console.error('Error fetching proposal details:', error);
         toast.error(error.title || t('errors.unexpected'));
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 

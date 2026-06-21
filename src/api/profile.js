@@ -13,7 +13,7 @@ export const profileApi = {
   getPrivacy: (options = {}) => api.get(ENDPOINTS.USER_PROFILE.PRIVACY, options),
   updatePrivacy: (data, options = {}) => api.patch(ENDPOINTS.USER_PROFILE.PRIVACY, data, options),
   addPaymentMethod: (data, options = {}) => api.post(ENDPOINTS.USER_PROFILE.PAYMENT_METHOD, data, options),
-  getPublicProfile: (userIdHash, options = {}) => api.get(ENDPOINTS.USER_PROFILE.PUBLIC(userIdHash), options),
+  getPublicProfile: (userIdHash, options = {}) => api.get(ENDPOINTS.USER_PROFILE.PUBLIC_FN(userIdHash), options),
   updateFreelancerDetails: (data, options = {}) => api.patch(ENDPOINTS.USER_PROFILE.FREELANCER_DETAILS, data, options),
   updatePreferredCurrency: (currency, options = {}) => api.patch(ENDPOINTS.USER_PROFILE.PREFERRED_CURRENCY, JSON.stringify(currency), options)
 };

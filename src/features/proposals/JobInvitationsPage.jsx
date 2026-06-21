@@ -20,25 +20,26 @@ const JobInvitationsPage = () => {
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState(null);
 
-  const fetchedRef = useRef(false);
-
-  const fetchInvitations = async () => {
+  const fetchInvitations = async (signal) => {
     try {
-      const response = await jobInvitationsApi.getInvitations();
+      const response = await jobInvitationsApi.getInvitations(undefined, { signal });
       const payload = response.data?.data || response.data;
       setInvitations(Array.isArray(payload) ? payload : (payload?.items || []));
     } catch (error) {
+      if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') return;
       console.error('Error fetching invitations:', error);
       toast.error(error.title || t('errors.unexpected'));
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
-    fetchInvitations();
+    const controller = new AbortController();
+    fetchInvitations(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const handleDecline = async (id, e) => {

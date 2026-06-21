@@ -17,11 +17,8 @@ const ViewOfferPage = () => {
   const [apiError, setApiError] = useState(null);
   const [contractId, setContractId] = useState(null); // Stored separately for reliable access in action handlers
 
-  const fetchedRef = useRef(false);
-
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
+    const controller = new AbortController();
 
     const fetchOfferDetails = async () => {
       try {
@@ -31,7 +28,7 @@ const ViewOfferPage = () => {
 
         // If not passed via state, look up in proposals list first
         if (!currentOffer) {
-          const response = await proposalsApi.getMyProposals();
+          const response = await proposalsApi.getMyProposals(undefined, { signal: controller.signal });
           const payload = response.data?.data || response.data;
           const activeList = payload?.activeProposals || payload?.active || [];
           const submittedList = payload?.submittedProposals || payload?.submitted || [];
@@ -45,13 +42,14 @@ const ViewOfferPage = () => {
           setContractId(cId); // Store contract ID in state for use in action handlers
           
           try {
-            const contractRes = await proposalsApi.getOffer(cId);
+            const contractRes = await proposalsApi.getOffer(cId, { signal: controller.signal });
             const contractData = contractRes.data?.data || contractRes.data;
             setOffer({ ...currentOffer, ...contractData });
             if (contractData?.id) {
               setContractId(contractData.id);
             }
           } catch (contractErr) {
+            if (contractErr.name === 'CanceledError' || contractErr.code === 'ERR_CANCELED') return;
             console.error('Error fetching detailed contract offer:', contractErr);
             setOffer(currentOffer);
           }
@@ -59,16 +57,21 @@ const ViewOfferPage = () => {
           setOffer(null);
         }
       } catch (error) {
+        if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') return;
         console.error('Error in fetchOfferDetails:', error);
         toast.error(error.title || t('errors.unexpected'));
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     if (proposalId) {
       fetchOfferDetails();
     }
+
+    return () => controller.abort();
   }, [proposalId, t]);
 
   const handleAccept = async () => {

@@ -21,8 +21,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [savedIds, setSavedIds] = useState(new Set());
   const [savingIds, setSavingIds] = useState(new Set());
-  const fetchedRef = useRef(false);
-
   const fetchRecommendations = useCallback(async (options = {}) => {
     const { signal } = options;
     setLoading(true);
@@ -81,18 +79,11 @@ export default function DashboardPage() {
   useEffect(() => {
     const controller = new AbortController();
     if (user?.role === 'Freelancer') {
-      if (!fetchedRef.current) {
-        fetchedRef.current = true;
-        Promise.resolve().then(() => {
-          fetchRecommendations({ signal: controller.signal });
-        });
-      }
+      fetchRecommendations({ signal: controller.signal });
     } else if (user && user.role !== 'Freelancer') {
-      Promise.resolve().then(() => {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      });
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
     return () => controller.abort();
   }, [user, fetchRecommendations]);

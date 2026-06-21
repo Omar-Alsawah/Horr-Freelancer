@@ -15,15 +15,12 @@ const MyProposalsPage = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const fetchedRef = useRef(false);
-
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
+    const controller = new AbortController();
 
     const fetchProposals = async () => {
       try {
-        const response = await proposalsApi.getMyProposals();
+        const response = await proposalsApi.getMyProposals(undefined, { signal: controller.signal });
         const payload = response.data?.data || response.data;
         let activeList = [];
         let submittedList = [];
@@ -57,14 +54,18 @@ const MyProposalsPage = () => {
           offers: offersList
         });
       } catch (error) {
+        if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') return;
         console.error('Error fetching proposals:', error);
         toast.error(error.title || t('errors.unexpected'));
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProposals();
+    return () => controller.abort();
   }, [t]);
 
   const handleWithdraw = async (id, e) => {
