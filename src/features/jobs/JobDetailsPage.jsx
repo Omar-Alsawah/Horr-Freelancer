@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Heart, Tag, Star, Globe, Calendar, ArrowLeft, Copy, Flag } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { jobsApi } from '../../api/jobs';
 
 function formatBudget(budget, currency, convertedBudget, convertedCurrency, lang) {
@@ -76,24 +77,29 @@ export default function JobDetailsPage() {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchJob = async () => {
       setLoading(true);
       setNotFound(false);
       try {
-        const res = await jobsApi.getJob(id);
+        const res = await jobsApi.getJob(id, { signal: controller.signal });
         setJob(res.data);
         setIsSaved(res.data.isSaved || false);
       } catch (err) {
+        if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
         if (err.status === 404) {
           setNotFound(true);
         } else {
           toast.error(err.title || t('common.error'));
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
     fetchJob();
+    return () => controller.abort();
   }, [id, t]);
 
   const handleToggleSave = async () => {

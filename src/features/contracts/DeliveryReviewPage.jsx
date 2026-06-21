@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { Loader2, FileText, Link as LinkIcon, CheckCircle2, AlertCircle, AlertTriangle, Clock, Search, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { useAuthStore } from '../../store/authStore';
@@ -63,13 +64,14 @@ export default function DeliveryReviewPage() {
   const [reasonError, setReasonError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadDelivery = useCallback(async () => {
+  const loadDelivery = useCallback(async (signal) => {
     setLoading(true);
     setError(false);
     try {
-      const res = await contractsApi.getDelivery(contractId, deliveryId);
+      const res = await contractsApi.getDelivery(contractId, deliveryId, { signal });
       setDelivery(res.data?.data || res.data);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
       setError(true);
     } finally {
@@ -79,15 +81,17 @@ export default function DeliveryReviewPage() {
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     const load = async () => {
       await Promise.resolve();
       if (active && role === 'Client') {
-        loadDelivery();
+        loadDelivery(controller.signal);
       }
     };
     load();
     return () => {
       active = false;
+      controller.abort();
     };
   }, [role, loadDelivery]);
 
@@ -161,7 +165,7 @@ export default function DeliveryReviewPage() {
         <AlertTriangle className="w-16 h-16 text-red-400 mb-4" />
         <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
         <button 
-          onClick={loadDelivery}
+          onClick={() => loadDelivery()}
           className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
         >
           <RefreshCw className="w-4 h-4 mr-2" />

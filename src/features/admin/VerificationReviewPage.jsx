@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import api, { getImageUrl } from '../../api/axios';
-
+import axios from 'axios';
 const IMAGE_TYPES = ['frontId', 'backId', 'selfie'];
 
 export default function VerificationReviewPage() {
@@ -21,19 +21,22 @@ export default function VerificationReviewPage() {
   const [rejectDialog, setRejectDialog] = useState({ isOpen: false, id: null, reason: '', error: null, clientError: null });
 
   useEffect(() => {
-    fetchRequests();
+    const controller = new AbortController();
+    fetchRequests(controller.signal);
+    return () => controller.abort();
   }, [filterMode]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (signal) => {
     setLoading(true);
     setRequests([]);
     try {
       const endpoint = filterMode === 'pending'
         ? ENDPOINTS.VERIFICATION.PENDING
         : ENDPOINTS.VERIFICATION.ALL;
-      const response = await api.get(endpoint);
+      const response = await api.get(endpoint, { signal });
       setRequests(response.data || []);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
     } finally {
       setLoading(false);

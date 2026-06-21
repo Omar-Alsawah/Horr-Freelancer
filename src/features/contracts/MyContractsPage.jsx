@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { contractsApi } from '../../api/contracts';
 import Pagination from '../jobs/Pagination';
 
@@ -53,10 +54,10 @@ export default function MyContractsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
-  const fetchContracts = useCallback(async () => {
+  const fetchContracts = useCallback(async (signal) => {
     setLoading(true);
     try {
-      const res = await contractsApi.getMyContracts({ page, limit });
+      const res = await contractsApi.getMyContracts({ page, limit }, { signal });
       const dataPayload = res.data?.data || res.data;
       const items = dataPayload?.items || dataPayload?.Items || (Array.isArray(dataPayload) ? dataPayload : []);
       const totalCount = dataPayload?.totalCount || dataPayload?.TotalCount || 0;
@@ -64,6 +65,7 @@ export default function MyContractsPage() {
       setContracts(items);
       setTotalPages(pages);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
       setContracts([]);
     } finally {
@@ -73,15 +75,17 @@ export default function MyContractsPage() {
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     const load = async () => {
       await Promise.resolve();
       if (active) {
-        fetchContracts();
+        fetchContracts(controller.signal);
       }
     };
     load();
     return () => {
       active = false;
+      controller.abort();
     };
   }, [fetchContracts]);
 

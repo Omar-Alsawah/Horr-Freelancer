@@ -1,14 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getClientProfile, logoutUser } from '../../services/clientService';
+import axios from 'axios';
 
 // Async thunk to fetch the user profile
 export const fetchMe = createAsyncThunk(
   'auth/fetchMe',
-  async (_, { rejectWithValue }) => {
+  async (options = {}, { rejectWithValue }) => {
     try {
-      const data = await getClientProfile();
+      const data = await getClientProfile(options);
       return data;
     } catch (err) {
+      if (axios.isCancel(err)) throw err;
       return rejectWithValue(err.response?.data || err.message);
     }
   }

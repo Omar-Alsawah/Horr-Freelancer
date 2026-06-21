@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, DollarSign, Wallet, History, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { billingApi } from '../../api/billing';
 import SettingsSidebar from '../profile/SettingsSidebar';
 import { Card } from '../../components/ui/card';
@@ -61,26 +62,28 @@ const WithdrawalsPage = () => {
   const [withdrawals, setWithdrawals] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
 
-  const fetchBalance = useCallback(async () => {
+  const fetchBalance = useCallback(async (signal) => {
     try {
       setBalanceLoading(true);
-      const res = await billingApi.getWalletBalance();
+      const res = await billingApi.getWalletBalance({ signal });
       const data = res.data?.data || res.data?.value || res.data;
       setBalance(data?.balanceEGP ?? 0);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('errors.unexpected'));
     } finally {
       setBalanceLoading(false);
     }
   }, [t]);
 
-  const fetchHistory = useCallback(async () => {
+  const fetchHistory = useCallback(async (signal) => {
     try {
       setHistoryLoading(true);
-      const res = await billingApi.getMyWithdrawalRequests();
+      const res = await billingApi.getMyWithdrawalRequests(undefined, { signal });
       const data = res.data?.data || res.data?.value || res.data;
       setWithdrawals(Array.isArray(data) ? data : data?.items || []);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('errors.unexpected'));
     } finally {
       setHistoryLoading(false);
@@ -88,8 +91,10 @@ const WithdrawalsPage = () => {
   }, [t]);
 
   useEffect(() => {
-    fetchBalance();
-    fetchHistory();
+    const controller = new AbortController();
+    fetchBalance(controller.signal);
+    fetchHistory(controller.signal);
+    return () => controller.abort();
   }, [fetchBalance, fetchHistory]);
 
   const validate = () => {

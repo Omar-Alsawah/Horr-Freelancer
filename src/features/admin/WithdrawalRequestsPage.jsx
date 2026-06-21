@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { X, Check } from 'lucide-react';
 import api from '../../api/axios';
-
+import axios from 'axios';
 const METHOD_DETAILS_MAP = {
   0: 'instapayUsername',
   1: 'bankAccountDetails',
@@ -51,16 +51,19 @@ export default function WithdrawalRequestsPage() {
   const [rejectDialogState, setRejectDialogState] = useState({ isOpen: false, id: null, note: '', error: null, clientError: null });
 
   useEffect(() => {
-    fetchRequests();
+    const controller = new AbortController();
+    fetchRequests(controller.signal);
+    return () => controller.abort();
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (signal) => {
     setLoading(true);
     try {
-      const response = await api.get(ENDPOINTS.ADMIN.WITHDRAWAL_PENDING);
+      const response = await api.get(ENDPOINTS.ADMIN.WITHDRAWAL_PENDING, { signal });
       const payload = response.data?.data || response.data;
       setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
     } finally {
       setLoading(false);

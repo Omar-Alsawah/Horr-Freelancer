@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import axios from 'axios';
 import { useChatConnection } from '../../../hooks/useClientChatConnection';
 import { getMessages, getChats } from '../../../services/chatService';
 import MessageBubble from './MessageBubble';
@@ -75,6 +76,7 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
   useEffect(() => {
     if (!isValidChat) return;
     let active = true;
+    const controller = new AbortController();
 
     const loadData = async () => {
       await Promise.resolve();
@@ -88,7 +90,7 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
       try {
         // Load active chat info
         if (!initialActiveChat) {
-          const chatsList = await getChats();
+          const chatsList = await getChats({ signal: controller.signal });
           if (active && chatsList && Array.isArray(chatsList)) {
             const found = chatsList.find(c => {
               const cId = getProp(c, 'id') || getProp(c, 'chatId');
@@ -101,7 +103,7 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
         }
 
         // Load messages (page 1)
-        const data = await getMessages(chatId, 1);
+        const data = await getMessages(chatId, 1, { signal: controller.signal });
         if (active) {
           const items = getProp(data, 'items') || [];
           const reversed = [...items].reverse();
@@ -110,7 +112,8 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
             setHasMore(false);
           }
         }
-      } catch {
+      } catch (err) {
+        if (axios.isCancel(err)) return;
         toast.error('Could not load messages from server.');
       } finally {
         if (active) {
@@ -123,6 +126,7 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
 
     return () => {
       active = false;
+      controller.abort();
     };
   }, [chatId, isValidChat, initialActiveChat]);
 

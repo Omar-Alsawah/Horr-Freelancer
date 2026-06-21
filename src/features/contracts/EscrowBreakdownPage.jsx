@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { Loader2, AlertTriangle, ArrowRight, ShieldCheck, Banknote, Wallet, Receipt, PackageOpen, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { walletApi } from '../../api/wallet';
@@ -24,13 +25,13 @@ export default function EscrowBreakdownPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const loadData = async () => {
+  const loadData = async (signal) => {
     setLoading(true);
     setError(false);
     try {
-      const promises = [contractsApi.getEscrow(contractId)];
+      const promises = [contractsApi.getEscrow(contractId, { signal })];
       if (role === 'Freelancer') {
-        promises.push(walletApi.getWalletBalance());
+        promises.push(walletApi.getWalletBalance({ signal }));
       }
       const results = await Promise.all(promises);
       setEscrow(results[0].data);
@@ -38,6 +39,7 @@ export default function EscrowBreakdownPage() {
         setWalletBalance(results[1].data?.balance ?? 0);
       }
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
       setError(true);
     } finally {
@@ -46,9 +48,11 @@ export default function EscrowBreakdownPage() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     if (role === 'Freelancer' || role === 'Client') {
-      loadData();
+      loadData(controller.signal);
     }
+    return () => controller.abort();
   }, [contractId, role, t]);
 
   if (role !== 'Freelancer' && role !== 'Client') {
@@ -61,7 +65,7 @@ export default function EscrowBreakdownPage() {
         <AlertTriangle className="w-16 h-16 text-red-400 mb-4" />
         <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
         <button 
-          onClick={loadData}
+          onClick={() => loadData()}
           className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
         >
           <RefreshCw className="w-4 h-4 mr-2" />

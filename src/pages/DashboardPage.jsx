@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import JobCard from '../features/jobs/JobCard';
 import JobCardSkeleton from '../features/jobs/JobCardSkeleton';
 import EmptyState from '../features/jobs/EmptyState';
+import axios from 'axios';
 
 const CACHE_KEY = 'horr_recommended_jobs';
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
@@ -22,7 +23,8 @@ export default function DashboardPage() {
   const [savingIds, setSavingIds] = useState(new Set());
   const fetchedRef = useRef(false);
 
-  const fetchRecommendations = useCallback(async () => {
+  const fetchRecommendations = useCallback(async (options = {}) => {
+    const { signal } = options;
     setLoading(true);
 
     const cachedData = localStorage.getItem(CACHE_KEY);
@@ -30,6 +32,7 @@ export default function DashboardPage() {
       try {
         const { items, fetchedAt } = JSON.parse(cachedData);
         if (Date.now() - fetchedAt < CACHE_DURATION && Array.isArray(items)) {
+          if (signal && signal.aborted) return;
           setJobs(items);
           const initialSaved = new Set(
             items.filter(job => job.isSaved).map(job => job.id)
@@ -44,9 +47,12 @@ export default function DashboardPage() {
     }
 
     try {
-      const res = await jobsApi.getRecommendedJobs();
+      const res = await jobsApi.getRecommendedJobs({ signal });
       const payload = res.data?.data || res.data;
       const items = Array.isArray(payload) ? payload : (payload?.items || []);
+      
+      if (signal && signal.aborted) return;
+
       setJobs(items);
       
       // Initialize savedIds with the ids of the jobs that are already saved
@@ -61,26 +67,34 @@ export default function DashboardPage() {
         fetchedAt: Date.now()
       }));
     } catch (err) {
+      if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
       toast.error(err.title || t('common.error'));
+      if (signal && signal.aborted) return;
       setJobs([]);
     } finally {
-      setLoading(false);
+      if (!signal || !signal.aborted) {
+        setLoading(false);
+      }
     }
   }, [t]);
 
   useEffect(() => {
+    const controller = new AbortController();
     if (user?.role === 'Freelancer') {
       if (!fetchedRef.current) {
         fetchedRef.current = true;
         Promise.resolve().then(() => {
-          fetchRecommendations();
+          fetchRecommendations({ signal: controller.signal });
         });
       }
     } else if (user && user.role !== 'Freelancer') {
       Promise.resolve().then(() => {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       });
     }
+    return () => controller.abort();
   }, [user, fetchRecommendations]);
 
   const handleToggleSave = async (jobId) => {

@@ -4,42 +4,49 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Wallet, ArrowDownFromLine, ShieldCheck, Gavel } from 'lucide-react';
 import api from '../../api/axios';
-
+import axios from 'axios';
 export default function AdminDashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [counts, setCounts] = useState({ deposits: null, withdrawals: null, verifications: null, disputes: null });
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchCounts = async () => {
-      const [depositsRes, withdrawalsRes, verificationsRes, disputesRes] = await Promise.allSettled([
-        api.get(ENDPOINTS.ADMIN.DEPOSIT_PENDING),
-        api.get(ENDPOINTS.ADMIN.WITHDRAWAL_PENDING),
-        api.get(ENDPOINTS.VERIFICATION.PENDING),
-        api.get(ENDPOINTS.DISPUTES.BASE),
-      ]);
+      try {
+        const [depositsRes, withdrawalsRes, verificationsRes, disputesRes] = await Promise.allSettled([
+          api.get(ENDPOINTS.ADMIN.DEPOSIT_PENDING, { signal: controller.signal }),
+          api.get(ENDPOINTS.ADMIN.WITHDRAWAL_PENDING, { signal: controller.signal }),
+          api.get(ENDPOINTS.VERIFICATION.PENDING, { signal: controller.signal }),
+          api.get(ENDPOINTS.DISPUTES.BASE, { signal: controller.signal }),
+        ]);
 
-      const resolve = (res) => {
-        if (res.status !== 'fulfilled') return '—';
-        const payload = res.value.data?.data || res.value.data;
-        return Array.isArray(payload) ? payload.length : '—';
-      };
+        const resolve = (res) => {
+          if (res.status !== 'fulfilled') return '—';
+          const payload = res.value.data?.data || res.value.data;
+          return Array.isArray(payload) ? payload.length : '—';
+        };
 
-      const resolveDisputes = (res) => {
-        if (res.status !== 'fulfilled') return '—';
-        const payload = res.value.data?.data || res.value.data;
-        return typeof payload?.totalCount === 'number' ? payload.totalCount : '—';
-      };
+        const resolveDisputes = (res) => {
+          if (res.status !== 'fulfilled') return '—';
+          const payload = res.value.data?.data || res.value.data;
+          return typeof payload?.totalCount === 'number' ? payload.totalCount : '—';
+        };
 
-      setCounts({
-        deposits: resolve(depositsRes),
-        withdrawals: resolve(withdrawalsRes),
-        verifications: resolve(verificationsRes),
-        disputes: resolveDisputes(disputesRes),
-      });
+        setCounts({
+          deposits: resolve(depositsRes),
+          withdrawals: resolve(withdrawalsRes),
+          verifications: resolve(verificationsRes),
+          disputes: resolveDisputes(disputesRes),
+        });
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        console.error(err);
+      }
     };
 
     fetchCounts();
+    return () => controller.abort();
   }, []);
 
   const cards = [

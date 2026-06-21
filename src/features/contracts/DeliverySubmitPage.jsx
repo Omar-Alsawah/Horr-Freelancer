@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { Loader2, Plus, Trash2, CheckCircle2, AlertTriangle, Info, RefreshCw } from 'lucide-react';
 import { contractsApi } from '../../api/contracts';
 import { useAuthStore } from '../../store/authStore';
@@ -32,11 +33,11 @@ export default function DeliverySubmitPage() {
   const [deliveryNote, setDeliveryNote] = useState('');
   const [attachments, setAttachments] = useState([]); // { id: string, type: 'FILE' | 'LINK', file: File | null, link: string }
 
-  const loadContract = useCallback(async () => {
+  const loadContract = useCallback(async (signal) => {
     setLoading(true);
     setError(false);
     try {
-      const res = await contractsApi.getContract(contractId);
+      const res = await contractsApi.getContract(contractId, { signal });
       const data = res.data?.data || res.data;
       setContract(data);
       
@@ -46,6 +47,7 @@ export default function DeliverySubmitPage() {
         if (m) setMilestone(m);
       }
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
       setError(true);
     } finally {
@@ -55,15 +57,17 @@ export default function DeliverySubmitPage() {
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     const load = async () => {
       await Promise.resolve();
       if (active && role === 'Freelancer') {
-        loadContract();
+        loadContract(controller.signal);
       }
     };
     load();
     return () => {
       active = false;
+      controller.abort();
     };
   }, [role, loadContract]);
 
@@ -139,7 +143,7 @@ export default function DeliverySubmitPage() {
         <AlertTriangle className="w-16 h-16 text-red-400 mb-4" />
         <h2 className="text-2xl font-bold text-red-900 mb-2">{t('common.error')}</h2>
         <button 
-          onClick={loadContract}
+          onClick={() => loadContract()}
           className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition"
         >
           <RefreshCw className="w-4 h-4 mr-2" />

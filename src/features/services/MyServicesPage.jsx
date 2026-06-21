@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
+import axios from 'axios';
 
 export default function MyServicesPage() {
   const [activeTab, setActiveTab] = useState('Approved');
@@ -8,7 +9,9 @@ export default function MyServicesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchServices();
+    const controller = new AbortController();
+    fetchServices(controller.signal);
+    return () => controller.abort();
   }, []);
 
   // Auto-select "Under review" tab if there are items there
@@ -21,12 +24,13 @@ export default function MyServicesPage() {
     }
   }, [isLoading, services]);
 
-  const fetchServices = async () => {
+  const fetchServices = async (signal) => {
     try {
       setIsLoading(true);
-      const response = await api.get('/api/services/my-services');
+      const response = await api.get('/api/services/my-services', { signal });
       setServices(response.data.data || []);
     } catch (error) {
+      if (axios.isCancel(error)) return;
       console.error('Failed to fetch services', error);
     } finally {
       setIsLoading(false);

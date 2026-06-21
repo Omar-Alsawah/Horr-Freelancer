@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getRecommendedFreelancers } from '../../../services/talentService';
 import RecommendedFreelancerCard from './RecommendedFreelancerCard';
 import InviteFreelancerModal from './InviteFreelancerModal';
+import axios from 'axios';
 
 const CACHE_KEY = 'horr_recommended_freelancers';
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
@@ -41,7 +42,7 @@ const RecommendedFreelancers = ({ title = 'Recommended for you' }) => {
           fetchedAt: Date.now()
         }));
       } catch (err) {
-        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
+        if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
         setError('Failed to load recommendations.');
       } finally {
         if (!controller.signal.aborted) {

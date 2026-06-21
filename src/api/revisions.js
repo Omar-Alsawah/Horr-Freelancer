@@ -6,7 +6,7 @@ export const revisionsApi = {
   getMyCases: () => api.get(ENDPOINTS.REVISIONS.MY_CASES),
   acceptRevision: (revisionId) => api.post(ENDPOINTS.REVISIONS.ACCEPT(revisionId)),
   getFreelancerRevisions: (contractId) => api.get(ENDPOINTS.REVISIONS.FREELANCER, { params: contractId ? { contractId } : undefined }),
-  getPendingAdditionalRevisions: () => api.get(ENDPOINTS.REVISIONS.PENDING),
+  getPendingAdditionalRevisions: (options = {}) => api.get(ENDPOINTS.REVISIONS.PENDING, options),
   respondToAdditionalRevision: (requestId, accept) => api.post(ENDPOINTS.REVISIONS.RESPOND(requestId), { accept }),
   getSpecialistQueue: () => api.get(ENDPOINTS.REVISIONS.SPECIALIST_QUEUE),
   submitSpecialistVerdict: (contractId, deliveryId, payload) =>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getClientJobs, sendJobInvitation } from '../../../services/clientService';
+import axios from 'axios';
 
 const InviteFreelancerModal = ({ freelancer, onClose }) => {
   const [jobs, setJobs] = useState([]);
@@ -15,25 +16,30 @@ const InviteFreelancerModal = ({ freelancer, onClose }) => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchJobs = async () => {
       setJobsLoading(true);
       setJobsError(null);
       try {
-        const response = await getClientJobs();
+        const response = await getClientJobs({ signal: controller.signal });
         const rawJobs = Array.isArray(response) ? response : response?.data || [];
         setJobs(Array.isArray(rawJobs) ? rawJobs : []);
         if (Array.isArray(rawJobs) && rawJobs.length > 0) {
           setSelectedJobId(rawJobs[0].id || '');
         }
       } catch (err) {
+        if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
         setJobsError(
           err.response?.data?.message || err.message || 'Unable to load job list.'
         );
       } finally {
-        setJobsLoading(false);
+        if (!controller.signal.aborted) {
+          setJobsLoading(false);
+        }
       }
     };
     fetchJobs();
+    return () => controller.abort();
   }, []);
 
   const handleSend = async () => {

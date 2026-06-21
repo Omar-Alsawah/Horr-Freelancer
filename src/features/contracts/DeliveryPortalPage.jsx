@@ -6,6 +6,7 @@ import {
   Sparkles, ShieldCheck, Clock, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { useAuthStore } from '../../store/authStore';
 import { 
   useContractQuery, 
@@ -60,15 +61,18 @@ export default function DeliveryPortalPage() {
 
   // Fetch pending additional revision requests
   useEffect(() => {
+    const controller = new AbortController();
     if (isFreelancer) {
-      revisionsApi.getPendingAdditionalRevisions()
+      revisionsApi.getPendingAdditionalRevisions({ signal: controller.signal })
         .then(res => {
           setPendingAdditionalRequests(res.data?.data || res.data || []);
         })
         .catch(err => {
+          if (axios.isCancel(err)) return;
           console.error('Failed to fetch pending additional revisions:', err);
         });
     }
+    return () => controller.abort();
   }, [isFreelancer, contractId]);
 
   const formatCurrency = (amount) => {

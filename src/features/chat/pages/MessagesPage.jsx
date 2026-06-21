@@ -4,6 +4,7 @@ import ChatSidebar from '../components/ChatSidebar';
 import ChatWindow from '../components/ChatWindow';
 import { getChats } from '../../../services/chatService';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 // ─── Import your layout stylesheet ─────────────────────────────────────────
 import '../../../styles/chat-styles.css';
@@ -27,7 +28,8 @@ export default function MessagesPage() {
 
   useEffect(() => {
     let active = true;
-    getChats()
+    const controller = new AbortController();
+    getChats({ signal: controller.signal })
       .then((data) => {
         if (active) {
           const chatsData = Array.isArray(data) ? data : (data?.items ?? data?.data ?? []);
@@ -35,6 +37,7 @@ export default function MessagesPage() {
         }
       })
       .catch((err) => {
+        if (axios.isCancel(err)) return;
         console.error(err);
         toast.error('Could not load conversations.');
       })
@@ -46,6 +49,7 @@ export default function MessagesPage() {
 
     return () => {
       active = false;
+      controller.abort();
     };
   }, []);
 

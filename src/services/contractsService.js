@@ -2,20 +2,20 @@ import apiClient from './apiClient';
 import { ENDPOINTS } from './endpoints';
 
 export const contractsService = {
-  getMyContracts: async (params) => {
-    const res = await apiClient.get(ENDPOINTS.CONTRACTS.MY_CONTRACTS, { params });
+  getMyContracts: async (params, options = {}) => {
+    const res = await apiClient.get(ENDPOINTS.CONTRACTS.MY_CONTRACTS, { params, ...options });
     return res.data?.data ?? res.data;
   },
-  getContract: async (id) => {
-    const res = await apiClient.get(ENDPOINTS.CONTRACTS.GET_CONTRACT(id));
+  getContract: async (id, options = {}) => {
+    const res = await apiClient.get(ENDPOINTS.CONTRACTS.GET_CONTRACT(id), options);
     return res.data?.data ?? res.data;
   },
   submitReview: async (id, payload) => {
     const res = await apiClient.post(ENDPOINTS.CONTRACTS.SUBMIT_REVIEW(id), payload);
     return res.data?.data ?? res.data;
   },
-  getDeliveries: async (contractId) => {
-    const res = await apiClient.get(ENDPOINTS.DELIVERIES.GET_BY_CONTRACT, { params: { contractId } });
+  getDeliveries: async (contractId, options = {}) => {
+    const res = await apiClient.get(ENDPOINTS.DELIVERIES.GET_BY_CONTRACT, { params: { contractId }, ...options });
     return res.data?.data ?? res.data;
   },
   approveDelivery: async (deliveryId) => {

@@ -6,6 +6,7 @@ import Pagination from '../../contracts/components/Pagination';
 import { BASE_URL } from '../../../services/apiClient';
 import { currencyApi } from '../../../api/currency';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 const InstaPayLogo = () => (
   <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -119,16 +120,19 @@ const BillingSection = () => {
   const [conversionRate, setConversionRate] = useState(48.00);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchRate = async () => {
       try {
-        const res = await currencyApi.convertCurrency(1, 'USD', 'EGP');
-        const rate = res?.data?.convertedAmount ?? res?.data?.result ?? res?.data ?? 48.00;
+        const res = await currencyApi.convertCurrency(1, 'USD', 'EGP', { signal: controller.signal });
+        const rate = res?.data?.amount ?? res?.data?.convertedAmount ?? res?.data?.result ?? 48.00;
         setConversionRate(Number(rate));
       } catch (err) {
+        if (axios.isCancel(err)) return;
         console.error('Failed to fetch conversion rate:', err);
       }
     };
     fetchRate();
+    return () => controller.abort();
   }, []);
 
   const handleDownloadReceipt = async (reqId, receiptNum) => {
