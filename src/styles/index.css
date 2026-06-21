@@ -1,3 +1,10 @@
+/* ============================================================
+   src/styles/index.css
+   Client-origin styles — converged to Horr token system.
+   The purple --accent system has been removed; all references
+   are now mapped to --color-primary-gold or Horr semantic tokens.
+   ============================================================ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,140 +16,23 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    /* Optional: fallback color in case the image takes time to load */
-    background-color: #000;
-  }
-}
-:root {
-  --color-border: #e2e8f0;
-  --color-white: #ffffff;
-  --color-success: #10b981;
-  --color-primary-navy: #1e293b;
-  --color-primary-gold: #eab308;
-  --color-text-main: #0f172a;
-  --color-text-secondary: #64748b;
-
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
+    background-color: var(--color-surface-base);
+    font-family: var(--font-body);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-/* === Contracts Styles (exact match to Horr-Freelancer structure) === */
+/* ============================================================
+   Contracts Styles (client-origin — converged to Horr tokens)
+   ============================================================ */
 
 .contract-item {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
   background: transparent;
 }
 
@@ -151,36 +41,36 @@ code {
 }
 
 .contract-item:hover {
-  background-color: var(--code-bg);
+  background-color: var(--color-surface-subtle);
   margin: 0 -24px;
   padding: 24px;
 }
 
 .contract-info h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-h);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
   margin: 0 0 4px 0;
   text-decoration: underline;
   text-decoration-color: transparent;
-  transition: text-decoration-color 0.2s;
+  transition: text-decoration-color var(--transition-fast);
 }
 
+/* ✦ Gold hover on contract titles — signature element */
 .contract-item:hover .contract-info h3 {
-  color: var(--accent);
-  text-decoration-color: var(--accent);
+  color: var(--color-primary-gold);
+  text-decoration-color: var(--color-primary-gold);
 }
 
 .client-info {
-  font-size: 14px;
-  color: var(--text);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
   margin-bottom: 8px;
 }
 
 .date-range {
-  font-size: 12px;
-  color: var(--text);
-  opacity: 0.85;
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
 }
 
 .contract-meta {
@@ -192,75 +82,68 @@ code {
 }
 
 .contract-rate {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--text-h);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body-lg);
+  color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 
+/* contract-status base — see also badge classes in components.css */
 .contract-status {
-  font-size: 12px;
+  font-size: var(--text-caption);
   display: inline-block;
   padding: 4px 8px;
-  border-radius: 12px;
-  background-color: var(--border);
-  color: var(--text);
-}
-
-.status-active {
-  background-color: rgba(46, 125, 50, 0.15);
-  color: #2e7d32;
-}
-
-.status-closed {
-  background-color: rgba(0, 0, 0, 0.06);
-  color: var(--text);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
 }
 
 /* Contract Page Layout */
 .main-container {
-  max-width: 1200px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
   padding: 24px;
 }
 
 .content-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   margin-bottom: 30px;
+  box-shadow: var(--shadow-card);
 }
 
+/* Tabs — client-origin: converged to .tab-item pattern from components.css */
 .tabs-header {
   padding: 0 24px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
-  gap: 24px;
+  gap: 0;
 }
 
 .tab-btn {
   background: none;
   border: none;
-  padding: 16px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
+  padding: 16px var(--space-6);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  position: relative;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
 }
 
 .tab-btn:hover {
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 
+/* ✦ SIGNATURE: Gold bottom border on active tab */
 .tab-btn.active {
-  color: var(--text-h);
-  font-weight: 600;
-  border-bottom-color: var(--accent);
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+  border-bottom-color: var(--color-primary-gold);
 }
 
 .tab-content {
@@ -276,41 +159,32 @@ code {
   display: block;
   margin-top: 8px;
   background: none;
-  border: 1px solid var(--accent-border);
-  color: var(--accent);
+  border: 1px solid var(--color-primary-gold);
+  color: var(--color-primary-gold);
   padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   margin-left: auto;
 }
 
 .view-details-btn:hover {
-  background: var(--accent);
-  color: #fff;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  background: var(--color-primary-gold);
+  color: var(--color-text-inverse);
 }
 
 /* Contract Details Layout */
 .details-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
   padding: 32px;
   margin-bottom: 24px;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-card);
 }
 
 .contract-header {
@@ -319,19 +193,19 @@ code {
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header-left h1 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
   margin: 0 0 8px 0;
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 
 .client-subtitle {
-  font-size: 16px;
-  color: var(--text);
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
 }
 
 .header-right {
@@ -344,26 +218,28 @@ code {
   gap: 12px;
 }
 
+/* btn-deliver inherits .btn-primary from components.css */
 .btn-deliver {
-  background-color: var(--accent);
-  color: #fff;
+  background-color: var(--color-primary-gold);
+  color: var(--color-text-inverse);
   border: none;
   padding: 10px 20px;
-  border-radius: 20px;
-  font-weight: 600;
+  border-radius: var(--radius-pill);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
-  font-size: 14px;
-  transition: opacity 0.2s;
-  box-shadow: var(--shadow);
+  font-size: var(--text-body-sm);
+  transition: background-color var(--transition-fast);
+  box-shadow: var(--shadow-card);
 }
 
 .btn-deliver:hover {
-  opacity: 0.9;
+  background-color: var(--color-gold-dark);
 }
 
+/* btn-message inherits .btn-icon-round from components.css */
 .btn-message {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--color-surface-base);
+  border: 1.5px solid var(--color-border);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -371,20 +247,13 @@ code {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--text);
-  transition: all 0.2s;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
 }
 
 .btn-message:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: var(--text-h);
+  border-color: var(--color-primary-gold);
+  color: var(--color-primary-gold);
 }
 
 .terms-grid {
@@ -402,55 +271,37 @@ code {
 
 .term-item .term-label {
   display: block;
-  font-size: 14px;
-  color: var(--text);
+  font-size: var(--text-label);
+  color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
 
 .term-item .term-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-h);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .description-box {
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--text-h);
-  padding: 1rem 1.25rem;
-  background: var(--code-bg);
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
 }
 
-/* Review Styles */
+/* Feedback */
 .feedback-section {
   padding-top: 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-border);
 }
 
-.feedback-textarea {
-  width: 100%;
-  min-height: 120px;
-  padding: 16px;
-  font-family: inherit;
-  font-size: 15px;
-  color: var(--text-h);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.feedback-textarea:focus {
-  border-color: var(--accent-border);
-}
+/* feedback-textarea styles are in components.css */
 
 .star-rating {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
 }
-

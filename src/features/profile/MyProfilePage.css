@@ -1,356 +1,329 @@
-/* Profile Page Specific Styles */
+/* ============================================================
+   MyProfilePage.css — Profile-specific layout styles.
+   All color/typography values now reference canonical Horr tokens.
+   The local :root block has been removed — tokens live in tokens.css.
+   ============================================================ */
 
-:root {
-    --profile-card-bg: #ffffff;
-    --profile-gold: #C5A065;
-    --profile-gold-hover: #b8962e;
-    --profile-navy: #0F1E2C;
-    --profile-text-main: #1a1a1a;
-    --profile-text-muted: #6c757d;
-    --profile-border: #e9ecef;
-    --profile-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --profile-spacing: 1.5rem;
-    --radius-card: 12px;
-    --radius-btn: 20px;
-}
-
+/* Layout */
 .profile-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
-    font-family: 'Inter', sans-serif;
-    background-image: url('../../assets/BackGround.PNG');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: center;
-    min-height: 100vh;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  font-family: var(--font-body);
+  /* Background is set globally on body — removed from here */
+  min-height: 100vh;
 }
 
 /* Profile Header */
 .profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem;
-    background: var(--profile-card-bg);
-    border: 1px solid var(--profile-border);
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--profile-shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-card);
 }
 
 .header-left {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .avatar-container {
-    width: 80px;
-    height: 80px;
-    background: #f3f4f6;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  width: 80px;
+  height: 80px;
+  background: var(--color-surface-muted);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .avatar-icon {
-    width: 40px;
-    height: 40px;
-    color: #9ca3af;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-muted);
 }
 
 .avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-info h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--profile-text-main);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  margin: 0;
+  color: var(--color-text-primary);
 }
 
 .location {
-    color: var(--profile-text-muted);
-    font-size: 0.9rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .header-right {
-    display: flex;
-    gap: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
 }
 
-/* Card Styling */
+/* Profile Card */
 .p-card {
-    background: var(--profile-card-bg);
-    border: 1px solid var(--profile-border);
-    border-radius: 8px;
-    padding: var(--profile-spacing);
-    margin-bottom: 1.5rem;
-    box-shadow: var(--profile-shadow);
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-card);
 }
 
-/* Buttons */
+/* Buttons — profile-origin now use canonical .btn classes */
 .btn {
-    padding: 0.6rem 1.4rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+  padding: 0.65rem 1.375rem;
+  border-radius: var(--radius-pill);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
 }
 
 .btn-primary {
-    background-color: var(--profile-gold);
-    color: white;
+  background-color: var(--color-primary-gold);
+  color: var(--color-text-inverse);
+  border: 1.5px solid var(--color-primary-gold);
 }
 
 .btn-primary:hover {
-    background-color: var(--profile-gold-hover);
+  background-color: var(--color-gold-dark);
+  border-color: var(--color-gold-dark);
 }
 
 .btn-outline {
-    background: transparent;
-    border: 1px solid var(--profile-border);
-    color: var(--profile-text-main);
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .btn-outline:hover {
-    background-color: #f8f9fa;
+  background-color: var(--color-surface-subtle);
 }
 
 .btn-icon {
-    background: transparent;
-    border: none;
-    color: var(--profile-text-muted);
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* Layout */
+/* Profile Layout */
 .profile-layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
 }
 
-/* Interactive Elements */
+/* Interactive icon buttons */
 .edit-btn,
 .add-btn,
 .edit-btn-small,
 .delete-btn-small {
-    background: transparent;
-    border: none;
-    color: var(--profile-text-muted);
-    cursor: pointer;
-    padding: 0.25rem;
-    border-radius: 4px;
-    transition: background 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-btn:hover,
 .add-btn:hover {
-    background-color: #f3f4f6;
-    color: var(--profile-text-main);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-primary);
 }
 
 /* Section Specifics */
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .section-header h2 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+  color: var(--color-text-primary);
 }
 
-/* Status & Tags */
+/* Status */
 .status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #10b981;
-    border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-success-text);
+  border-radius: 50%;
 }
 
+/* Skill tags — profile-origin now uses canonical .skill-tag from components.css */
 .skills-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .skill-tag {
-    background-color: #fff9e6;
-    color: #b8962e;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
+  background-color: var(--color-gold-light);
+  color: var(--color-gold-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
 }
 
-/* Portfolio & Linked Accounts */
+/* Portfolio */
 .portfolio-list {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .portfolio-item {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--profile-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .portfolio-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .portfolio-info p {
-    margin: 0;
+  margin: 0;
 }
 
 .portfolio-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .linked-item {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .social-icon {
-    width: 20px;
-    height: 20px;
+  width: 20px;
+  height: 20px;
 }
 
-.linkedin {
-    color: #0077b5;
-}
-
-.github {
-    color: #181717;
-}
+.linkedin { color: #0077b5; }
+.github   { color: #181717; }
 
 .view-link {
-    text-decoration: none;
-    font-weight: 500;
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+  color: var(--color-text-accent);
 }
 
 .view-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+  color: var(--color-gold-dark);
 }
 
-.text-bold {
-    font-weight: 600;
-}
+/* Typography utilities */
+.text-bold  { font-weight: var(--weight-semibold); }
+.text-muted { color: var(--color-text-muted); }
+.subtext    { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+.summary-text { line-height: var(--leading-relaxed); margin: 0; }
+.role-title { font-size: var(--text-h2); color: var(--color-text-primary); margin: 0; }
 
-.text-muted {
-    color: var(--profile-text-muted);
-}
-
-.subtext {
-    font-size: 0.85rem;
-    color: var(--profile-text-muted);
-}
-
-.summary-text {
-    line-height: 1.6;
-    margin: 0;
-}
-
-.role-title {
-    font-size: 1.5rem;
-    color: var(--profile-text-main);
-    margin: 0;
-}
-
-/* File Upload Placeholders */
+/* File Upload */
 .placeholder-content {
-    display: flex;
-    justify-content: center;
-    padding: 1rem 0;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
 }
 
 .icon-circle {
-    width: 48px;
-    height: 48px;
-    background: #fff9e6;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--color-gold-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .placeholder-icon {
-    width: 24px;
-    height: 24px;
-    color: var(--profile-gold);
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary-gold);
 }
 
 /* Education */
 .education-item {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .education-item:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 /* Responsive */
 @media (max-width: 850px) {
-    .profile-layout {
-        grid-template-columns: 1fr;
-    }
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
 
-    .profile-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
 
-    .header-left {
-        flex-direction: column;
-    }
-    
-    .header-right {
-        width: 100%;
-        justify-content: center;
-    }
+  .header-left {
+    flex-direction: column;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: center;
+  }
 }

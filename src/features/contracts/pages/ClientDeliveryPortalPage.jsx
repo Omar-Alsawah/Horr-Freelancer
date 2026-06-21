@@ -138,8 +138,7 @@ export default function ClientDeliveryPortalPage() {
     <div className="max-w-6xl mx-auto px-4 py-8 w-full">
       <Link 
         to={`/client/contracts/${contractId}`} 
-        className="inline-flex items-center gap-1.5 text-accent font-semibold text-sm mb-6 hover:underline"
-        style={{ color: 'var(--accent)' }}
+        className="inline-flex items-center gap-1.5 link-accent text-body-sm font-semibold mb-6 hover:underline"
       >
         <ArrowLeft size={16} /> Back to Contract Details
       </Link>

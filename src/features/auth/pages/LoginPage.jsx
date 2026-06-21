@@ -79,9 +79,9 @@ export default function LoginPage() {
         navigate("/client/dashboard", { replace: true });
       } else if (userRole) {
         const currentPort = window.location.port;
-        let targetUrl = "http://localhost:5173";
+        let targetUrl = import.meta.env.VITE_FREELANCER_URL || "http://localhost:5173";
         if (currentPort === "5174") {
-          targetUrl = "http://localhost:5173";
+          targetUrl = import.meta.env.VITE_FREELANCER_URL || "http://localhost:5173";
         }
         window.location.href = targetUrl;
       }
@@ -131,9 +131,9 @@ export default function LoginPage() {
         navigate("/client/dashboard");
       } else {
         const currentPort = window.location.port;
-        let targetUrl = "http://localhost:5173";
+        let targetUrl = import.meta.env.VITE_FREELANCER_URL || "http://localhost:5173";
         if (currentPort === "5174") {
-          targetUrl = "http://localhost:5173";
+          targetUrl = import.meta.env.VITE_FREELANCER_URL || "http://localhost:5173";
         }
         window.location.href = targetUrl;
       }

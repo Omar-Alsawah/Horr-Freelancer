@@ -1,7 +1,7 @@
 import axios from 'axios';
 import i18n from '../i18n';
 
-export const BASE_URL = 'http://localhost:5200';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200';
 
 const api = axios.create({
   baseURL: BASE_URL,

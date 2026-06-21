@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const uploadClient = axios.create({
-  baseURL: 'https://localhost:5200',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://localhost:5200',
 });
 
 uploadClient.interceptors.request.use((config) => {

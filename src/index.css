@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import './styles/tokens.css';
+@import './styles/components.css';
 
 @tailwind base;
 @tailwind components;
@@ -7,6 +9,7 @@
 
 @layer base {
   :root {
+    /* shadcn/ui HSL tokens — required for component library */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -19,23 +22,23 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 210 40% 96.1%;   /* shadcn accent — NOT the purple from src/styles/index.css */
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 214.3 31.8% 91.4%;  /* was navy-based; use border for consistency */
     --radius: 0.5rem;
-    --color-border: #e2e8f0; /* gray-200 */
-    --color-white: #ffffff;
-    --color-success: #10b981; /* emerald-500 */
-    
-    /* HORR Theme Extracted */
-    --color-primary-navy: #1e293b;
-    --color-primary-gold: #eab308;
-    --color-text-main: #0f172a;
-    --color-text-secondary: #64748b;
+
+    /* Legacy aliases — referenced by older component classes still in use */
+    --color-border: var(--color-border);     /* resolved by tokens.css */
+    --color-white: var(--color-surface-base);
+    --color-success: var(--color-success-text);
+    --color-text-main: var(--color-text-primary);
+    --color-text-secondary: var(--color-text-secondary);
+    /* Note: --color-primary-navy and --color-primary-gold
+       are the canonical values defined in tokens.css */
   }
 }
 
@@ -45,6 +48,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
     background-image: url('/BackGround.PNG');
     background-size: cover;
     background-repeat: no-repeat;
@@ -1476,69 +1480,9 @@
 }
 
 /* ================================================= */
-/* --- PORTED PROTOTYPE CSS --- */
+/* --- SHARED COMPONENT STYLES (migrated to tokens) --- */
+/* Glass/gradient overrides removed. Unified via components.css */
 /* ================================================= */
-
-/* Premium Visual Enhancement Variables */
-:root {
-    --gradient-primary: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
-    --gradient-vibrant: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.3);
-}
-
-.light-theme-flow {
-    /* Background removed to show global background */
-}
-
-.card,
-.project-creation-card,
-.pricing-card,
-.add-on-card,
-.service-card {
-    backdrop-filter: blur(10px) !important;
-    background: var(--glass-bg) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
-    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12) !important;
-}
-
-.btn-success {
-    background: var(--gradient-vibrant) !important;
-    border: none !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
-    transition: all 0.3s ease !important;
-    padding: 0.6rem 1.4rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.btn-success:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 165, 0, 0.4);
-}
-
-.page-title {
-    background: linear-gradient(to right, #333, #666);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 800;
-}
 
 /* --- Stepper --- */
 .stepper-container {
@@ -1795,18 +1739,7 @@
     color: #2f855a;
 }
 
-.feed-tab.active {
-    border-bottom-color: #000 !important;
-}
-
-.feed-tab {
-    color: #5e6d55;
-    transition: color 0.2s;
-}
-
-.feed-tab:hover {
-    color: #108a00;
-}
+/* feed-tab active/hover converged to components.css .tab-item pattern */
 
 .service-row-item {
     background: transparent;

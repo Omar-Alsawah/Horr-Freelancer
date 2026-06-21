@@ -149,7 +149,7 @@ export default function Login() {
             />
             {handleErrorKey('password') && <div className="text-red-500 text-xs">{handleErrorKey('password')[0]}</div>}
           </div>
-          <Button type="submit" className="w-full bg-[#eab308] hover:bg-yellow-500 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-gold hover:bg-gold-dark text-white" disabled={loading}>
             {loading ? t('common.loading') : t('auth.submit_login')}
           </Button>
           <div className="mt-4 text-center text-sm">

@@ -1,12 +1,6 @@
-    :root {
-        --color-border: #e2e8f0;
-        --color-white: #ffffff;
-        --color-success: #10b981;
-        --color-primary-navy: #1e293b;
-        --color-primary-gold: #eab308;
-        --color-text-main: #0f172a;
-        --color-text-secondary: #64748b;
-    }
+/* Token overrides removed — all values derive from src/styles/tokens.css */
+/* --color-primary-gold: #C5A065  (canonical warm gold — do not redefine here) */
+/* --color-primary-navy: #1B2B4B  (canonical navy — do not redefine here) */
 
     /* Chat Layout */
     /* Chat Layout body styles removed to fix global scrolling */

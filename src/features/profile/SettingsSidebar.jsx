@@ -43,7 +43,7 @@ const SettingsSidebar = () => {
             to={item.path}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-[#d4af37] text-white shadow-sm'
+                ? 'bg-gold text-white shadow-sm'
                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
             }`}
           >

@@ -170,44 +170,29 @@ const BillingPage = () => {
   const currentLocale = i18n.language;
 
   return (
-    <div className="container max-w-[1100px] mx-auto pt-8 pb-16 px-4 font-inter">
+    <div className="max-w-[1100px] mx-auto pt-8 pb-16 px-4" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex flex-col md:flex-row gap-8">
         <SettingsSidebar />
 
         <main className="flex-1 space-y-8">
-          <h1 className="text-2xl font-bold text-gray-900">{t('billing.pageTitle')}</h1>
+          <h1 className="heading-h1">{t('billing.pageTitle')}</h1>
 
           {/* Outstanding Balance Card */}
-          <div className="balance-card" style={{
-            background: '#F8F9FA',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            border: '1px solid #E0E0E0',
-          }}>
-            <h3 className="info-label" style={{
-              color: 'var(--color-text-secondary, #6b7280)',
-              marginBottom: '0.5rem',
-              fontSize: '0.95rem',
-              fontWeight: 500,
-            }}>
+          <div className="card-base rounded-horr-lg p-6">
+            <h3 className="label text-text-secondary mb-2">
               {t('billing.outstandingBalance')}
             </h3>
             {balanceLoading ? (
-              <Loader2 className="w-6 h-6 animate-spin text-[#d4af37]" />
+              <Loader2 className="w-6 h-6 animate-spin text-gold" />
             ) : (
               <>
-                <div style={{
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  color: 'var(--color-text-main, #111827)',
-                  margin: '0.5rem 0',
-                }}>
+                <div className="text-h1 font-bold text-text-main mt-2 mb-1 mono">
                   {formatEGP(balance, currentLocale)}
                 </div>
-                <p style={{ color: 'var(--color-text-secondary, #6b7280)', fontSize: '0.9rem' }}>
+                <p className="body-sm">
                   {t('billing.approxUsd', { amount: new Intl.NumberFormat(currentLocale === 'ar' ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balance / 47.85) })}
                 </p>
-                <p style={{ color: 'var(--color-text-secondary, #6b7280)', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                <p className="caption mt-1">
                   {t('billing.conversionRate')}
                 </p>
               </>
@@ -215,21 +200,21 @@ const BillingPage = () => {
           </div>
 
           {/* Deposit Request Form Card */}
-          <Card className="p-8 border-none shadow-sm ring-1 ring-gray-100 rounded-2xl space-y-6">
-            <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-              <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+          <Card className="card-base p-8 space-y-6">
+            <div className="flex items-center gap-3 border-b border-[var(--color-border)] pb-4">
+              <div className="w-10 h-10 bg-gold-light rounded-horr-lg flex items-center justify-center text-gold">
                 <CreditCard size={20} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-800">{t('billing.depositTitle')}</h2>
-                <p className="text-sm text-gray-500 mt-0.5">{t('billing.depositDescription')}</p>
+                <h2 className="heading-h3">{t('billing.depositTitle')}</h2>
+                <p className="caption mt-0.5">{t('billing.depositDescription')}</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Amount */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider" htmlFor="deposit-amount">
+                <label className="label" htmlFor="deposit-amount">
                   {t('billing.amountLabel')}
                 </label>
                 <Input
@@ -237,7 +222,7 @@ const BillingPage = () => {
                   type="number"
                   step="0.01"
                   min="0"
-                  className={`h-12 rounded-xl ${formErrors.amount ? 'border-red-500' : 'border-gray-200'}`}
+                  className={`form-input h-12 ${formErrors.amount ? 'border-danger-border' : ''}`}
                   value={amount}
                   onChange={(e) => {
                     setAmount(e.target.value);
@@ -245,7 +230,7 @@ const BillingPage = () => {
                   }}
                   placeholder={t('billing.amountPlaceholder')}
                 />
-                {formErrors.amount && <p className="text-red-500 text-xs mt-1">{formErrors.amount}</p>}
+                {formErrors.amount && <p className="error-message">{formErrors.amount}</p>}
               </div>
 
               {/* Receipt Number */}

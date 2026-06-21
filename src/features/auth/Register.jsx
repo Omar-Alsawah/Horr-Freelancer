@@ -136,7 +136,7 @@ export default function Register() {
               value={form.bio}
               onChange={update('bio')}
               rows={3}
-              className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#eab308] focus:border-transparent resize-none ${errorFor('bio') ? 'border-red-500' : ''}`}
+              className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold resize-none ${errorFor('bio') ? 'border-red-500' : ''}`}
             />
             <FieldError field="bio" />
           </div>
@@ -181,7 +181,7 @@ export default function Register() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-[#eab308] hover:bg-yellow-500 text-white" disabled={loading}>
+          <Button type="submit" className="w-full bg-gold hover:bg-gold-dark text-white" disabled={loading}>
             {loading ? t('common.loading') : t('auth.submit_register')}
           </Button>
 

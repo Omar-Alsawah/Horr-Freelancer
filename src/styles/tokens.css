@@ -1,0 +1,159 @@
+/* ============================================================
+   HORR DESIGN SYSTEM — CANONICAL TOKENS
+   Single source of truth. All pages derive their values from here.
+   Do NOT add hardcoded hex values anywhere else.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* -------------------------------------------------------
+     BRAND COLORS
+     Primary identity of the Horr marketplace.
+     Navy = trust, authority.  Gold = excellence, premium.
+  ------------------------------------------------------- */
+  --color-primary-navy: #1B2B4B;
+  --color-primary-gold: #C5A065;
+  --color-gold-dark:    #A8884E;   /* hover/pressed state for gold CTAs */
+  --color-gold-light:   #FDF6EC;   /* gold tint — selected card backgrounds */
+  --color-gold-ring:    rgba(197, 160, 101, 0.25); /* focus ring glow */
+
+  /* -------------------------------------------------------
+     SURFACE COLORS
+     Background layers, card fills, muted zones.
+  ------------------------------------------------------- */
+  --color-surface-base:   #FFFFFF;
+  --color-surface-subtle: #F8F9FA;
+  --color-surface-muted:  #F1F5F9;
+
+  /* -------------------------------------------------------
+     TEXT COLORS
+  ------------------------------------------------------- */
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #94A3B8;
+  --color-text-inverse:   #FFFFFF;
+  --color-text-accent:    #C5A065;
+
+  /* -------------------------------------------------------
+     BORDER COLORS
+  ------------------------------------------------------- */
+  --color-border:       #E2E8F0;
+  --color-border-focus: #C5A065;
+
+  /* -------------------------------------------------------
+     SEMANTIC COLORS
+     Status indicators, alerts, badges.
+  ------------------------------------------------------- */
+  /* Success */
+  --color-success-bg:     #ECFDF5;
+  --color-success-text:   #065F46;
+  --color-success-border: #6EE7B7;
+
+  /* Warning / Pending */
+  --color-warning-bg:     #FFFBEB;
+  --color-warning-text:   #92400E;
+  --color-warning-border: #FCD34D;
+
+  /* Danger / Error */
+  --color-danger-bg:     #FEF2F2;
+  --color-danger-text:   #991B1B;
+  --color-danger-border: #FCA5A5;
+
+  /* Info / Process */
+  --color-info-bg:     #EFF6FF;
+  --color-info-text:   #1E40AF;
+  --color-info-border: #93C5FD;
+
+  /* Neutral / Closed / Default */
+  --color-neutral-bg:     #F9FAFB;
+  --color-neutral-text:   #374151;
+  --color-neutral-border: #D1D5DB;
+
+  /* Purple — for special states like "Delivered" */
+  --color-purple-bg:     #F5F3FF;
+  --color-purple-text:   #5B21B6;
+  --color-purple-border: #C4B5FD;
+
+  /* -------------------------------------------------------
+     TYPOGRAPHY
+     Plus Jakarta Sans for Latin UI.
+     Cairo as RTL/Arabic fallback (already in project).
+  ------------------------------------------------------- */
+  --font-heading: 'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
+  --font-body:    'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Code', Consolas, monospace;
+
+  /* Type scale — 4px-grid anchored */
+  --text-display:  2.5rem;    /* 40px — heroes, landing headlines */
+  --text-h1:       2rem;      /* 32px — page title */
+  --text-h2:       1.5rem;    /* 24px — section heading */
+  --text-h3:       1.25rem;   /* 20px — card title, modal title */
+  --text-h4:       1.0625rem; /* 17px — subsection / sidebar title */
+  --text-body-lg:  1rem;      /* 16px — lead body text */
+  --text-body:     0.9375rem; /* 15px — standard body */
+  --text-body-sm:  0.875rem;  /* 14px — secondary body */
+  --text-label:    0.8125rem; /* 13px — form labels, table headers */
+  --text-caption:  0.75rem;   /* 12px — timestamps, meta, helper text */
+  --text-mono:     0.875rem;  /* 14px — IDs, amounts, contract numbers */
+
+  /* Font weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Line heights */
+  --leading-tight:  1.25;
+  --leading-snug:   1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* -------------------------------------------------------
+     BORDER RADIUS
+  ------------------------------------------------------- */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-pill: 9999px;
+
+  /* -------------------------------------------------------
+     SHADOWS
+  ------------------------------------------------------- */
+  --shadow-card:     0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.06);
+  --shadow-modal:    0 8px 40px rgba(15,23,42,0.15);
+  --shadow-dropdown: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-gold:     0 0 0 3px var(--color-gold-ring);
+
+  /* -------------------------------------------------------
+     TRANSITIONS
+  ------------------------------------------------------- */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   350ms ease;
+
+  /* -------------------------------------------------------
+     SPACING (4px grid)
+  ------------------------------------------------------- */
+  --space-1:  0.25rem;   /*  4px */
+  --space-2:  0.5rem;    /*  8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+
+  /* -------------------------------------------------------
+     LAYOUT
+  ------------------------------------------------------- */
+  --page-max-width:   1200px;
+  --page-padding:     1.5rem;
+  --sidebar-width:    300px;
+  --navbar-height:    64px;
+}

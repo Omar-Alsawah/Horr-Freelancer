@@ -1,34 +1,34 @@
 import { useTranslation } from 'react-i18next';
 
+/**
+ * DeliveryStatusBadge — converged to the same .badge system as StatusBadge.
+ * Previously had a border class variant that diverged from StatusBadge.
+ * Now both components produce visually identical badges for the same status.
+ */
 export default function DeliveryStatusBadge({ status }) {
   const { t } = useTranslation();
 
-  const getBadgeStyle = (currentStatus) => {
+  const getBadgeVariant = (currentStatus) => {
     switch (currentStatus) {
-      case 'Pending':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'Approved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'RevisionRequested':
-        return 'bg-rose-100 text-rose-800 border-rose-200';
-      case 'Disputed':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Pending':          return 'badge--warning';
+      case 'Approved':         return 'badge--success';
+      case 'RevisionRequested': return 'badge--danger';
+      case 'Disputed':         return 'badge--danger';
+      default:                 return 'badge--neutral';
     }
   };
 
   const statusKeyMap = {
-    'Pending': 'delivery.status.pending',
-    'Approved': 'delivery.status.approved',
-    'Disputed': 'delivery.status.disputed',
-    'RevisionRequested': 'delivery.status.revisionRequested'
+    'Pending':           'delivery.status.pending',
+    'Approved':          'delivery.status.approved',
+    'Disputed':          'delivery.status.disputed',
+    'RevisionRequested': 'delivery.status.revisionRequested',
   };
 
   const label = t(statusKeyMap[status] || status, { defaultValue: status });
 
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${getBadgeStyle(status)}`}>
+    <span className={`badge ${getBadgeVariant(status)}`}>
       {label}
     </span>
   );

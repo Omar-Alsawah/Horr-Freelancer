@@ -36,7 +36,7 @@ export default function SpecialistLayout() {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200">
           <div className="flex items-center gap-2 text-decoration-none">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#eab308" xmlns="http://www.w3.org/2000/svg">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--color-primary-gold)" xmlns="http://www.w3.org/2000/svg">
               <polygon points="12 2 22 20 2 20" />
             </svg>
             <span className="font-bold text-2xl text-gray-900 tracking-tight">HORR</span>
@@ -61,9 +61,9 @@ export default function SpecialistLayout() {
                 <div 
                   className={`w-1.5 h-6 absolute transition-all ${
                     i18n.language === 'ar' ? 'right-0 rounded-l-full' : 'left-0 rounded-r-full'
-                  } ${isActive ? 'bg-[#eab308]' : 'bg-transparent'}`}
+                  } ${isActive ? 'bg-gold' : 'bg-transparent'}`}
                 ></div>
-                <item.icon className={`w-5 h-5 ${isActive ? 'text-[#eab308]' : 'text-gray-400'}`} />
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-gold' : 'text-gray-400'}`} />
                 {item.name}
               </NavLink>
             );

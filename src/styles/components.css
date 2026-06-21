@@ -1,0 +1,739 @@
+/* ============================================================
+   HORR DESIGN SYSTEM — SHARED COMPONENT CLASSES
+   All semantic classes used across both freelancer and client pages.
+   Only className / class references belong here — no logic.
+   ============================================================ */
+
+/* ============================================================
+   TYPOGRAPHY SCALE
+   Use these instead of ad-hoc Tailwind text-* utilities.
+   ============================================================ */
+
+.heading-display {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
+.heading-h1,
+.page-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  /* Reset the gradient clip from the old prototype */
+  background: none;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+}
+
+.heading-h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+}
+
+.heading-h3,
+.section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.heading-h4 {
+  font-family: var(--font-heading);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+}
+
+.body-lg {
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+}
+
+.body {
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+}
+
+.body-sm {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+}
+
+.label {
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+}
+
+.caption {
+  font-size: var(--text-caption);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+/* ============================================================
+   BUTTONS
+   Single spec across all pages.
+   .btn = base. Combine with .btn--primary, .btn--secondary etc.
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.375rem;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  position: relative;
+  letter-spacing: 0.01em;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary — Gold fill (main CTAs) */
+.btn-primary,
+.btn-apply,
+.btn-deliver,
+.btn-success {
+  background-color: var(--color-primary-gold);
+  border-color: var(--color-primary-gold);
+  color: var(--color-text-inverse);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-body-sm);
+  padding: 0.65rem 1.375rem;
+  border-radius: var(--radius-pill);
+  /* Reset prototype overrides */
+  text-transform: none;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+}
+
+.btn-primary:hover,
+.btn-apply:hover,
+.btn-deliver:hover,
+.btn-success:hover {
+  background-color: var(--color-gold-dark);
+  border-color: var(--color-gold-dark);
+  transform: none;
+}
+
+/* Secondary — Navy outline */
+.btn-secondary,
+.btn-specialist,
+.btn-save {
+  background-color: var(--color-surface-base);
+  border-color: var(--color-primary-navy);
+  color: var(--color-primary-navy);
+}
+
+.btn-secondary:hover,
+.btn-specialist:hover,
+.btn-save:hover {
+  background-color: var(--color-surface-muted);
+}
+
+/* Ghost — subtle text button */
+.btn-ghost,
+.btn-outline {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover,
+.btn-outline:hover {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-primary);
+}
+
+/* Danger */
+.btn-danger {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-danger-border);
+  color: var(--color-text-inverse);
+}
+
+/* Icon-only round button */
+.btn-icon-round,
+.btn-icon-circle,
+.btn-message {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--color-surface-base);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon-round:hover,
+.btn-icon-circle:hover,
+.btn-message:hover {
+  border-color: var(--color-primary-gold);
+  color: var(--color-primary-gold);
+  background-color: var(--color-gold-light);
+}
+
+.btn-icon-round.saved,
+.btn-icon-circle.saved {
+  background-color: var(--color-gold-light);
+  border-color: var(--color-primary-gold);
+  color: var(--color-primary-gold);
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.card-base,
+.card,
+.content-card,
+.details-card,
+.p-card {
+  background-color: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  /* Reset the glassmorphism prototype override */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Interactive card — hover lift + gold accent border on select */
+.card-interactive,
+.job-card-v2,
+.contract-item,
+.proposal-group {
+  background-color: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
+              background-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.card-interactive:hover,
+.job-card-v2:hover {
+  border-color: var(--color-primary-gold);
+  box-shadow: var(--shadow-card-hover);
+  background-color: var(--color-gold-light);
+}
+
+/* Selected/active card — Horr signature gold left-border */
+.card-interactive.active,
+.card-interactive--selected {
+  border-left: 3px solid var(--color-primary-gold);
+  background-color: var(--color-gold-light);
+}
+
+/* ============================================================
+   STATUS BADGES
+   Unified system replacing both StatusBadge.jsx and
+   DeliveryStatusBadge.jsx raw class names.
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+  /* Remove old border variant inconsistency */
+  border: none;
+}
+
+.badge--success,
+.status-active {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.badge--warning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.badge--danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.badge--info {
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.badge--neutral,
+.status-closed,
+.contract-status {
+  background-color: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}
+
+.badge--purple {
+  background-color: var(--color-purple-bg);
+  color: var(--color-purple-text);
+}
+
+/* Service-specific status badges */
+.status-review {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.status-approved {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+/* ============================================================
+   TABS
+   Unified across: jobs feed, proposals, contracts, services.
+   Replaces: .feed-tab, .proposal-tab, .tab-btn
+   ============================================================ */
+
+.tabs-bar,
+.tabs-header,
+.job-feed-tabs,
+.proposal-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+
+.tab-item,
+.feed-tab,
+.proposal-tab,
+.tab-btn {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tab-item:hover,
+.feed-tab:hover,
+.proposal-tab:hover,
+.tab-btn:hover {
+  color: var(--color-text-primary);
+  /* Remove the old green hover from services tabs */
+}
+
+/* ✦ SIGNATURE ELEMENT: Gold bottom border as the active indicator */
+.tab-item.active,
+.feed-tab.active,
+.proposal-tab.active,
+.tab-btn.active {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+  border-bottom: 2px solid var(--color-primary-gold);
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   Identical on freelancer and client pages.
+   ============================================================ */
+
+.form-field {
+  margin-bottom: var(--space-5);
+}
+
+.form-label,
+.form-label-text {
+  display: block;
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.form-hint {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.form-input,
+.form-select,
+.cover-letter-area,
+.feedback-textarea,
+.tier-input,
+.textarea-limited,
+.textarea-large {
+  width: 100%;
+  padding: 0.7rem 0.875rem;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.cover-letter-area:focus,
+.feedback-textarea:focus,
+.tier-input:focus,
+.textarea-limited:focus,
+.textarea-large:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-gold);
+}
+
+.form-input.error,
+.form-select.error {
+  border-color: var(--color-danger-border);
+}
+
+.error-message {
+  color: var(--color-danger-text);
+  font-size: var(--text-caption);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-weight: var(--weight-medium);
+}
+
+/* Toggle switch — token-driven */
+input:checked + .slider {
+  background-color: var(--color-primary-gold);
+}
+
+/* ============================================================
+   EMPTY STATES
+   Unified across all features.
+   ============================================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-8);
+  color: var(--color-text-secondary);
+}
+
+.empty-state__icon {
+  display: inline-flex;
+  padding: var(--space-4);
+  background-color: var(--color-surface-muted);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.empty-state__heading {
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.empty-state__body {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  max-width: 320px;
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4);
+}
+
+.modal-container {
+  background: var(--color-surface-base);
+  width: 100%;
+  max-width: 600px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-modal);
+}
+
+.modal-header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.close-modal:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-muted);
+}
+
+.modal-body {
+  padding: var(--space-6);
+  background: var(--color-surface-base);
+}
+
+/* ============================================================
+   CHAT — SIGNATURE GOLD LEFT-BORDER ON ACTIVE CONVERSATION
+   ============================================================ */
+
+.conversation-item {
+  display: flex;
+  padding: var(--space-4) var(--space-6);
+  gap: var(--space-4);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid var(--color-surface-subtle);
+  border-left: 3px solid transparent;   /* reserve space */
+}
+
+.conversation-item:hover {
+  background-color: var(--color-surface-subtle);
+}
+
+/* ✦ SIGNATURE ELEMENT: Gold left-border on active conversation */
+.conversation-item.active {
+  background-color: var(--color-gold-light);
+  border-left: 3px solid var(--color-primary-gold);
+  padding-left: calc(var(--space-6) - 3px);
+}
+
+/* ============================================================
+   NAVBAR ACTIVE STATE (mobile)
+   ✦ SIGNATURE ELEMENT: Gold left-border on selected nav item
+   ============================================================ */
+
+.nav-item-mobile.active {
+  border-left: 3px solid var(--color-primary-gold);
+  background-color: var(--color-gold-light);
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+/* ============================================================
+   UPLOAD AREAS
+   ============================================================ */
+
+.upload-placeholder {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.upload-placeholder:hover {
+  border-color: var(--color-primary-gold);
+  background-color: var(--color-gold-light);
+}
+
+.attach-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  background: var(--color-surface-base);
+}
+
+.attach-btn:hover {
+  border-color: var(--color-primary-gold);
+  background-color: var(--color-gold-light);
+  color: var(--color-text-accent);
+}
+
+/* ============================================================
+   STEPPER
+   ============================================================ */
+
+.stepper-line-progress {
+  height: 100%;
+  background: var(--color-primary-gold);
+  transition: width 0.4s ease;
+  border-radius: var(--radius-sm);
+}
+
+.step-item.active .step-circle {
+  background: var(--color-primary-gold);
+  border-color: var(--color-primary-gold);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-gold);
+}
+
+.step-item.active .step-label {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-bold);
+}
+
+.step-item.completed .step-circle {
+  background: var(--color-primary-gold);
+  border-color: var(--color-primary-gold);
+  color: var(--color-text-inverse);
+}
+
+.step-item.completed .step-label {
+  color: var(--color-primary-gold);
+}
+
+/* ============================================================
+   SKILL TAGS
+   ============================================================ */
+
+.skill-badge,
+.skill-tag {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  transition: background-color var(--transition-fast);
+  display: inline-block;
+}
+
+.skill-badge:hover,
+.skill-tag:hover {
+  background-color: var(--color-border);
+}
+
+/* ============================================================
+   GLOBAL FOCUS RING
+   Gold focus ring for keyboard navigation.
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   RATING STARS
+   ============================================================ */
+
+.rating-stars,
+.stars {
+  color: var(--color-primary-gold);
+}
+
+/* ============================================================
+   LINK ACCENT
+   Used for in-context navigation links.
+   ============================================================ */
+
+.link-accent {
+  color: var(--color-text-accent);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.link-accent:hover {
+  color: var(--color-gold-dark);
+  text-decoration: underline;
+}

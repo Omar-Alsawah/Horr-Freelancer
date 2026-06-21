@@ -52,7 +52,7 @@ export default function Navbar() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center gap-2 text-decoration-none">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="#eab308" xmlns="http://www.w3.org/2000/svg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--color-primary-gold)" xmlns="http://www.w3.org/2000/svg">
                   <polygon points="12 2 22 20 2 20" />
                 </svg>
                 <span className="font-bold text-2xl text-gray-900 tracking-tight">HORR</span>
@@ -65,13 +65,13 @@ export default function Navbar() {
               <div className="relative" ref={findWorkRef}>
                 <button
                   onClick={() => setFindWorkDropdownOpen(!findWorkDropdownOpen)}
-                  className="text-gray-900 hover:text-gray-500 px-3 py-2 text-sm font-medium flex items-center gap-1 focus:outline-none"
+                  className="text-text-primary hover:text-gold px-3 py-2 text-body-sm font-medium flex items-center gap-1 focus:outline-none transition-colors duration-fast"
                 >
                   Find work <ChevronDown className="w-4 h-4" />
                 </button>
 
                 {findWorkDropdownOpen && (
-                  <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-horr-lg shadow-dropdown py-1 bg-surface-base ring-1 ring-black ring-opacity-5 z-50">
                     <Link
                       to="/find-work"
                       onClick={() => setFindWorkDropdownOpen(false)}
@@ -127,10 +127,10 @@ export default function Navbar() {
                 )}
               </div>
 
-              <Link to="/contracts/my-contracts" className="text-gray-900 hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link to="/contracts/my-contracts" className="text-text-primary hover:text-gold px-3 py-2 text-body-sm font-medium transition-colors duration-fast">
                 Contracts
               </Link>
-              <Link to="/messages" className="text-gray-900 hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link to="/messages" className="text-text-primary hover:text-gold px-3 py-2 text-body-sm font-medium transition-colors duration-fast">
                 Messages
               </Link>
             </div>
@@ -138,7 +138,7 @@ export default function Navbar() {
 
           {/* Middle: Search Bar (Hidden on mobile) */}
           <div className="hidden md:flex flex-1 items-center justify-center px-6">
-            <div className="w-full max-w-lg flex items-center border border-gray-300 rounded-full px-4 py-2 bg-gray-50 hover:bg-white transition-colors focus-within:ring-2 focus-within:ring-[#eab308] focus-within:border-transparent">
+            <div className="w-full max-w-lg flex items-center border border-[var(--color-border)] rounded-horr-pill px-4 py-2 bg-surface-subtle hover:bg-surface-base transition-colors focus-within:ring-2 focus-within:ring-gold focus-within:border-transparent">
               <Search className="w-4 h-4 text-gray-500 mr-2" />
               <input
                 type="text"
@@ -158,7 +158,7 @@ export default function Navbar() {
             {/* Language Toggle */}
             <button
               onClick={toggleLang}
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 px-2 py-1 transition-colors border border-gray-300 rounded-md hover:bg-gray-50"
+              className="text-body-sm font-medium text-text-secondary hover:text-text-primary px-2 py-1 transition-colors border border-[var(--color-border)] rounded-horr-md hover:bg-surface-subtle"
             >
               {i18n.language === 'en' ? 'عربي' : 'EN'}
             </button>
@@ -173,7 +173,7 @@ export default function Navbar() {
             <div className="relative ml-1" ref={profileRef}>
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center justify-center h-9 w-9 rounded-full bg-[#1e293b] text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#eab308]"
+                className="flex items-center justify-center h-9 w-9 rounded-full bg-navy text-white text-body-sm font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold"
               >
                 {getInitials(user?.name)}
               </button>
@@ -221,17 +221,17 @@ export default function Navbar() {
             <Link to="/contracts/my-contracts" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Contracts</Link>
             <Link to="/messages" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50">Messages</Link>
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200 bg-gray-50">
+          <div className="pt-4 pb-3 border-t border-gray-200 bg-surface-subtle">
             <div className="flex items-center px-5 gap-4">
               <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#1e293b] text-white font-bold">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-brand-primary text-white font-bold">
                   {getInitials(user?.name)}
                 </div>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium leading-none text-gray-800">{user?.name || 'User'}</div>
+                <div className="text-base font-medium leading-none text-text-primary">{user?.name || 'User'}</div>
               </div>
-              <button className="ml-auto flex-shrink-0 bg-white p-2 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none">
+              <button className="ml-auto flex-shrink-0 bg-surface-base p-2 rounded-full text-text-secondary hover:text-text-primary focus:outline-none">
                 <Bell className="h-6 w-6" />
               </button>
             </div>
