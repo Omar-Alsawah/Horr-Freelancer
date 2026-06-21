@@ -85,8 +85,8 @@ export default function MessageInput({ chatId, onMessageSent }) {
     try {
       const newMessage = await uploadFile(chatId, file);
       onMessageSent(newMessage);
-    } catch {
-      toast.error('File upload failed. Please try again.');
+    } catch (err) {
+      toast.error(err?.title || 'File upload failed. Please try again.');
     } finally {
       setLoading(false);
       e.target.value = ''; // Reset file input

@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '../../services/endpoints';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
@@ -19,7 +20,7 @@ export default function DepositRequestsPage() {
   const handleViewReceipt = async (request) => {
     try {
       setReceiptImage(request);
-      const response = await api.get(`/api/billing/deposit-requests/${request.id}/receipt`, { responseType: 'blob' });
+      const response = await api.get(ENDPOINTS.BILLING.DOWNLOAD_RECEIPT(request.id), { responseType: 'blob' });
       const blob = response.data || response;
       const objectUrl = URL.createObjectURL(blob);
       setLightboxUrl(objectUrl);
@@ -39,7 +40,7 @@ export default function DepositRequestsPage() {
 
   const handleDownloadReceipt = async (request) => {
     try {
-      const response = await api.get(`/api/billing/deposit-requests/${request.id}/receipt`, { responseType: 'blob' });
+      const response = await api.get(ENDPOINTS.BILLING.DOWNLOAD_RECEIPT(request.id), { responseType: 'blob' });
       const blob = response.data || response;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -61,7 +62,7 @@ export default function DepositRequestsPage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/admin/billing/deposit-requests/pending');
+      const response = await api.get(ENDPOINTS.ADMIN.DEPOSIT_PENDING);
       const payload = response.data?.data || response.data;
       setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
@@ -75,7 +76,7 @@ export default function DepositRequestsPage() {
     const { id } = approveDialogState;
     if (!id) return;
     try {
-      await api.patch(`/api/admin/billing/deposit-requests/${id}/review`, { status: 1 });
+      await api.patch(ENDPOINTS.ADMIN.DEPOSIT_REVIEW(id), { status: 1 });
       setRequests(prev => prev.filter(r => r.id !== id));
       toast.success(t('admin.approveSuccess'));
       setApproveDialogState({ isOpen: false, id: null, error: null });
@@ -93,7 +94,7 @@ export default function DepositRequestsPage() {
     const { id, note } = rejectDialogState;
     if (!id) return;
     try {
-      await api.patch(`/api/admin/billing/deposit-requests/${id}/review`, { 
+      await api.patch(ENDPOINTS.ADMIN.DEPOSIT_REVIEW(id), { 
         status: 2, 
         adminNote: note 
       });

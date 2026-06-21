@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/api/axios';
+import { ENDPOINTS } from '@/services/endpoints';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,7 +59,7 @@ export default function Register() {
     };
 
     try {
-      const res = await api.post('/api/auth/register', payload);
+      const res = await api.post(ENDPOINTS.AUTH.REGISTER, payload);
       navigate('/verify-email', { state: { email: form.email } });
     } catch (err) {
       toast.error(err.title || t('common.error'));

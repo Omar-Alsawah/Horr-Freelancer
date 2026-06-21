@@ -1,6 +1,7 @@
+import { ENDPOINTS } from '@/services/endpoints';
 import api from './axios';
 
 export const disputesApi = {
-  getAdminDisputes: () => api.get('/api/disputes?status=Open&status=UnderReview'),
-  resolveDispute: (disputeId, payload) => api.post(`/api/disputes/${disputeId}/resolve`, payload)
+  getAdminDisputes: () => api.get(ENDPOINTS.DISPUTES.ADMIN_LIST),
+  resolveDispute: (disputeId, payload) => api.post(ENDPOINTS.DISPUTES.RESOLVE(disputeId), payload)
 };

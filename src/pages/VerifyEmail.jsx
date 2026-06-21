@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import api from '@/api/axios';
 import toast from 'react-hot-toast';
+import { ENDPOINTS } from '@/services/endpoints';
 
 export default function VerifyEmail() {
   const { t } = useTranslation();
@@ -20,8 +21,8 @@ export default function VerifyEmail() {
     }
     setResending(true);
     try {
-      // Backend: POST /api/auth/resend-confirmation-email?email=...
-      await api.post(`/api/auth/resend-confirmation-email?email=${encodeURIComponent(email)}`);
+      // Backend: POST /Auth/resend-confirmation-email?email=...
+      await api.post(`${ENDPOINTS.AUTH.RESEND_CONFIRMATION_EMAIL}?email=${encodeURIComponent(email)}`);
       toast.success(t('verify_email.resend_success'));
     } catch (err) {
       toast.error(err.title || t('common.error'));

@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '../../services/endpoints';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
@@ -28,8 +29,8 @@ export default function VerificationReviewPage() {
     setRequests([]);
     try {
       const endpoint = filterMode === 'pending'
-        ? '/api/Verification/pending'
-        : '/api/Verification/all';
+        ? ENDPOINTS.VERIFICATION.PENDING
+        : ENDPOINTS.VERIFICATION.ALL;
       const response = await api.get(endpoint);
       setRequests(response.data || []);
     } catch (err) {
@@ -43,7 +44,7 @@ export default function VerificationReviewPage() {
     const { id } = approveDialog;
     if (!id) return;
     try {
-      await api.post('/api/Verification/review', { requestId: id, approved: true });
+      await api.post(ENDPOINTS.VERIFICATION.REVIEW, { requestId: id, approved: true });
       setRequests(prev => prev.filter(r => r.id !== id));
       toast.success(t('admin.verifyApproveSuccess'));
       setApproveDialog({ isOpen: false, id: null, error: null });
@@ -61,7 +62,7 @@ export default function VerificationReviewPage() {
     }
 
     try {
-      await api.post('/api/Verification/review', { 
+      await api.post(ENDPOINTS.VERIFICATION.REVIEW, { 
         requestId: id, 
         approved: false, 
         rejectionReason: reason 

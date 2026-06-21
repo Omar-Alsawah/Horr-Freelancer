@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import api from '@/api/axios';
+import { ENDPOINTS } from '@/services/endpoints';
 
 export default function EmailConfirmed() {
   const { t } = useTranslation();
@@ -22,8 +23,8 @@ export default function EmailConfirmed() {
         return;
       }
       try {
-        // Backend: POST /api/auth/confirm-email?userId=...&token=...
-        await api.post(`/api/auth/confirm-email?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`);
+        // Backend: POST /Auth/confirm-email?userId=...&token=...
+        await api.post(`${ENDPOINTS.AUTH.CONFIRM_EMAIL}?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`);
         setStatus('success');
       } catch {
         setStatus('error');

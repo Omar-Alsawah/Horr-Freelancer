@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '../../services/endpoints';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +13,10 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchCounts = async () => {
       const [depositsRes, withdrawalsRes, verificationsRes, disputesRes] = await Promise.allSettled([
-        api.get('/api/admin/billing/deposit-requests/pending'),
-        api.get('/api/admin/billing/withdrawal-requests/pending'),
-        api.get('/api/Verification/pending'),
-        api.get('/api/disputes'),
+        api.get(ENDPOINTS.ADMIN.DEPOSIT_PENDING),
+        api.get(ENDPOINTS.ADMIN.WITHDRAWAL_PENDING),
+        api.get(ENDPOINTS.VERIFICATION.PENDING),
+        api.get(ENDPOINTS.DISPUTES.BASE),
       ]);
 
       const resolve = (res) => {

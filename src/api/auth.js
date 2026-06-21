@@ -1,6 +1,7 @@
 import axios from './axios';
+import { ENDPOINTS } from '../services/endpoints';
 
 export const authApi = {
-  changePassword: (data) => axios.post('/api/Auth/change-password', data),
-  closeAccount: () => axios.delete('/api/Auth/close-account')
+  changePassword: (data) => axios.post(ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
+  closeAccount: () => axios.delete(ENDPOINTS.AUTH.CLOSE_ACCOUNT)
 };

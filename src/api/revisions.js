@@ -1,18 +1,19 @@
+import { ENDPOINTS } from '@/services/endpoints';
 import api from './axios';
 
 export const revisionsApi = {
-  getOpenRevisions: () => api.get('/api/revisions/open'),
-  getMyCases: () => api.get('/api/revisions/my-cases'),
-  acceptRevision: (revisionId) => api.post(`/api/revisions/${revisionId}/accept`),
-  getFreelancerRevisions: (contractId) => api.get('/api/revisions/freelancer', { params: contractId ? { contractId } : undefined }),
-  getPendingAdditionalRevisions: () => api.get('/api/revisions/additional/pending'),
-  respondToAdditionalRevision: (requestId, accept) => api.post(`/api/revisions/additional/${requestId}/respond`, { accept }),
-  getSpecialistQueue: () => api.get('/api/revisions/specialist-queue'),
+  getOpenRevisions: () => api.get(ENDPOINTS.REVISIONS.OPEN),
+  getMyCases: () => api.get(ENDPOINTS.REVISIONS.MY_CASES),
+  acceptRevision: (revisionId) => api.post(ENDPOINTS.REVISIONS.ACCEPT(revisionId)),
+  getFreelancerRevisions: (contractId) => api.get(ENDPOINTS.REVISIONS.FREELANCER, { params: contractId ? { contractId } : undefined }),
+  getPendingAdditionalRevisions: () => api.get(ENDPOINTS.REVISIONS.PENDING),
+  respondToAdditionalRevision: (requestId, accept) => api.post(ENDPOINTS.REVISIONS.RESPOND(requestId), { accept }),
+  getSpecialistQueue: () => api.get(ENDPOINTS.REVISIONS.SPECIALIST_QUEUE),
   submitSpecialistVerdict: (contractId, deliveryId, payload) =>
     api.post(
-      `/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review/submit`,
+      ENDPOINTS.DELIVERIES.SUBMIT_SPECIALIST_REVIEW(contractId, deliveryId),
       payload
     ),
   getSpecialistReviewStatus: (contractId, deliveryId) =>
-    api.get(`/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`)
+    api.get(ENDPOINTS.DELIVERIES.SPECIALIST_REVIEW(contractId, deliveryId))
 };

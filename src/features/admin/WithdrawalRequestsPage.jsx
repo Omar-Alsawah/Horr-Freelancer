@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '../../services/endpoints';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
@@ -56,7 +57,7 @@ export default function WithdrawalRequestsPage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/admin/billing/withdrawal-requests/pending');
+      const response = await api.get(ENDPOINTS.ADMIN.WITHDRAWAL_PENDING);
       const payload = response.data?.data || response.data;
       setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
@@ -70,7 +71,7 @@ export default function WithdrawalRequestsPage() {
     const { id, note } = approveDialogState;
     if (!id) return;
     try {
-      await api.patch(`/api/admin/billing/withdrawal-requests/${id}/review`, { status: 1, adminNote: note });
+      await api.patch(ENDPOINTS.ADMIN.WITHDRAWAL_REVIEW(id), { status: 1, adminNote: note });
       setRequests(prev => prev.filter(r => r.id !== id));
       toast.success(t('admin.withdrawApproveSuccess'));
       setApproveDialogState({ isOpen: false, id: null, note: '', error: null });
@@ -94,7 +95,7 @@ export default function WithdrawalRequestsPage() {
     }
 
     try {
-      await api.patch(`/api/admin/billing/withdrawal-requests/${id}/review`, { 
+      await api.patch(ENDPOINTS.ADMIN.WITHDRAWAL_REVIEW(id), { 
         status: 2, 
         adminNote: note 
       });

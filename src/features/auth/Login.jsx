@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/api/axios';
+import { ENDPOINTS } from '@/services/endpoints';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +49,7 @@ export default function Login() {
     if (!unverifiedEmail) return;
     setResending(true);
     try {
-      await api.post(`/api/auth/resend-confirmation-email?email=${encodeURIComponent(unverifiedEmail)}`);
+      await api.post(`${ENDPOINTS.AUTH.RESEND_CONFIRMATION_EMAIL}?email=${encodeURIComponent(unverifiedEmail)}`);
       toast.success(t('verify_email.resend_success') || 'Verification email resent!');
     } catch (err) {
       toast.error(err.title || t('common.error'));
@@ -63,7 +64,7 @@ export default function Login() {
     setFieldErrors({});
     setUnverifiedEmail('');
     try {
-      const res = await api.post('/api/auth/login', { email, password });
+      const res = await api.post(ENDPOINTS.AUTH.LOGIN, { email, password });
       const token = res.data;
 
       loginAction(token);
