@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { updateJob, getCategories, getSkills } from '../../../services/clientService';
+import axios from 'axios';
 
 // ── Data normalizers (same pattern as PostJobPage) ──────────────────────────
-async function fetchCategoriesData() {
+async function fetchCategoriesData(options = {}) {
     try {
-        const response = await getCategories();
+        const response = await getCategories(options);
         const data = response?.data || response;
         const rawList = Array.isArray(data) ? data : (data?.$values || []);
         return rawList.map((c) => ({
@@ -13,20 +14,22 @@ async function fetchCategoriesData() {
             name: c.name || c.Name,
         }));
     } catch (err) {
+        if (axios.isCancel(err) || err.code === 'ERR_CANCELED') throw err;
         console.error('Error fetching categories:', err);
         return [];
     }
 }
 
-async function fetchSkillsData() {
+async function fetchSkillsData(options = {}) {
     try {
-        const data = await getSkills();
+        const data = await getSkills(options);
         const rawList = Array.isArray(data) ? data : (data?.$values || []);
         return rawList.map((s) => ({
             id: s.id || s.Id,
             name: s.name || s.Name,
         }));
     } catch (err) {
+        if (axios.isCancel(err) || err.code === 'ERR_CANCELED') throw err;
         console.error('Error fetching skills:', err);
         return [];
     }
@@ -70,32 +73,45 @@ const EditJobDetailsModal = ({ job, onClose, onSaved }) => {
     });
 
     useEffect(() => {
+        const controller = new AbortController();
         const loadMeta = async () => {
             setLoadingMeta(true);
-            const [cats, skills] = await Promise.all([fetchCategoriesData(), fetchSkillsData()]);
-            setCategories(cats);
-            setAvailableSkills(skills);
+            try {
+                const [cats, skills] = await Promise.all([
+                    fetchCategoriesData({ signal: controller.signal }), 
+                    fetchSkillsData({ signal: controller.signal })
+                ]);
+                
+                if (controller.signal.aborted) return;
+                
+                setCategories(cats);
+                setAvailableSkills(skills);
 
-            // Resolve the job's existing skill NAMES (from job details) into IDs using the loaded skills list
-            setForm((prev) => {
-                const resolvedIds = [];
-                const resolvedNames = [];
-                prev.skillNames.forEach((name) => {
-                    const match = skills.find((s) => s.name.toLowerCase() === name.toLowerCase());
-                    if (match) {
-                        resolvedIds.push(match.id);
-                        resolvedNames.push(match.name);
-                    } else {
-                        // Skill no longer exists in the master list — drop it rather than send an invalid id
-                        console.warn(`Skill "${name}" not found in skills list; removing from form.`);
-                    }
+                // Resolve the job's existing skill NAMES (from job details) into IDs using the loaded skills list
+                setForm((prev) => {
+                    const resolvedIds = [];
+                    const resolvedNames = [];
+                    prev.skillNames.forEach((name) => {
+                        const match = skills.find((s) => s.name.toLowerCase() === name.toLowerCase());
+                        if (match) {
+                            resolvedIds.push(match.id);
+                            resolvedNames.push(match.name);
+                        } else {
+                            // Skill no longer exists in the master list — drop it rather than send an invalid id
+                            console.warn(`Skill "${name}" not found in skills list; removing from form.`);
+                        }
+                    });
+                    return { ...prev, skills: resolvedIds, skillNames: resolvedNames };
                 });
-                return { ...prev, skills: resolvedIds, skillNames: resolvedNames };
-            });
 
-            setLoadingMeta(false);
+                setLoadingMeta(false);
+            } catch (err) {
+                if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
+                setLoadingMeta(false);
+            }
         };
         loadMeta();
+        return () => controller.abort();
     }, []);
 
     const patch = (fields) => setForm((prev) => ({ ...prev, ...fields }));

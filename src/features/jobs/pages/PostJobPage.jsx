@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { createJob, getCategories, getSkills } from "../../../services/clientService";
+import axios from "axios";
 
 import WizardShell    from "../components/WizardShell";
 import StepCategory   from "../components/StepCategory";
@@ -35,9 +36,9 @@ const NEXT_LABELS = {
 
 // ── Data Fetching Logic ───────────────────────────────────────────────────
 
-async function fetchCategoriesData() {
+async function fetchCategoriesData(options = {}) {
   try {
-    const response = await getCategories();
+    const response = await getCategories(options);
     
     // Handle the standard response wrapper { succeeded, data: [...] }
     const data = response?.data || response;
@@ -60,14 +61,15 @@ async function fetchCategoriesData() {
       };
     });
   } catch (error) {
+    if (axios.isCancel(error) || error.code === 'ERR_CANCELED') throw error;
     console.error("Error fetching categories:", error);
     return [];
   }
 }
 
-async function fetchSkillsData() {
+async function fetchSkillsData(options = {}) {
   try {
-    const data = await getSkills();
+    const data = await getSkills(options);
     // Handle .NET's $values wrapper or direct array
     const rawList = Array.isArray(data) ? data : (data?.$values || []);
     
@@ -77,6 +79,7 @@ async function fetchSkillsData() {
       name: s.name || s.Name
     }));
   } catch (error) {
+    if (axios.isCancel(error) || error.code === 'ERR_CANCELED') throw error;
     console.error("Error fetching skills:", error);
     return [];
   }
@@ -116,8 +119,14 @@ export default function PostJobPage() {
 
   // Fetch categories and all skills on mount
   useEffect(() => {
-    fetchCategoriesData().then(setCategories);
-    fetchSkillsData().then(setAvailableSkills);
+    const controller = new AbortController();
+    fetchCategoriesData({ signal: controller.signal })
+      .then(cats => { if (!controller.signal.aborted) setCategories(cats); })
+      .catch(err => { if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return; });
+    fetchSkillsData({ signal: controller.signal })
+      .then(skills => { if (!controller.signal.aborted) setAvailableSkills(skills); })
+      .catch(err => { if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return; });
+    return () => controller.abort();
   }, []);
 
   // Map skills to suggestions (optional: filter by categoryId if backend supports it)

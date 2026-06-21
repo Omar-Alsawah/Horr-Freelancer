@@ -1,13 +1,13 @@
 import apiClient from './apiClient';
 import { ENDPOINTS } from './endpoints';
 
-export const getChats = async () => {
-  const res = await apiClient.get(ENDPOINTS.CHAT.LIST);
+export const getChats = async (options = {}) => {
+  const res = await apiClient.get(ENDPOINTS.CHAT.LIST, options);
   return res.data?.data ?? res.data;
 };
 
-export const getMessages = async (chatId, page, pageSize) => {
-  const res = await apiClient.get(ENDPOINTS.CHAT.MESSAGES(chatId), { params: { page, pageSize } });
+export const getMessages = async (chatId, page, pageSize, options = {}) => {
+  const res = await apiClient.get(ENDPOINTS.CHAT.MESSAGES(chatId), { params: { page, pageSize }, ...options });
   return res.data?.data ?? res.data;
 };
 

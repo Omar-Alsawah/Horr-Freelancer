@@ -7,23 +7,7 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
-const originalGet = api.get;
-const pendingGetRequests = new Map();
 
-api.get = function (url, config) {
-  const key = JSON.stringify({ url, params: config?.params });
-  if (pendingGetRequests.has(key)) {
-    return pendingGetRequests.get(key);
-  }
-
-  const promise = originalGet.call(this, url, config)
-    .finally(() => {
-      pendingGetRequests.delete(key);
-    });
-
-  pendingGetRequests.set(key, promise);
-  return promise;
-};
 
 export const getImageUrl = (path) => {
   if (!path) return '';
@@ -50,6 +34,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const status = error.response?.status || 0;
     
     if (status === 401) {

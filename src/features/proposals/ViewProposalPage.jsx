@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import { proposalsApi } from '../../api/proposals';
+import axios from 'axios';
 
 const ViewProposalPage = () => {
   const { id } = useParams();
@@ -34,9 +35,11 @@ const ViewProposalPage = () => {
     }
     fetchedRef.current = true;
 
+    const controller = new AbortController();
+
     const fetchProposal = async () => {
       try {
-        const response = await proposalsApi.getMyProposals();
+        const response = await proposalsApi.getMyProposals({ signal: controller.signal });
         const payload = response.data?.data || response.data;
         const activeList = payload?.activeProposals || payload?.active || [];
         const submittedList = payload?.submittedProposals || payload?.submitted || [];
@@ -46,6 +49,7 @@ const ViewProposalPage = () => {
         const found = allProposals.find(p => String(p.id || p.Id) === String(id));
         setProposal(found || null);
       } catch (error) {
+        if (axios.isCancel(error)) return;
         console.error('Error fetching proposal details:', error);
         toast.error(error.title || t('errors.unexpected'));
       } finally {
@@ -54,6 +58,7 @@ const ViewProposalPage = () => {
     };
 
     fetchProposal();
+    return () => controller.abort();
   }, [id, t, proposal]);
 
   const handleWithdraw = async () => {

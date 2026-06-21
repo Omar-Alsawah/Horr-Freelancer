@@ -191,6 +191,6 @@ export const ENDPOINTS = {
     INITIATE: '/api/chat/initiate',
   },
   CURRENCY: {
-    CONVERT: '/currency/convert',
+    CONVERT: '/api/currency/convert',
   }
 };

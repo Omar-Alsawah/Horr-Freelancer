@@ -2,31 +2,30 @@ import { ENDPOINTS } from '@/services/endpoints';
 import api from './axios';
 
 export const contractsApi = {
-  getMyContracts: (params = {}) => api.get(ENDPOINTS.CONTRACTS.MY_CONTRACTS, { params }),
-  getContract: (id) => api.get(ENDPOINTS.CONTRACTS.GET_CONTRACT(id)),
-  acceptOffer: (contractId) => api.post(ENDPOINTS.CONTRACTS.ACCEPT_OFFER(contractId)),
-  declineOffer: (contractId) => api.post(ENDPOINTS.CONTRACTS.DECLINE_OFFER(contractId)),
+  getMyContracts: (params = {}, options = {}) => api.get(ENDPOINTS.CONTRACTS.MY_CONTRACTS, { params, ...options }),
+  getContract: (id, options = {}) => api.get(ENDPOINTS.CONTRACTS.GET_CONTRACT(id), options),
+  acceptOffer: (contractId, options = {}) => api.post(ENDPOINTS.CONTRACTS.ACCEPT_OFFER(contractId), undefined, options),
+  declineOffer: (contractId, options = {}) => api.post(ENDPOINTS.CONTRACTS.DECLINE_OFFER(contractId), undefined, options),
   deliverWork: (id, formData, config = {}) => api.post(ENDPOINTS.CONTRACTS.DELIVER_WORK(id), formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     ...config
   }),
-  submitReview: (id, payload) => api.post(ENDPOINTS.CONTRACTS.SUBMIT_REVIEW(id), payload),
-  submitDelivery: (payload) => api.post(ENDPOINTS.DELIVERIES.SUBMIT, payload),
-  updateDelivery: (deliveryId, payload) => api.put(ENDPOINTS.DELIVERIES.BY_ID(deliveryId), payload),
+  submitReview: (id, payload, options = {}) => api.post(ENDPOINTS.CONTRACTS.SUBMIT_REVIEW(id), payload, options),
+  submitDelivery: (payload, options = {}) => api.post(ENDPOINTS.DELIVERIES.SUBMIT, payload, options),
+  updateDelivery: (deliveryId, payload, options = {}) => api.put(ENDPOINTS.DELIVERIES.BY_ID(deliveryId), payload, options),
   uploadFiles: (formData, config = {}) => api.post(ENDPOINTS.DELIVERIES.UPLOAD, formData, config),
-  getDelivery: (contractId, deliveryId) => api.get(`/api/contracts/${contractId}/deliveries/${deliveryId}`),
-  approveDelivery: (deliveryId) => api.post(ENDPOINTS.DELIVERIES.APPROVE(deliveryId)),
-  requestDeliveryRevision: (deliveryId, payload) => api.post(ENDPOINTS.DELIVERIES.REVISION(deliveryId), payload),
-  disputeDelivery: (deliveryId, payload) => api.post(ENDPOINTS.DELIVERIES.DISPUTE(deliveryId), payload),
-  fundMilestone: (milestoneId) => api.post(ENDPOINTS.MILESTONES.FUND(milestoneId)),
-  getEscrow: (contractId) => api.get(ENDPOINTS.CONTRACTS.ESCROW(contractId)),
+  getDelivery: (contractId, deliveryId, options = {}) => api.get(`/api/contracts/${contractId}/deliveries/${deliveryId}`, options),
+  approveDelivery: (deliveryId, options = {}) => api.post(ENDPOINTS.DELIVERIES.APPROVE(deliveryId), undefined, options),
+  requestDeliveryRevision: (deliveryId, payload, options = {}) => api.post(ENDPOINTS.DELIVERIES.REVISION(deliveryId), payload, options),
+  disputeDelivery: (deliveryId, payload, options = {}) => api.post(ENDPOINTS.DELIVERIES.DISPUTE(deliveryId), payload, options),
+  fundMilestone: (milestoneId, options = {}) => api.post(ENDPOINTS.MILESTONES.FUND(milestoneId), undefined, options),
+  getEscrow: (contractId, options = {}) => api.get(ENDPOINTS.CONTRACTS.ESCROW(contractId), options),
   
   // Contract Delivery Portal Endpoints
-  getDeliveries: (contractId) => api.get(ENDPOINTS.DELIVERIES.BASE, { params: { contractId } }),
-  downloadAttachment: (attachmentId) => api.get(
+  getDeliveries: (contractId, options = {}) => api.get(ENDPOINTS.DELIVERIES.BASE, { params: { contractId }, ...options }),
+  downloadAttachment: (attachmentId, options = {}) => api.get(
     ENDPOINTS.DELIVERIES.DOWNLOAD(attachmentId),
-    { responseType: 'blob' }
+    { responseType: 'blob', ...options }
   ),
-  completeContract: (contractId) => api.post(ENDPOINTS.CONTRACTS.COMPLETE(contractId))
+  completeContract: (contractId, options = {}) => api.post(ENDPOINTS.CONTRACTS.COMPLETE(contractId), undefined, options)
 };
-

@@ -2,8 +2,8 @@ import { ENDPOINTS } from '@/services/endpoints';
 import apiClient from './axios';
 
 // ─── Get all chats for the authenticated user ───────────────────────────────
-export async function getChats() {
-  const response = await apiClient.get(ENDPOINTS.CHAT.LIST);
+export async function getChats(options = {}) {
+  const response = await apiClient.get(ENDPOINTS.CHAT.LIST, options);
   return response.data;
 }
 

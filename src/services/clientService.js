@@ -1,8 +1,8 @@
 import apiClient from './apiClient';
 import { ENDPOINTS } from './endpoints';
 
-export const getClientProfile = async () => {
-  const response = await apiClient.get(ENDPOINTS.CLIENT.ME);
+export const getClientProfile = async (options = {}) => {
+  const response = await apiClient.get(ENDPOINTS.CLIENT.ME, options);
   return response.data;
 };
 
@@ -13,8 +13,8 @@ export const getOnboardingStatus = async () => {
 
 // Jobs
 
-export const getClientJobs = async () => {
-  const response = await apiClient.get(ENDPOINTS.CLIENT.JOBS);
+export const getClientJobs = async (options = {}) => {
+  const response = await apiClient.get(ENDPOINTS.CLIENT.JOBS, options);
   return response.data;
 };
 
@@ -127,13 +127,13 @@ export const createJob = async (jobData) => {
   return response.data;
 };
 
-export const getCategories = async () => {
-  const response = await apiClient.get(ENDPOINTS.CATEGORIES);
+export const getCategories = async (options = {}) => {
+  const response = await apiClient.get(ENDPOINTS.CATEGORIES, options);
   return response.data;
 };
 
-export const getSkills = async () => {
-  const response = await apiClient.get(ENDPOINTS.SKILLS);
+export const getSkills = async (options = {}) => {
+  const response = await apiClient.get(ENDPOINTS.SKILLS, options);
   return response.data;
 };
 
@@ -199,8 +199,8 @@ export const revokeOffer = async (contractId) => {
   return response.data;
 };
 
-export const getJobDetails = async (jobId) => {
+export const getJobDetails = async (jobId, options = {}) => {
   const url = ENDPOINTS.JOBS.DETAILS.replace('{id}', jobId);
-  const response = await apiClient.get(url);
+  const response = await apiClient.get(url, options);
   return response.data;
 };

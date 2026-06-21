@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getJobDetails, deleteJob } from '../../../services/clientService';
 import EditJobDetailsModal from '../components/EditJobDetailsModal';
+import axios from 'axios';
 
 // ── Delete Confirm Modal ──────────────────────────────────────────────────────
 function DeleteConfirmModal({ job, onClose, onDeleted }) {
@@ -116,27 +117,26 @@ export default function ManageJobPage() {
     const [deletingJob, setDeletingJob] = useState(false);
 
     useEffect(() => {
-        let isMounted = true;
+        const controller = new AbortController();
 
         const fetchJob = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getJobDetails(id);
-                if (isMounted) setJob(data);
+                const data = await getJobDetails(id, { signal: controller.signal });
+                setJob(data);
             } catch (err) {
-                if (isMounted) {
-                    setError(
-                        err.response?.data?.message || 'Failed to load job details. Please try again.'
-                    );
-                }
+                if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
+                setError(
+                    err.response?.data?.message || 'Failed to load job details. Please try again.'
+                );
             } finally {
-                if (isMounted) setLoading(false);
+                if (!controller.signal.aborted) setLoading(false);
             }
         };
 
         fetchJob();
-        return () => { isMounted = false; };
+        return () => controller.abort();
     }, [id]);
 
     const hasProposals = (job?.stats?.proposals ?? 0) > 0;

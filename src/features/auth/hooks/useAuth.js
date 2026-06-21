@@ -22,10 +22,12 @@ export default function useAuth() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     // Only fetch if we haven't initialized yet and not currently loading
     if (!isInitialized && !loading && !user) {
-      dispatch(fetchMe());
+      dispatch(fetchMe({ signal: controller.signal }));
     }
+    return () => controller.abort();
   }, [dispatch, isInitialized, loading, user]);
 
   return { 

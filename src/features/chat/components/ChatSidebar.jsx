@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import axios from 'axios';
 import { getChats } from '../../../services/chatService';
 
 export default function ChatSidebar({ chats: propChats, setChats: propSetChats, loading: propLoading }) {
@@ -18,12 +19,17 @@ export default function ChatSidebar({ chats: propChats, setChats: propSetChats, 
   // ─── Load chats from API on mount ─────────────────────────────────────────
   useEffect(() => {
     if (propChats !== undefined) return;
-    getChats()
+    const controller = new AbortController();
+    getChats({ signal: controller.signal })
       .then((data) => {
         setChats(data || []);
       })
-      .catch(() => toast.error('Could not load conversations.'))
+      .catch((err) => {
+        if (axios.isCancel(err)) return;
+        toast.error('Could not load conversations.');
+      })
       .finally(() => setInternalLoading(false));
+    return () => controller.abort();
   }, [propChats, setChats]);
 
   // ─── Auto-redirect if no valid chatId is present ───────────────────────────

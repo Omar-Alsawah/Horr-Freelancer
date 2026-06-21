@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, Upload, Inbox, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { billingApi } from '../../api/billing';
 import { currencyApi } from '../../api/currency';
 import SettingsSidebar from '../profile/SettingsSidebar';
@@ -55,26 +56,30 @@ const BillingPage = () => {
   const [conversionRate, setConversionRate] = useState(48.00);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchRate = async () => {
       try {
-        const res = await currencyApi.convertCurrency(1, 'USD', 'EGP');
-        const rate = res?.data?.convertedAmount ?? res?.data?.result ?? res?.data ?? 48.00;
+        const res = await currencyApi.convertCurrency(1, 'USD', 'EGP', { signal: controller.signal });
+        const rate = res?.data?.amount ?? res?.data?.convertedAmount ?? res?.data?.result ?? 48.00;
         setConversionRate(Number(rate));
       } catch (err) {
+        if (axios.isCancel(err)) return;
         console.error('Failed to fetch conversion rate:', err);
       }
     };
     fetchRate();
+    return () => controller.abort();
   }, []);
 
   // Fetch wallet balance
-  const fetchBalance = useCallback(async () => {
+  const fetchBalance = useCallback(async (signal) => {
     try {
       setBalanceLoading(true);
-      const res = await billingApi.getWalletBalance();
+      const res = await billingApi.getWalletBalance({ signal });
       const data = res.data?.data || res.data?.value || res.data;
       setBalance(data?.balanceEGP ?? 0);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('errors.unexpected'));
     } finally {
       setBalanceLoading(false);
@@ -82,13 +87,14 @@ const BillingPage = () => {
   }, [t]);
 
   // Fetch deposit history
-  const fetchDeposits = useCallback(async () => {
+  const fetchDeposits = useCallback(async (signal) => {
     try {
       setDepositsLoading(true);
-      const res = await billingApi.getMyDepositRequests();
+      const res = await billingApi.getMyDepositRequests(undefined, { signal });
       const data = res.data?.data || res.data?.value || res.data;
       setDeposits(Array.isArray(data) ? data : data?.items || []);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('errors.unexpected'));
     } finally {
       setDepositsLoading(false);
@@ -96,8 +102,10 @@ const BillingPage = () => {
   }, [t]);
 
   useEffect(() => {
-    fetchBalance();
-    fetchDeposits();
+    const controller = new AbortController();
+    fetchBalance(controller.signal);
+    fetchDeposits(controller.signal);
+    return () => controller.abort();
   }, [fetchBalance, fetchDeposits]);
 
   // File selection handler

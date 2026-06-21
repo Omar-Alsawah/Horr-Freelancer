@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { X, Check, Eye } from 'lucide-react';
 import api, { getImageUrl } from '../../api/axios';
-
+import axios from 'axios';
 export default function DepositRequestsPage() {
   const { t, i18n } = useTranslation();
   
@@ -56,16 +56,19 @@ export default function DepositRequestsPage() {
   };
 
   useEffect(() => {
-    fetchRequests();
+    const controller = new AbortController();
+    fetchRequests(controller.signal);
+    return () => controller.abort();
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (signal) => {
     setLoading(true);
     try {
-      const response = await api.get(ENDPOINTS.ADMIN.DEPOSIT_PENDING);
+      const response = await api.get(ENDPOINTS.ADMIN.DEPOSIT_PENDING, { signal });
       const payload = response.data?.data || response.data;
       setRequests(Array.isArray(payload) ? payload : []);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
     } finally {
       setLoading(false);

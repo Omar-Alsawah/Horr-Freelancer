@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Paperclip, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
 import { contractsService } from '../../../services/contractsService';
 import { getChatByContract } from '../../../services/chatService';
 
@@ -24,18 +25,20 @@ export default function ContractDetailsPage() {
   const [comment, setComment] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
-  const fetchContract = useCallback(async () => {
+  const fetchContract = useCallback(async (signal) => {
     try {
       setLoading(true);
-      const contractData = await contractsService.getContract(id);
+      const contractData = await contractsService.getContract(id, { signal });
       setContract(contractData);
       try {
-        const resDeliveries = await contractsService.getDeliveries(id);
+        const resDeliveries = await contractsService.getDeliveries(id, { signal });
         setDeliveries(Array.isArray(resDeliveries) ? resDeliveries : []);
       } catch (err) {
+        if (axios.isCancel(err)) return;
         console.error('Failed to load deliveries:', err);
       }
     } catch (err) {
+      if (axios.isCancel(err)) return;
       console.error(err);
       toast.error('Failed to load contract details.');
       navigate('/client/contracts');
@@ -46,15 +49,17 @@ export default function ContractDetailsPage() {
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     const load = async () => {
       await Promise.resolve();
       if (active) {
-        fetchContract();
+        fetchContract(controller.signal);
       }
     };
     load();
     return () => {
       active = false;
+      controller.abort();
     };
   }, [fetchContract]);
 

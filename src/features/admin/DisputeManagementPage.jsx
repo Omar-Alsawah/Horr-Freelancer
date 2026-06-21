@@ -7,6 +7,7 @@ import { disputesApi } from '../../api/disputes';
 import { BASE_URL } from '../../api/axios';
 import { useAuthStore } from '../../store/authStore';
 import StatusBadge from '../../components/ui/StatusBadge';
+import axios from 'axios';
 
 function formatCurrency(amount, lang) {
   if (amount == null) return '';
@@ -31,11 +32,11 @@ export default function DisputeManagementPage() {
   const [notesError, setNotesError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchDisputes = async () => {
+  const fetchDisputes = async (signal) => {
     setLoading(true);
     setError(false);
     try {
-      const response = await disputesApi.getAdminDisputes();
+      const response = await disputesApi.getAdminDisputes({ signal });
       const rawItems = response.data?.data?.items || response.data?.items || response.data || [];
       const mapped = rawItems.map(d => ({
         id: d.id,
@@ -55,6 +56,7 @@ export default function DisputeManagementPage() {
       }));
       setDisputes(mapped);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error(err.title || t('common.error'));
       setError(true);
     } finally {
@@ -63,9 +65,11 @@ export default function DisputeManagementPage() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     if (role === 'Admin') {
-      fetchDisputes();
+      fetchDisputes(controller.signal);
     }
+    return () => controller.abort();
   }, [t, role]);
 
   if (role !== 'Admin') {

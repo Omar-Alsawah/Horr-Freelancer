@@ -51,7 +51,7 @@ export default function FindWorkPage() {
         setTotalPages(Math.ceil((res.data.totalCount || 0) / pageSize));
         setLoading(false);
       } catch (err) {
-        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED' || err.message === 'canceled') return;
         toast.error(err.title || err.message || t('common.error'));
         setJobs([]);
         setLoading(false);
