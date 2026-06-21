@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Loader2, Upload, Inbox, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { billingApi } from '../../api/billing';
+import { currencyApi } from '../../api/currency';
 import SettingsSidebar from '../profile/SettingsSidebar';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -49,6 +50,22 @@ const BillingPage = () => {
   // Deposit history state
   const [deposits, setDeposits] = useState([]);
   const [depositsLoading, setDepositsLoading] = useState(true);
+
+  // Conversion rate state
+  const [conversionRate, setConversionRate] = useState(48.00);
+
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const res = await currencyApi.convertCurrency(1, 'USD', 'EGP');
+        const rate = res?.data?.convertedAmount ?? res?.data?.result ?? res?.data ?? 48.00;
+        setConversionRate(Number(rate));
+      } catch (err) {
+        console.error('Failed to fetch conversion rate:', err);
+      }
+    };
+    fetchRate();
+  }, []);
 
   // Fetch wallet balance
   const fetchBalance = useCallback(async () => {
@@ -190,10 +207,10 @@ const BillingPage = () => {
                   {formatEGP(balance, currentLocale)}
                 </div>
                 <p className="body-sm">
-                  {t('billing.approxUsd', { amount: new Intl.NumberFormat(currentLocale === 'ar' ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balance / 47.85) })}
+                  {t('billing.approxUsd', { amount: new Intl.NumberFormat(currentLocale === 'ar' ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balance / conversionRate) })}
                 </p>
                 <p className="caption mt-1">
-                  {t('billing.conversionRate')}
+                  1 USD = {conversionRate.toFixed(2)} EGP
                 </p>
               </>
             )}
