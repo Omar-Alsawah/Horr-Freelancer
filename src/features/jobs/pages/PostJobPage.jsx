@@ -177,6 +177,19 @@ export default function PostJobPage() {
       setError("Please select a category.");
       return;
     }
+
+    if (step === 4) {
+      if (!jobData.budgetAmount || String(jobData.budgetAmount).trim() === "") {
+        setError("Please enter a budget amount.");
+        return;
+      }
+      const budgetVal = parseFloat(jobData.budgetAmount);
+      if (isNaN(budgetVal) || budgetVal < 0) {
+        setError("Budget cannot be negative.");
+        return;
+      }
+    }
+
     setError(null);
 
     if (step === TOTAL_STEPS) {

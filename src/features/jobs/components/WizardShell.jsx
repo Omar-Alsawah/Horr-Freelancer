@@ -39,12 +39,29 @@ function StepBar({ current }) {
   );
 }
 
+import { Link } from "react-router-dom";
+
 export default function WizardShell({ step, onNext, onBack, error, submitting, nextLabel, children }) {
+  const isInsufficientBalance = typeof error === "string" && error.toLowerCase().includes("insufficient balance");
+
   return (
     <div className="pj-container">
       <StepBar current={step} />
       {children}
-      {error && <div className="pj-error">⚠ {error}</div>}
+      {error && (
+        <div className="pj-error" style={isInsufficientBalance ? { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } : {}}>
+          <span>⚠ {error}</span>
+          {isInsufficientBalance && (
+            <Link 
+              to="/client/settings"
+              state={{ tab: 'billing' }}
+              style={{ background: "#c00", color: "#fff", padding: "0.4rem 0.8rem", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}
+            >
+              Deposit Funds
+            </Link>
+          )}
+        </div>
+      )}
       <div className="pj-wizard-footer">
         <button
           className="pj-btn-back"

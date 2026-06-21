@@ -89,21 +89,21 @@ export const getWalletBalance = async () => {
 };
 
 export const submitDepositRequest = async (formData) => {
-  const response = await apiClient.post('/Billing/deposit-requests', formData, {
+  const response = await apiClient.post(ENDPOINTS.BILLING.SUBMIT_DEPOSIT_REQUEST, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
   return response.data;
 };
 
 export const getMyDepositRequests = async (page = 1, pageSize = 10) => {
-  const response = await apiClient.get('/Billing/deposit-requests/my-requests', {
+  const response = await apiClient.get(ENDPOINTS.BILLING.MY_DEPOSIT_REQUESTS, {
     params: { page, pageSize }
   });
   return response.data?.data || response.data;
 };
 
 export const downloadReceipt = async (requestId) => {
-  const response = await apiClient.get(`/Billing/deposit-requests/${requestId}/receipt`, { responseType: 'blob' });
+  const response = await apiClient.get(ENDPOINTS.BILLING.DOWNLOAD_RECEIPT.replace('{requestId}', requestId), { responseType: 'blob' });
   return response.data?.data || response.data;
 };
 

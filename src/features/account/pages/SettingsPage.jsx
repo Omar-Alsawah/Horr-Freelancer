@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import SettingsSidebar from '../components/SettingsSidebar';
 import MyInfoSection from '../components/MyInfoSection';
 import BillingSection from '../components/BillingSection';
 import SecuritySection from '../components/SecuritySection';
 
 const SettingsPage = () => {
-  const [activeTab, setActiveTab] = useState('my-info');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'my-info');
 
   const renderContent = () => {
     switch (activeTab) {
