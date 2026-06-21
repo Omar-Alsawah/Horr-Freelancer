@@ -51,8 +51,14 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setFieldErrors({});
+    
+    const payload = {
+      ...form,
+      role: form.role === 'Freelancer' ? 1 : 0
+    };
+
     try {
-      const res = await api.post('/api/auth/register', form);
+      const res = await api.post('/api/auth/register', payload);
       navigate('/verify-email', { state: { email: form.email } });
     } catch (err) {
       toast.error(err.title || t('common.error'));
