@@ -73,7 +73,7 @@ export const setupInterceptors = (axiosInstance) => {
   // REQUEST INTERCEPTOR
   axiosInstance.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('horr_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -120,7 +120,7 @@ export const setupInterceptors = (axiosInstance) => {
             .then(({ data }) => {
               // The backend should return the new JWT in the body
               const newToken = data.token || data.jwt || data;
-              localStorage.setItem('token', newToken);
+              localStorage.setItem('horr_token', newToken);
               axiosInstance.defaults.headers.common['Authorization'] = 'Bearer ' + newToken;
               originalRequest.headers['Authorization'] = 'Bearer ' + newToken;
               processQueue(null, newToken);
@@ -128,7 +128,7 @@ export const setupInterceptors = (axiosInstance) => {
             })
             .catch((err) => {
               processQueue(err, null);
-              localStorage.removeItem('token');
+              localStorage.removeItem('horr_token');
               window.location.href = '/login';
               reject(err);
             })
