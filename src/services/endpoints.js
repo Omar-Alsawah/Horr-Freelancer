@@ -189,5 +189,8 @@ export const ENDPOINTS = {
     BY_CONTRACT: (contractId) => `/api/chat/by-contract/${contractId}`,
     // New ones:
     INITIATE: '/api/chat/initiate',
+  },
+  CURRENCY: {
+    CONVERT: '/currency/convert',
   }
 };
