@@ -38,27 +38,28 @@ export default function FindWorkPage() {
   const debouncedKeyword = useDebounce(keyword, 400);
   const pageSize = 10;
 
-  const fetchJobs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = { page, pageSize, sortBy };
-      if (debouncedKeyword) params.keyword = debouncedKeyword;
-      if (jobType) params.jobType = jobType;
-      const res = await jobsApi.getJobs(params);
-      setJobs(res.data.items || []);
-      setTotalPages(Math.ceil((res.data.totalCount || 0) / pageSize));
-    } catch (err) {
-      toast.error(err.title || t('common.error'));
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchJobs = async () => {
+      setLoading(true);
+      try {
+        const params = { page, pageSize, sortBy };
+        if (debouncedKeyword) params.keyword = debouncedKeyword;
+        if (jobType) params.jobType = jobType;
+        const res = await jobsApi.getJobs(params, { signal: controller.signal });
+        setJobs(res.data.items || []);
+        setTotalPages(Math.ceil((res.data.totalCount || 0) / pageSize));
+        setLoading(false);
+      } catch (err) {
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
+        toast.error(err.title || err.message || t('common.error'));
+        setJobs([]);
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+    return () => controller.abort();
   }, [page, pageSize, sortBy, debouncedKeyword, jobType, t]);
-
-  useEffect(() => { fetchJobs(); }, [fetchJobs]);
-
-  // Reset to page 1 when filters change
-  useEffect(() => { setPage(1); }, [debouncedKeyword, jobType, sortBy]);
 
   useEffect(() => {
     const fetchCompletionData = async () => {
@@ -147,7 +148,10 @@ export default function FindWorkPage() {
               type="text"
               placeholder={t('jobs.search_placeholder')}
               value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              onChange={(e) => {
+                setKeyword(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
         </div>
@@ -162,7 +166,10 @@ export default function FindWorkPage() {
             {jobTypeFilters.map((f) => (
               <div
                 key={f.value}
-                onClick={() => setJobType(f.value)}
+                onClick={() => {
+                  setJobType(f.value);
+                  setPage(1);
+                }}
                 className={`feed-tab ${jobType === f.value ? 'active' : ''}`}
               >
                 {f.label}
@@ -174,7 +181,10 @@ export default function FindWorkPage() {
             <span style={{ fontSize: '0.9rem', color: '#5e6d55' }}>{t('jobs.sort_by')}</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPage(1);
+              }}
               id="job-sort-select"
               style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', color: '#333', outline: 'none', cursor: 'pointer' }}
             >

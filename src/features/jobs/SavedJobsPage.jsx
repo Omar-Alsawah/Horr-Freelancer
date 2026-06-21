@@ -18,30 +18,35 @@ export default function SavedJobsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
 
-  const fetchSavedJobs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await jobsApi.getSavedJobs({ page, pageSize });
-      setJobs(res.data.items || []);
-      setTotalPages(Math.ceil((res.data.totalCount || 0) / pageSize));
-    } catch (err) {
-      toast.error(err.title || t('common.error'));
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchSavedJobs = async () => {
+      setLoading(true);
+      try {
+        const res = await jobsApi.getSavedJobs({ page, pageSize }, { signal: controller.signal });
+        setJobs(res.data.items || []);
+        setTotalPages(Math.ceil((res.data.totalCount || 0) / pageSize));
+        setLoading(false);
+      } catch (err) {
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
+        toast.error(err.title || err.message || t('common.error'));
+        setJobs([]);
+        setLoading(false);
+      }
+    };
+    fetchSavedJobs();
+    return () => controller.abort();
   }, [page, pageSize, t]);
 
-  useEffect(() => { fetchSavedJobs(); }, [fetchSavedJobs]);
-
   const handleUnsave = async (jobId) => {
+    const previousJobs = [...jobs];
     // Optimistic remove
     setJobs((prev) => prev.filter((j) => j.id !== jobId));
     try {
       await jobsApi.unsaveJob(jobId);
     } catch (err) {
       toast.error(t('errors.unsave_failed'));
-      fetchSavedJobs();
+      setJobs(previousJobs);
     }
   };
 

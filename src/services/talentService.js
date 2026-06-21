@@ -99,9 +99,9 @@ export const getSavedFreelancers = async (params = {}) => {
   }
 };
 
-export const getRecommendedFreelancers = async () => {
+export const getRecommendedFreelancers = async (options = {}) => {
   try {
-    const response = await apiClient.get(ENDPOINTS.TALENT.recommendedFreelancers);
+    const response = await apiClient.get(ENDPOINTS.TALENT.recommendedFreelancers, options);
     return response.data;
   } catch (error) {
     console.error("Error fetching recommended freelancers:", error);

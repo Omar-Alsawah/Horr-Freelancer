@@ -135,57 +135,61 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Bio */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.bio')}</label>
-            <textarea
-              value={form.bio}
-              onChange={update('bio')}
-              rows={3}
-              className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold resize-none ${errorFor('bio') ? 'border-red-500' : ''}`}
-            />
-            <FieldError field="bio" />
-          </div>
+          {form.role === 'Freelancer' && (
+            <>
+              {/* Bio */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.bio')}</label>
+                <textarea
+                  value={form.bio}
+                  onChange={update('bio')}
+                  rows={3}
+                  className={`w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold resize-none ${errorFor('bio') ? 'border-red-500' : ''}`}
+                />
+                <FieldError field="bio" />
+              </div>
 
-          {/* Location Fields — 2 columns */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.address')}</label>
-              <Input value={form.address} onChange={update('address')} className={inputCls('address')} />
-              <FieldError field="address" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.city')}</label>
-              <Input value={form.city} onChange={update('city')} className={inputCls('city')} />
-              <FieldError field="city" />
-            </div>
-          </div>
+              {/* Location Fields — 2 columns */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.address')}</label>
+                  <Input value={form.address} onChange={update('address')} className={inputCls('address')} />
+                  <FieldError field="address" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.city')}</label>
+                  <Input value={form.city} onChange={update('city')} className={inputCls('city')} />
+                  <FieldError field="city" />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.state_province')}</label>
-              <Input value={form.stateProvince} onChange={update('stateProvince')} className={inputCls('stateProvince')} />
-              <FieldError field="stateProvince" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.country')}</label>
-              <Input value={form.country} onChange={update('country')} className={inputCls('country')} />
-              <FieldError field="country" />
-            </div>
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.state_province')}</label>
+                  <Input value={form.stateProvince} onChange={update('stateProvince')} className={inputCls('stateProvince')} />
+                  <FieldError field="stateProvince" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.country')}</label>
+                  <Input value={form.country} onChange={update('country')} className={inputCls('country')} />
+                  <FieldError field="country" />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.zip_code')}</label>
-              <Input value={form.zipCode} onChange={update('zipCode')} className={inputCls('zipCode')} />
-              <FieldError field="zipCode" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.timezone')}</label>
-              <Input value={form.timeZone} onChange={update('timeZone')} className={inputCls('timeZone')} />
-              <FieldError field="timeZone" />
-            </div>
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.zip_code')}</label>
+                  <Input value={form.zipCode} onChange={update('zipCode')} className={inputCls('zipCode')} />
+                  <FieldError field="zipCode" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">{t('auth.timezone')}</label>
+                  <Input value={form.timeZone} onChange={update('timeZone')} className={inputCls('timeZone')} />
+                  <FieldError field="timeZone" />
+                </div>
+              </div>
+            </>
+          )}
 
           <Button type="submit" className="w-full bg-gold hover:bg-gold-dark text-white" disabled={loading}>
             {loading ? t('common.loading') : t('auth.submit_register')}

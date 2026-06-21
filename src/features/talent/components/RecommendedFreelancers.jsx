@@ -3,6 +3,9 @@ import { getRecommendedFreelancers } from '../../../services/talentService';
 import RecommendedFreelancerCard from './RecommendedFreelancerCard';
 import InviteFreelancerModal from './InviteFreelancerModal';
 
+const CACHE_KEY = 'horr_recommended_freelancers';
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours
+
 const RecommendedFreelancers = ({ title = 'Recommended for you' }) => {
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,18 +13,44 @@ const RecommendedFreelancers = ({ title = 'Recommended for you' }) => {
   const [invitingFreelancer, setInvitingFreelancer] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchRecommended = async () => {
+      setLoading(true);
+
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      if (cachedData) {
+        try {
+          const { items, fetchedAt } = JSON.parse(cachedData);
+          if (Date.now() - fetchedAt < CACHE_DURATION && Array.isArray(items)) {
+            setFreelancers(items);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse cached recommendations', e);
+        }
+      }
+
       try {
-        setLoading(true);
-        const data = await getRecommendedFreelancers();
-        setFreelancers(Array.isArray(data) ? data : []);
+        const data = await getRecommendedFreelancers({ signal: controller.signal });
+        const items = Array.isArray(data) ? data : [];
+        setFreelancers(items);
+
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          items,
+          fetchedAt: Date.now()
+        }));
       } catch (err) {
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
         setError('Failed to load recommendations.');
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
     fetchRecommended();
+    return () => controller.abort();
   }, []);
 
   // Silently hide the section if there's an error or nothing to show
