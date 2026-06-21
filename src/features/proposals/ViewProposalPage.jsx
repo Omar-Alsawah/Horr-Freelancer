@@ -271,6 +271,11 @@ const ViewProposalPage = () => {
             <span className="terms-value" style={{ fontWeight: '500' }}>{t('jobs.egp_format', { amount: receiveAmount.toFixed(2) })}</span>
           </div>
 
+          <div className="terms-row" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+            <span className="terms-label" style={{ color: 'var(--color-text-secondary)' }}>{t('proposals.revisions_label') || 'Max Revisions'}</span>
+            <span className="terms-value" style={{ fontWeight: '500' }}>{proposal.maxRevisions ?? proposal.MaxRevisions ?? 'N/A'}</span>
+          </div>
+
           {isEditing ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '2rem' }}>
               <button 

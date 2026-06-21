@@ -178,6 +178,10 @@ export default function ContractDetailsPage() {
               {isActive ? t('contracts.status_active') : t('contracts.status_closed')}
             </span>
           </div>
+          <div className="term-item">
+            <label>{t('contracts.max_revisions') || 'Max Revisions'}</label>
+            <span>{contract.maxRevisions ?? contract.MaxRevisions ?? 'N/A'}</span>
+          </div>
         </div>
 
         <div className="section-title">{t('contracts.description')}</div>

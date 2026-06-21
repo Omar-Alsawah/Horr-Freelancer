@@ -22,6 +22,7 @@ const SubmitProposalPage = () => {
   const [bidRate, setBidRate] = useState(0);
   const [coverLetter, setCoverLetter] = useState('');
   const [durationDays, setDurationDays] = useState('');
+  const [maxRevisions, setMaxRevisions] = useState('');
   const [bidCurrency, setBidCurrency] = useState('EGP');
   const [convertedClientAmount, setConvertedClientAmount] = useState(0);
   const [convertedJobBudget, setConvertedJobBudget] = useState(0);
@@ -98,6 +99,10 @@ const SubmitProposalPage = () => {
       newErrors.durationDays = t('proposals.validation.duration_invalid');
     }
 
+    if (maxRevisions === '' || maxRevisions < 0 || maxRevisions > 99) {
+      newErrors.maxRevisions = t('proposals.validation.revisions_invalid') || 'Invalid number of revisions';
+    }
+
     if (coverLetter.length < 50) {
       newErrors.coverLetter = t('proposals.validation.cover_letter_min');
     } else if (coverLetter.length > 2000) {
@@ -127,7 +132,8 @@ const SubmitProposalPage = () => {
         bidRate,
         bidCurrency,
         coverLetter,
-        durationDays
+        durationDays,
+        maxRevisions
       };
 
       await proposalsApi.submitProposal(proposalData);
@@ -290,6 +296,26 @@ const SubmitProposalPage = () => {
             </div>
           </div>
           {errors.durationDays && <div className="error-message mb-4">{errors.durationDays}</div>}
+
+          <div className="rate-grid">
+            <div>
+              <strong>{t('proposals.revisions_label') || 'Max Revisions'}</strong>
+              <div className="text-sm text-gray-500">{t('proposals.revisions_hint') || 'Number of revisions included'}</div>
+            </div>
+            <div className="rate-input-group">
+              <input 
+                type="number" 
+                min="0"
+                max="99"
+                placeholder="Revisions"
+                value={maxRevisions} 
+                onChange={(e) => setMaxRevisions(e.target.value === '' ? '' : parseInt(e.target.value))}
+                className={errors.maxRevisions ? 'border-red-500' : ''}
+                style={{ paddingLeft: '0.6rem', textAlign: 'right' }}
+              />
+            </div>
+          </div>
+          {errors.maxRevisions && <div className="error-message mb-4">{errors.maxRevisions}</div>}
         </div>
 
 

@@ -301,6 +301,10 @@ export default function ContractDetailsPage() {
               </span>
             </span>
           </div>
+          <div className="term-item" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span className="term-label" style={{ fontSize: '13px', color: '#888' }}>Max Revisions</span>
+            <span className="term-value" style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>{contract.maxRevisions ?? contract.MaxRevisions ?? 'N/A'}</span>
+          </div>
         </div>
 
         <div className="section-title" style={{ fontSize: '17px', fontWeight: '600', color: '#1a1a1a', marginBottom: '1.25rem' }}>
