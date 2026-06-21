@@ -4,6 +4,8 @@ import useFetch from '../../../hooks/useFetch';
 import { toast } from 'sonner';
 import Pagination from '../../contracts/components/Pagination';
 import { BASE_URL } from '../../../services/apiClient';
+import { currencyApi } from '../../../api/currency';
+import { useEffect } from 'react';
 
 const InstaPayLogo = () => (
   <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -112,6 +114,22 @@ const BillingSection = () => {
   const [page, setPage] = useState(1);
   const fetchMyRequests = useCallback(() => getMyDepositRequests(page, 10), [page]);
   const { data: historyData, loading: historyLoading, refetch: refreshHistory } = useFetch(fetchMyRequests, true);
+
+  // Conversion rate
+  const [conversionRate, setConversionRate] = useState(48.00);
+
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const res = await currencyApi.convertCurrency(1, 'USD', 'EGP');
+        const rate = res?.data?.convertedAmount ?? res?.data?.result ?? res?.data ?? 48.00;
+        setConversionRate(Number(rate));
+      } catch (err) {
+        console.error('Failed to fetch conversion rate:', err);
+      }
+    };
+    fetchRate();
+  }, []);
 
   const handleDownloadReceipt = async (reqId, receiptNum) => {
     try {
@@ -279,8 +297,8 @@ const BillingSection = () => {
                 {balanceLoading ? '...' : `${(balanceData?.balanceEGP ?? 0).toFixed(2)} EGP`}
               </div>
               <div className="flex items-center gap-3 text-gray-500 font-medium">
-                <span>≈ {balanceLoading ? '...' : ((balanceData?.balanceEGP ?? 0) / 48).toFixed(2)} USD</span>
-                <span className="text-xs px-2 py-1 bg-white rounded-md border border-gray-100">1 USD = 48.00 EGP</span>
+                <span>≈ {balanceLoading ? '...' : ((balanceData?.balanceEGP ?? 0) / conversionRate).toFixed(2)} USD</span>
+                <span className="text-xs px-2 py-1 bg-white rounded-md border border-gray-100">1 USD = {conversionRate.toFixed(2)} EGP</span>
               </div>
             </div>
             <div>

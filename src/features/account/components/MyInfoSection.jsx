@@ -117,10 +117,16 @@ const MyInfoSection = () => {
                 <div className="text-gray-500 text-sm font-medium">Time Zone</div>
                 <div className="font-semibold text-gray-900">{profile.timeZone || 'UTC+02:00 Cairo'}</div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 items-center mb-4">
                 <div className="text-gray-500 text-sm font-medium">Country</div>
                 <div className="font-semibold text-gray-900 flex items-center gap-2">
                    {profile.country || 'Egypt'}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 items-center">
+                <div className="text-gray-500 text-sm font-medium">Preferred Currency</div>
+                <div className="font-semibold text-gray-900 flex items-center gap-2">
+                   USD
                 </div>
               </div>
             </div>
