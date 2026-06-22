@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
 import { useChatConnection } from '../../hooks/useChatConnection';
@@ -33,6 +33,9 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
   const [loading, setLoading] = useState(isValidChat);
   const [activeChat, setActiveChat] = useState(initialActiveChat || null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isClient = location.pathname.startsWith('/client');
+  const contractsBasePath = isClient ? '/client/contracts' : '/contracts';
 
   // ─── Pagination & Scrolling States ──────────────────────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
@@ -255,7 +258,7 @@ export default function ChatWindow({ chatId, initialActiveChat }) {
         {contractId && (
           <button
             onClick={() => {
-              navigate(`/contracts/${contractId}/deliveries`);
+              navigate(`${contractsBasePath}/${contractId}/deliveries`);
             }}
             className="bg-[#eab308] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-opacity"
           >

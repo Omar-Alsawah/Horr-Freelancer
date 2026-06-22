@@ -12,7 +12,7 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export default function StepReview({ jobData }) {
+export default function StepReview({ jobData, preferredCurrency = "USD" }) {
   return (
     <>
       <p className="pj-step-indicator">Review Job Post</p>
@@ -56,7 +56,7 @@ export default function StepReview({ jobData }) {
           <div>
             <p className="pj-review-label">Budget</p>
             <p className="pj-review-value">
-              {jobData.budgetAmount ? `$${jobData.budgetAmount} (Fixed Price)` : "Not specified"}
+              {jobData.budgetAmount ? `${jobData.budgetAmount} ${preferredCurrency} (Fixed Price)` : "Not specified"}
             </p>
           </div>
         </div>

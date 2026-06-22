@@ -22,7 +22,7 @@ const formatDate = (dateStr) => {
 };
 
 const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
-  const { freelancerName, bidRate, coverLetter, status, createdAt } = proposal;
+  const { freelancerName, bidRate, coverLetter, status, createdAt, maxRevisions, MaxRevisions } = proposal;
   const badge = statusStyles[status] || statusStyles.Active;
 
   const s = String(status).toLowerCase();
@@ -78,15 +78,20 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
           </div>
         </div>
 
-        {/* Right — bid rate */}
+        {/* Right — bid rate & revisions */}
         <div style={{ textAlign: 'right' }}>
           <p style={{ fontSize: '12px', color: '#999', margin: '0 0 4px', letterSpacing: '0.02em' }}>
             Bid rate
           </p>
-          <p style={{ fontSize: '24px', fontWeight: '600', color: '#1a1a1a', margin: 0, lineHeight: 1 }}>
+          <p style={{ fontSize: '24px', fontWeight: '600', color: '#1a1a1a', margin: '0 0 8px', lineHeight: 1 }}>
             {bidRate.toLocaleString()}{' '}
             <span style={{ fontSize: '13px', color: '#999', fontWeight: '400' }}>EGP</span>
           </p>
+          {(maxRevisions != null || MaxRevisions != null) && (
+            <p style={{ fontSize: '12px', color: '#B7A06A', margin: 0, fontWeight: '500' }}>
+              Max Revisions: {maxRevisions ?? MaxRevisions}
+            </p>
+          )}
         </div>
       </div>
 

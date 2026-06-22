@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { createJob, getCategories, getSkills } from "../../../services/clientService";
+import { createJob, getCategories, getSkills, getUserProfile } from "../../../services/clientService";
+import { currencyApi } from "../../../api/currency";
 import axios from "axios";
 
 import WizardShell    from "../components/WizardShell";
@@ -97,6 +98,7 @@ export default function PostJobPage() {
   const [error,           setError]           = useState(null);
   const [skillInput,      setSkillInput]      = useState("");
   const [posted,          setPosted]          = useState(false);
+  const [preferredCurrency, setPreferredCurrency] = useState("USD");
 
   // All form data — update keys to match BE request body when available
   const [jobData, setJobData] = useState({
@@ -117,7 +119,7 @@ export default function PostJobPage() {
 
   const patch = (fields) => setJobData((prev) => ({ ...prev, ...fields }));
 
-  // Fetch categories and all skills on mount
+  // Fetch categories, skills, and profile on mount
   useEffect(() => {
     const controller = new AbortController();
     fetchCategoriesData({ signal: controller.signal })
@@ -125,6 +127,13 @@ export default function PostJobPage() {
       .catch(err => { if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return; });
     fetchSkillsData({ signal: controller.signal })
       .then(skills => { if (!controller.signal.aborted) setAvailableSkills(skills); })
+      .catch(err => { if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return; });
+    getUserProfile()
+      .then(profile => { 
+        if (!controller.signal.aborted && profile?.preferredCurrency) {
+          setPreferredCurrency(profile.preferredCurrency);
+        }
+      })
       .catch(err => { if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return; });
     return () => controller.abort();
   }, []);
@@ -205,7 +214,6 @@ export default function PostJobPage() {
       // Submit to BE
       setSubmitting(true);
       try {
-        // Map frontend state to Backend DTO (JobDetailsDto)
         const payload = {
           title: jobData.title,
           categoryId: jobData.categoryId, // Map selected category id
@@ -221,6 +229,7 @@ export default function PostJobPage() {
             "any": "Intermediate"
           }[jobData.experience[0]] || "Intermediate",
           budget: parseFloat(jobData.budgetAmount) || 0,
+          budgetCurrency: preferredCurrency,
           jobType: jobData.budgetType === "fixed" ? "FixedPrice" : "Hourly",
           skills: jobData.skills, // Send array of id strings
           description: jobData.description,
@@ -479,6 +488,7 @@ export default function PostJobPage() {
           <StepBudget
             jobData={jobData}
             patch={patch}
+            preferredCurrency={preferredCurrency}
           />
         )}
         {step === 5 && (
@@ -490,6 +500,7 @@ export default function PostJobPage() {
         {step === 6 && (
           <StepReview
             jobData={jobData}
+            preferredCurrency={preferredCurrency}
           />
         )}
       </WizardShell>

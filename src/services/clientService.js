@@ -67,6 +67,13 @@ export const updateEmail = async (email) => {
   return response.data;
 };
 
+export const updatePreferredCurrency = async (currency) => {
+  const response = await apiClient.patch(ENDPOINTS.USER_PROFILE.PREFERRED_CURRENCY, JSON.stringify(currency), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.data;
+};
+
 export const updateLocation = async (locationData) => {
   const response = await apiClient.patch(ENDPOINTS.USER_PROFILE.UPDATE_LOCATION, locationData);
   return response.data;

@@ -437,7 +437,7 @@ const EditJobDetailsModal = ({ job, onClose, onSaved }) => {
 
                         <div style={{ flex: '1 1 160px' }}>
                             <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: '#5a5650', marginBottom: '0.5rem' }}>
-                                Budget (EGP)
+                                Budget ({job.budgetCurrency || 'EGP'})
                             </label>
                             <input
                                 type="number"

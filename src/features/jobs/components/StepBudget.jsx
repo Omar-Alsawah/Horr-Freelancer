@@ -5,7 +5,7 @@
  * Currently fixed price only.
  * TODO: extend when hourly rate option is added from BE.
  */
-export default function StepBudget({ jobData, patch }) {
+export default function StepBudget({ jobData, patch, preferredCurrency = "USD" }) {
   return (
     <>
       <p className="pj-step-indicator">Step 4 / 6 — Job Post</p>
@@ -45,7 +45,7 @@ export default function StepBudget({ jobData, patch }) {
               value={jobData.budgetAmount}
               onChange={(e) => patch({ budgetAmount: e.target.value })}
             />
-            <span className="pj-price-currency">USD</span>
+            <span className="pj-price-currency">{preferredCurrency}</span>
           </div>
         </div>
       </div>

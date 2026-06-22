@@ -5,12 +5,14 @@ import { Heart, Tag, Star, Globe, Calendar, ArrowLeft, Copy, Flag } from 'lucide
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { jobsApi } from '../../api/jobs';
+import { getUserProfile } from '../../services/clientService';
+import { currencyApi } from '../../api/currency';
 
 function formatBudget(budget, currency, convertedBudget, convertedCurrency, lang) {
   const fmt = (n, cur) => {
     return new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en-EG', {
       style: 'currency',
-      currency: cur || 'USD',
+      currency: cur || 'EGP',
       maximumFractionDigits: 0
     }).format(n);
   };
@@ -75,6 +77,8 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [preferredCurrency, setPreferredCurrency] = useState(null);
+  const [userConvertedBudget, setUserConvertedBudget] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -83,8 +87,35 @@ export default function JobDetailsPage() {
       setNotFound(false);
       try {
         const res = await jobsApi.getJob(id, { signal: controller.signal });
-        setJob(res.data);
-        setIsSaved(res.data.isSaved || false);
+        const jobData = res.data;
+        setJob(jobData);
+        setIsSaved(jobData.isSaved || false);
+
+        // Fetch user profile to get preferred currency
+        let prefCurr = null;
+        try {
+          const profile = await getUserProfile();
+          if (profile && profile.preferredCurrency) {
+            prefCurr = profile.preferredCurrency;
+            setPreferredCurrency(prefCurr);
+          }
+        } catch (profileErr) {
+          // Ignore if user is not logged in or profile fails
+        }
+
+        // Convert budget if we have a preferred currency that differs from job currency
+        const jobCurr = jobData.budgetCurrency || 'EGP';
+        if (prefCurr && prefCurr !== jobCurr && jobData.budget > 0) {
+          try {
+            const convRes = await currencyApi.convertCurrency(jobData.budget, jobCurr, prefCurr);
+            const val = typeof convRes.data === 'number' ? convRes.data : (convRes.data?.amount ?? convRes.data?.convertedAmount ?? convRes.data?.result ?? convRes.data);
+            if (val && !isNaN(val)) {
+              setUserConvertedBudget(Number(val));
+            }
+          } catch (convErr) {
+            console.error("Failed to convert currency to preferred currency", convErr);
+          }
+        }
       } catch (err) {
         if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
         if (err.status === 404) {
@@ -147,7 +178,15 @@ export default function JobDetailsPage() {
                 <Tag className="w-5 h-5" />
               </div>
               <div className="feature-text">
-                <div>{formatBudget(job.budget, job.budgetCurrency, job.convertedBudget, job.convertedCurrency, lang)}</div>
+                <div>
+                  {formatBudget(
+                    job.budget,
+                    job.budgetCurrency,
+                    preferredCurrency ? userConvertedBudget : job.convertedBudget,
+                    preferredCurrency && userConvertedBudget != null ? preferredCurrency : job.convertedCurrency,
+                    lang
+                  )}
+                </div>
                 <div>{job.jobType === 'FixedPrice' ? t('jobs.fixed_price') : t('jobs.hourly')}</div>
               </div>
             </div>

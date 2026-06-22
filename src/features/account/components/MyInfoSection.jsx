@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { updateName, updateEmail, getUserProfile } from '../../../services/clientService';
+import { updateName, updateEmail, updatePreferredCurrency, getUserProfile } from '../../../services/clientService';
 import useAuth from '../../auth/hooks/useAuth';
 import useFetch from '../../../hooks/useFetch';
 import { toast } from 'sonner';
@@ -15,7 +15,8 @@ const MyInfoSection = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: ''
+    email: '',
+    preferredCurrency: 'USD'
   });
   const [saving, setSaving] = useState(false);
 
@@ -32,6 +33,7 @@ const MyInfoSection = () => {
   const displayLastName = profile.lastName || '';
   const displayEmail = profile.email || 'Not Provided';
   const displayUserName = profile.fullName || `${displayFirstName} ${displayLastName}`.trim() || 'N/A';
+  const displayCurrency = profile.preferredCurrency || 'USD';
 
   const handleSave = async () => {
     setSaving(true);
@@ -41,6 +43,10 @@ const MyInfoSection = () => {
       
       if (formData.email && formData.email !== displayEmail) {
         await updateEmail(formData.email);
+      }
+      
+      if (formData.preferredCurrency && formData.preferredCurrency !== displayCurrency) {
+        await updatePreferredCurrency(formData.preferredCurrency);
       }
       
       await refreshUser();
@@ -83,7 +89,8 @@ const MyInfoSection = () => {
                 setFormData({
                   firstName: displayFirstName,
                   lastName: displayLastName,
-                  email: displayEmail === 'Not Provided' ? '' : displayEmail
+                  email: displayEmail === 'Not Provided' ? '' : displayEmail,
+                  preferredCurrency: displayCurrency
                 });
               }
               setIsEditing(!isEditing);
@@ -126,7 +133,7 @@ const MyInfoSection = () => {
               <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 items-center">
                 <div className="text-gray-500 text-sm font-medium">Preferred Currency</div>
                 <div className="font-semibold text-gray-900 flex items-center gap-2">
-                   USD
+                   {displayCurrency}
                 </div>
               </div>
             </div>
@@ -159,14 +166,33 @@ const MyInfoSection = () => {
                 </div>
               </div>
 
-              <div className="mb-8">
-                <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide">Email</label>
-                <input 
-                  type="email" 
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-amber-600 focus:ring-4 focus:ring-amber-100 focus:outline-none transition-all" 
-                  value={formData.email} 
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide">Email</label>
+                  <input 
+                    type="email" 
+                    className="w-full px-4 py-3 border border-slate-200 rounded-lg bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-amber-600 focus:ring-4 focus:ring-amber-100 focus:outline-none transition-all" 
+                    value={formData.email} 
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide">Preferred Currency</label>
+                  <div className="relative">
+                    <select 
+                      className="w-full px-4 py-3 border border-slate-200 rounded-lg bg-white text-gray-900 text-sm appearance-none focus:border-amber-600 focus:ring-4 focus:ring-amber-100 focus:outline-none transition-all"
+                      value={formData.preferredCurrency}
+                      onChange={(e) => setFormData({...formData, preferredCurrency: e.target.value})}
+                    >
+                      <option value="USD">USD - US Dollar</option>
+                      <option value="EUR">EUR - Euro</option>
+                      <option value="GBP">GBP - British Pound</option>
+                    </select>
+                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4">

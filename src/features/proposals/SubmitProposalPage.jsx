@@ -202,7 +202,7 @@ const SubmitProposalPage = () => {
             {t('proposals.terms_title')}
             {job && (
               <div className="client-budget-tag">
-                {t('proposals.client_budget')} {job.budgetType === 'Fixed' ? `${job.budgetCurrency || 'USD'} ${job.budget}` : `${job.budgetCurrency || 'USD'} ${job.minBudget} - ${job.maxBudget}`}
+                {t('proposals.client_budget')} {job.budgetType === 'Fixed' ? `${job.budgetCurrency || 'EGP'} ${job.budget}` : `${job.budgetCurrency || 'EGP'} ${job.minBudget} - ${job.maxBudget}`}
                 {job.budgetCurrency !== bidCurrency && convertedJobBudget > 0 && (
                   <span className="ml-2 text-xs font-normal">
                     (Approx. {bidCurrency} {convertedJobBudget.toFixed(2)})

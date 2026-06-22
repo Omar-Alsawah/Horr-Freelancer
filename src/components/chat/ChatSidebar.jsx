@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { getChats } from '../../api/chatApi';
@@ -9,7 +9,10 @@ export default function ChatSidebar({ chats: propChats, setChats: propSetChats, 
   const [internalLoading, setInternalLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { chatId } = useParams();
+
+  const basePath = location.pathname.startsWith('/client') ? '/client/messages' : '/messages';
 
   const chats = propChats !== undefined ? propChats : internalChats;
   const setChats = propSetChats !== undefined ? propSetChats : setInternalChats;
@@ -34,7 +37,7 @@ export default function ChatSidebar({ chats: propChats, setChats: propSetChats, 
         const firstChat = chats[0];
         const firstId = firstChat.id || firstChat.chatId || firstChat.Id || firstChat.ChatId;
         if (firstId) {
-          navigate(`/messages/${firstId}`, { replace: true });
+          navigate(`${basePath}/${firstId}`, { replace: true });
         }
       }
     }
@@ -129,7 +132,7 @@ export default function ChatSidebar({ chats: propChats, setChats: propSetChats, 
           return (
             <div
               key={cId}
-              onClick={() => navigate(`/messages/${cId}`)}
+              onClick={() => navigate(`${basePath}/${cId}`)}
               className={`conversation-item ${String(cId) === String(chatId) ? 'active' : ''}`}
               role="button"
               tabIndex={0}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getJobDetails, deleteJob } from '../../../services/clientService';
+import { getJobDetails, deleteJob, getUserProfile } from '../../../services/clientService';
+import { currencyApi } from '../../../api/currency';
 import EditJobDetailsModal from '../components/EditJobDetailsModal';
 import axios from 'axios';
 
@@ -115,6 +116,9 @@ export default function ManageJobPage() {
     const [error, setError] = useState(null);
     const [editingJob, setEditingJob] = useState(false);
     const [deletingJob, setDeletingJob] = useState(false);
+    const [preferredCurrency, setPreferredCurrency] = useState('USD');
+    const [convertedBudget, setConvertedBudget] = useState(null);
+    const [convertedMilestones, setConvertedMilestones] = useState({});
 
     useEffect(() => {
         const controller = new AbortController();
@@ -123,8 +127,42 @@ export default function ManageJobPage() {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getJobDetails(id, { signal: controller.signal });
-                setJob(data);
+                
+                const jobData = await getJobDetails(id, { signal: controller.signal });
+                setJob(jobData);
+
+                let pCurrency = 'USD';
+                try {
+                    const profile = await getUserProfile();
+                    if (profile?.preferredCurrency) {
+                        pCurrency = profile.preferredCurrency;
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch user profile for currency", e);
+                }
+                setPreferredCurrency(pCurrency);
+
+                const jobCurr = jobData.budgetCurrency || 'EGP';
+                if (pCurrency !== jobCurr) {
+                    try {
+                        const bgConv = await currencyApi.convertCurrency(jobData.budget, jobCurr, pCurrency, { signal: controller.signal });
+                        const bgVal = typeof bgConv.data === 'number' ? bgConv.data : (bgConv.data?.amount ?? bgConv.data?.convertedAmount ?? bgConv.data?.result ?? bgConv.data);
+                        setConvertedBudget(bgVal);
+
+                        if (jobData.milestones && jobData.milestones.length > 0) {
+                            const mConvs = {};
+                            for (let m of jobData.milestones) {
+                                const mConv = await currencyApi.convertCurrency(m.amount, jobCurr, pCurrency, { signal: controller.signal });
+                                const mVal = typeof mConv.data === 'number' ? mConv.data : (mConv.data?.amount ?? mConv.data?.convertedAmount ?? mConv.data?.result ?? mConv.data);
+                                mConvs[m.id] = mVal;
+                            }
+                            setConvertedMilestones(mConvs);
+                        }
+                    } catch (e) {
+                        console.error("Currency conversion failed", e);
+                    }
+                }
+
             } catch (err) {
                 if (axios.isCancel(err) || err.code === 'ERR_CANCELED') return;
                 setError(
@@ -294,7 +332,11 @@ export default function ManageJobPage() {
                         <div className="mj-card">
                             <p className="mj-card-title">Budget</p>
                             <div className="mj-budget-row">
-                                <span className="mj-budget-amount">{Number(job.budget).toLocaleString()} EGP</span>
+                                <span className="mj-budget-amount">
+                                    {preferredCurrency !== (job?.budgetCurrency || 'EGP') && convertedBudget != null 
+                                        ? `${Number(convertedBudget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${preferredCurrency}` 
+                                        : `${Number(job?.budget).toLocaleString()} ${job?.budgetCurrency || 'EGP'}`}
+                                </span>
                                 <span className="mj-budget-type">{job.jobType === 'FixedPrice' ? 'Fixed price' : 'Hourly rate'}</span>
                             </div>
                         </div>
@@ -325,7 +367,11 @@ export default function ManageJobPage() {
                                     <div key={m.id} className="mj-milestone">
                                         <div className="mj-milestone-head">
                                             <p className="mj-milestone-title">{m.title}</p>
-                                            <span className="mj-milestone-amount">{Number(m.amount).toLocaleString()} EGP</span>
+                                            <span className="mj-milestone-amount">
+                                                {preferredCurrency !== (job?.budgetCurrency || 'EGP') && convertedMilestones[m.id] != null
+                                                    ? `${Number(convertedMilestones[m.id]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${preferredCurrency}`
+                                                    : `${Number(m.amount).toLocaleString()} ${job?.budgetCurrency || 'EGP'}`}
+                                            </span>
                                         </div>
                                         {m.description && <p className="mj-milestone-desc">{m.description}</p>}
                                         <div className="mj-milestone-meta">
